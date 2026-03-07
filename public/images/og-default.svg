@@ -1,0 +1,17 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#F8FAFC"/>
+  <circle cx="976" cy="72" r="240" fill="#BBF7D0" fill-opacity="0.8"/>
+  <circle cx="1080" cy="-24" r="200" fill="#86EFAC" fill-opacity="0.55"/>
+  <rect x="72" y="72" width="1056" height="486" rx="36" fill="white"/>
+  <rect x="104" y="104" width="64" height="64" rx="16" fill="#171717"/>
+  <path d="M136 136C136 123.85 145.85 114 158 114H200V146H158C152.477 146 148 150.477 148 156V198H136V136Z" fill="#22C55E"/>
+  <text x="104" y="252" fill="#18181B" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">
+    Responsive Website Starter
+  </text>
+  <text x="104" y="322" fill="#52525B" font-family="Arial, Helvetica, sans-serif" font-size="30">
+    Next.js 16 · Tailwind CSS · TanStack Query
+  </text>
+  <text x="104" y="372" fill="#71717A" font-family="Arial, Helvetica, sans-serif" font-size="28">
+    Production-oriented starter template for modern responsive websites
+  </text>
+</svg>

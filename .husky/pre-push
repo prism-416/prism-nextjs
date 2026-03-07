@@ -1,0 +1,8 @@
+# Volta의 pnpm 경로를 PATH에 추가
+export PATH="$HOME/.volta/bin:$PATH"
+
+echo "🔍 Running type check..."
+pnpm run type-check
+
+echo "🏗️  Running build..."
+pnpm run build

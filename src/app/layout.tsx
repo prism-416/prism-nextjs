@@ -1,0 +1,103 @@
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { METADATA } from "@/shared/constants/metadata";
+import { getCanonicalUrl, getRobots, getServerDeviceInfo, getPackageVersion } from "@/shared/utils/server-util";
+import Provider from "./_providers";
+import React from "react";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+type TemplateString = {
+  template: string;
+  default: string;
+};
+
+const TITLE: TemplateString = {
+  template: `${METADATA.siteName} | %s`,
+  default: METADATA.siteName,
+};
+
+const DESCRIPTION = METADATA.description;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = await getCanonicalUrl();
+  const robots = await getRobots("index, follow");
+  const metadataBase = new URL(canonical);
+
+  return {
+    metadataBase,
+    applicationName: METADATA.siteName,
+    title: TITLE,
+    description: DESCRIPTION,
+    keywords: METADATA.keywords,
+    robots,
+    icons: {
+      icon: "/icon.svg",
+      shortcut: "/icon.svg",
+      apple: "/icon.svg",
+    },
+    alternates: {
+      canonical,
+      languages: {
+        "x-default": canonical,
+      },
+    },
+    openGraph: {
+      title: TITLE,
+      description: DESCRIPTION,
+      images: [
+        {
+          url: METADATA.imageUrl,
+          secureUrl: METADATA.imageUrl,
+          type: METADATA.imageType,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      url: canonical,
+      siteName: METADATA.siteName,
+      locale: METADATA.locale,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: TITLE,
+      description: DESCRIPTION,
+      images: [METADATA.imageUrl],
+    },
+  };
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: METADATA.themeColor,
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const [deviceInfo, version] = await Promise.all([getServerDeviceInfo(), getPackageVersion()]);
+
+  const initData = {
+    deviceInfo,
+    version,
+  };
+
+  return (
+    <html
+      lang="ko"
+      suppressHydrationWarning
+      className={`${inter.variable}`}
+    >
+      <body className="font-sans antialiased">
+        <Provider initData={initData}>{children}</Provider>
+      </body>
+    </html>
+  );
+}
