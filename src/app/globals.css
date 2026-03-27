@@ -1,21 +1,71 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-cream-050: #fcf8ef;
+  --color-cream-100: #f4ecd6;
+  --color-mint-100: #d9e8e7;
+  --color-mint-200: #cce0df;
+  --color-teal-300: #b3d0d0;
+  --color-teal-500: #6ea9a7;
+  --color-blue-900: #0c4767;
+  --color-blue-950: #08344b;
+  --color-slate-500: #61717c;
+  --color-slate-700: #33424d;
+  --color-sand-200: #e8deca;
+  --color-coral-500: #d96857;
+  --background: var(--color-cream-050);
+  --foreground: var(--color-slate-700);
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-strong: #ffffff;
+  --surface-muted: rgba(217, 232, 231, 0.5);
+  --border: rgba(179, 208, 208, 0.6);
+  --border-strong: rgba(110, 169, 167, 0.65);
+  --primary: var(--color-blue-900);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-mint-100);
+  --secondary-foreground: var(--color-blue-950);
+  --muted: var(--color-slate-500);
+  --accent: var(--color-coral-500);
+  --accent-foreground: #ffffff;
+  --ring: rgba(110, 169, 167, 0.35);
   color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-pretendard);
+  --color-prism-muted: var(--muted);
+  --color-prism-body: var(--foreground);
+  --color-prism-cream: var(--color-cream-100);
+  --color-prism-cream-soft: var(--color-cream-050);
+  --color-prism-mint-100: var(--color-mint-100);
+  --color-prism-mint-200: var(--color-mint-200);
+  --color-prism-teal-300: var(--color-teal-300);
+  --color-prism-teal-500: var(--color-teal-500);
+  --color-prism-navy: var(--color-blue-900);
+  --color-prism-navy-deep: var(--color-blue-950);
+  --color-prism-sand: var(--color-sand-200);
+  --color-prism-accent: var(--color-coral-500);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-cream-050);
+    --foreground: var(--color-slate-700);
   }
 }
 
@@ -23,7 +73,7 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-family: var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 html {
