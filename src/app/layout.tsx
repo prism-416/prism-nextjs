@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { METADATA } from "@/shared/constants/metadata";
 import { getCanonicalUrl, getRobots, getServerDeviceInfo, getPackageVersion } from "@/shared/utils/server-util";
 import Provider from "./_providers";
 import React from "react";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+const pretendard = localFont({
+  src: "../../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  display: "swap",
+  weight: "45 920",
 });
 
 type TemplateString = {
@@ -93,7 +95,7 @@ export default async function RootLayout({
     <html
       lang="ko"
       suppressHydrationWarning
-      className={`${inter.variable}`}
+      className={`${pretendard.variable}`}
     >
       <body className="font-sans antialiased">
         <Provider initData={initData}>{children}</Provider>

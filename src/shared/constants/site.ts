@@ -1,12 +1,17 @@
-export const SITE_NAVIGATION = [
+﻿export const SITE_NAVIGATION = [
   { href: "/", label: "Home" },
-  { href: "/#features", label: "Features" },
-  { href: "/#structure", label: "Structure" },
-  { href: "/#getting-started", label: "Get Started" },
+  { href: "/#capabilities", label: "Capabilities" },
+  { href: "/#workflow", label: "Workflow" },
+] as const;
+
+export const SITE_AUTH_ACTIONS = [
+  { href: "/sign-in", label: "Sign in" },
+  { href: "/sign-up", label: "Sign up" },
 ] as const;
 
 export const SITE_FOOTER_LINKS = [
-  { href: "https://nextjs.org/docs", label: "Next.js Docs" },
-  { href: "https://tanstack.com/query/latest", label: "TanStack Query" },
-  { href: "https://tailwindcss.com/docs", label: "Tailwind CSS" },
+  { href: "/#capabilities", label: "Capabilities" },
+  { href: "/#workflow", label: "Workflow" },
+  { href: "/sign-in", label: "Sign in" },
+  { href: "/sign-up", label: "Sign up" },
 ] as const;
