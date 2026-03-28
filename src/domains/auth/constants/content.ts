@@ -1,14 +1,6 @@
+import type { SignUpStepContent } from "../types";
+
 export type AuthHighlight = {
-  title: string;
-  description: string;
-};
-
-export type SignUpStepKey = "account" | "profile" | "workspace";
-
-export type SignUpStepContent = {
-  key: SignUpStepKey;
-  step: string;
-  label: string;
   title: string;
   description: string;
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Typography } from "@/atomics/atoms/Typography";
-import type { SignUpStepContent } from "@/domains/auth/constants/content";
+import type { SignUpStepContent } from "@/domains/auth/types";
 import { cn } from "@/shared/utils/cn";
 
 type AuthStepIndicatorProps = {
