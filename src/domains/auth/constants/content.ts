@@ -3,29 +3,39 @@ export type AuthHighlight = {
   description: string;
 };
 
-export const SIGN_IN_CONTENT = {
-  title: "Sign in",
-  description: "Access your workspace.",
-  emailLabel: "Email",
-  emailPlaceholder: "you@example.com",
-  passwordLabel: "Password",
-  passwordPlaceholder: "Password",
-  showPasswordLabel: "Show password",
-  hidePasswordLabel: "Hide password",
-  rememberMeLabel: "Keep me signed in",
-  submitLabel: "Sign in",
-  socialLegend: "Continue with a social account",
-  socialSeparatorLabel: "Or",
-  signUpPrompt: "New to Prizmatic?",
-  signUpLabel: "Create an account",
-  panelEyebrow: "Prizmatic Workspace",
-  panelTitle: "Keep product, execution, and decisions moving in the same direction.",
-  panelDescription:
-    "Prizmatic gives teams a single operating surface for planning, tracking, and shipping work without losing context between conversations and delivery.",
-  panelFooterEyebrow: "Designed for teams",
-  panelFooterDescription:
-    "A calmer sign-in surface for product, design, and engineering teams working across shared priorities.",
-} as const;
+export type SignUpStepKey = "account" | "profile" | "workspace";
+
+export type SignUpStepContent = {
+  key: SignUpStepKey;
+  step: string;
+  label: string;
+  title: string;
+  description: string;
+};
+
+export const SIGN_UP_STEPS: readonly SignUpStepContent[] = [
+  {
+    key: "account",
+    step: "01",
+    label: "Account",
+    title: "Create your account",
+    description: "Start with a secure sign-up for your Prizmatic workspace.",
+  },
+  {
+    key: "profile",
+    step: "02",
+    label: "Profile",
+    title: "Set up your profile",
+    description: "This is how teammates will recognize you across projects and work items.",
+  },
+  {
+    key: "workspace",
+    step: "03",
+    label: "Workspace",
+    title: "Name your workspace",
+    description: "Create the shared space where projects, sprints, and work items live.",
+  },
+] as const;
 
 export const AUTH_SOCIAL_LABELS = {
   github: "Continue with GitHub",
