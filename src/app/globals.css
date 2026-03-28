@@ -3,21 +3,30 @@
 :root {
   --color-cream-050: #fcf8ef;
   --color-cream-100: #f4ecd6;
+  --color-mint-050: #eef4f1;
   --color-mint-100: #d9e8e7;
-  --color-mint-200: #cce0df;
-  --color-teal-300: #b3d0d0;
+  --color-teal-400: #78c4d4;
   --color-teal-500: #6ea9a7;
   --color-blue-900: #0c4767;
   --color-blue-950: #08344b;
   --color-slate-500: #61717c;
   --color-slate-700: #33424d;
+  --color-sand-100: #efe7d7;
   --color-sand-200: #e8deca;
   --color-coral-500: #d96857;
+  --color-gold-300: #fff1a8;
+  --color-magenta-400: #ff6bc6;
+  --color-violet-400: #9d7bff;
+  --color-sky-400: #63b2ff;
+  --color-teal-300: #62d7c7;
+  --color-red-200: #f3d9d4;
+  --color-red-700: #9f4b3e;
   --background: var(--color-cream-050);
   --foreground: var(--color-slate-700);
   --surface: rgba(255, 255, 255, 0.72);
   --surface-strong: #ffffff;
-  --surface-muted: rgba(217, 232, 231, 0.5);
+  --surface-field: rgba(252, 248, 239, 0.88);
+  --surface-field-soft: rgba(252, 248, 239, 0.7);
   --border: rgba(179, 208, 208, 0.6);
   --border-strong: rgba(110, 169, 167, 0.65);
   --primary: var(--color-blue-900);
@@ -28,6 +37,22 @@
   --accent: var(--color-coral-500);
   --accent-foreground: #ffffff;
   --ring: rgba(110, 169, 167, 0.35);
+  --feedback-danger: var(--color-red-700);
+  --feedback-danger-soft: var(--color-red-200);
+  --gradient-auth-main: linear-gradient(180deg, var(--color-blue-900) 0%, var(--color-blue-950) 100%);
+  --gradient-auth-shell: linear-gradient(90deg, var(--color-cream-100) 0%, var(--color-cream-100) 25%, var(--color-blue-900) 25%, var(--color-blue-900) 100%);
+  --gradient-auth-backdrop: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.06), transparent 24%), linear-gradient(180deg, var(--color-blue-900) 0%, var(--color-blue-950) 100%);
+  --gradient-auth-highlight-aurora: radial-gradient(circle at 80% 18%, rgba(244, 236, 214, 0.08), transparent 22%);
+  --gradient-auth-highlight-static: radial-gradient(circle at 78% 18%, rgba(244, 236, 214, 0.12), transparent 20%), radial-gradient(circle at 18% 78%, rgba(120, 196, 212, 0.08), transparent 24%);
+  --gradient-hero-surface: linear-gradient(180deg, var(--color-cream-050) 0%, var(--color-cream-100) 46%, var(--color-mint-050) 100%);
+  --gradient-hero-overlay: radial-gradient(circle at 12% 18%, rgba(255, 241, 168, 0.48), transparent 18%), radial-gradient(circle at 28% 74%, rgba(255, 107, 198, 0.14), transparent 22%), radial-gradient(circle at 84% 18%, rgba(157, 123, 255, 0.3), transparent 18%), radial-gradient(circle at 78% 70%, rgba(99, 178, 255, 0.18), transparent 24%), linear-gradient(180deg, rgba(252, 248, 239, 0.03), rgba(252, 248, 239, 0.66));
+  --gradient-workflow-surface: linear-gradient(180deg, rgba(217, 232, 231, 0.42), rgba(252, 248, 239, 0.85));
+  --gradient-launch-surface: linear-gradient(135deg, var(--color-blue-950) 0%, var(--color-blue-900) 58%, var(--color-teal-500) 160%);
+  --gradient-capability-card: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(236, 245, 243, 0.72));
+  --gradient-panel-surface: linear-gradient(180deg, rgba(252, 248, 239, 0.94) 0%, rgba(255, 255, 255, 0.72) 100%);
+  --shadow-auth-panel: 0 28px 120px rgba(3, 23, 34, 0.24);
+  --shadow-soft-navy-card: 0 14px 40px rgba(12, 71, 103, 0.08);
+  --shadow-soft-navy: 0 8px 24px rgba(12, 71, 103, 0.08);
   color-scheme: light;
 }
 
@@ -36,7 +61,6 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-surface-strong: var(--surface-strong);
-  --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
   --color-primary: var(--primary);
@@ -51,15 +75,20 @@
   --color-prism-muted: var(--muted);
   --color-prism-body: var(--foreground);
   --color-prism-cream: var(--color-cream-100);
-  --color-prism-cream-soft: var(--color-cream-050);
-  --color-prism-mint-100: var(--color-mint-100);
-  --color-prism-mint-200: var(--color-mint-200);
-  --color-prism-teal-300: var(--color-teal-300);
   --color-prism-teal-500: var(--color-teal-500);
   --color-prism-navy: var(--color-blue-900);
   --color-prism-navy-deep: var(--color-blue-950);
+  --color-prism-sand-soft: var(--color-sand-100);
   --color-prism-sand: var(--color-sand-200);
   --color-prism-accent: var(--color-coral-500);
+  --color-prism-glow-gold: var(--color-gold-300);
+  --color-prism-glow-magenta: var(--color-magenta-400);
+  --color-prism-glow-violet: var(--color-violet-400);
+  --color-prism-glow-sky: var(--color-sky-400);
+  --color-prism-danger: var(--feedback-danger);
+  --color-prism-danger-soft: var(--feedback-danger-soft);
+  --color-prism-surface-field: var(--surface-field);
+  --color-prism-surface-field-soft: var(--surface-field-soft);
 }
 
 @media (prefers-color-scheme: dark) {
