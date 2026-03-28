@@ -1,6 +1,9 @@
 import { Sparkles } from "lucide-react";
+
 import ColorBends from "@/atomics/atoms/ColorBends";
 import Container from "@/atomics/atoms/Container";
+import { Typography } from "@/atomics/atoms/Typography";
+
 import LandingCtaLink from "./LandingCtaLink";
 import LandingSignalCard from "./LandingSignalCard";
 import { HERO_BACKGROUND, HERO_CONTENT, LANDING_SIGNALS } from "../constants/content";
@@ -33,25 +36,41 @@ export default function LandingHeroSection() {
       <Container className="relative py-18 md:py-24 lg:py-28">
         <div className="mx-auto max-w-4xl text-center">
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-4 py-1.5 text-xs font-medium uppercase tracking-[0.24em] text-prism-navy shadow-sm backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-4 py-1.5 shadow-sm backdrop-blur">
               <Sparkles
                 className="size-3.5 text-prism-teal-500"
                 aria-hidden
               />
-              {HERO_CONTENT.badge}
+              <Typography
+                as="span"
+                variant="overline"
+                tone="inherit"
+                weight="medium"
+                className="text-prism-navy"
+              >
+                {HERO_CONTENT.badge}
+              </Typography>
             </div>
           </div>
 
-          <h1
+          <Typography
             id="hero-heading"
-            className="mt-6 text-balance text-5xl font-semibold tracking-[-0.04em] text-prism-navy md:text-6xl lg:text-[5rem] lg:leading-[0.96]"
+            variant="display"
+            tone="inherit"
+            wrap="balance"
+            className="mt-6 text-prism-navy"
           >
             {HERO_CONTENT.title}
-          </h1>
+          </Typography>
 
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-8 text-prism-muted md:text-xl">
+          <Typography
+            variant="bodyLg"
+            tone="muted"
+            wrap="pretty"
+            className="mx-auto mt-6 max-w-2xl"
+          >
             {HERO_CONTENT.description}
-          </p>
+          </Typography>
 
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <LandingCtaLink

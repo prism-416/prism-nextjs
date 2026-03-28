@@ -2,6 +2,7 @@
 
 import { ButtonHTMLAttributes } from "react";
 
+import { Typography } from "@/atomics/atoms/Typography";
 import { Input } from "@/atomics/atoms/Input";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/atomics/molecules/Field";
 import { FormHintChecklist } from "@/domains/auth/components/FormHintChecklist";
@@ -102,8 +103,20 @@ function WorkspaceModeCard({ isSelected, label, description, onClick }: Workspac
       )}
       onClick={onClick}
     >
-      <p className="text-sm font-semibold text-primary">{label}</p>
-      <p className="mt-1 text-sm leading-6 text-prism-body/68">{description}</p>
+      <Typography
+        variant="bodySm"
+        tone="primary"
+        weight="semibold"
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="bodySm"
+        tone="inherit"
+        className="mt-1 text-prism-body/68"
+      >
+        {description}
+      </Typography>
     </button>
   );
 }

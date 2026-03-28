@@ -1,4 +1,7 @@
 import { Layers } from "lucide-react";
+
+import { Typography } from "@/atomics/atoms/Typography";
+
 import LandingOperatingStepCard from "./LandingOperatingStepCard";
 import LandingSectionIntro from "./LandingSectionIntro";
 import LandingSectionShell from "./LandingSectionShell";
@@ -23,8 +26,20 @@ export default function LandingWorkflowSection() {
                 />
               </div>
               <div>
-                <p className="text-sm font-semibold">{LANDING_WORKFLOW_HIGHLIGHT.title}</p>
-                <p className="text-sm text-white/70">{LANDING_WORKFLOW_HIGHLIGHT.description}</p>
+                <Typography
+                  variant="bodySm"
+                  tone="inverse"
+                  weight="semibold"
+                >
+                  {LANDING_WORKFLOW_HIGHLIGHT.title}
+                </Typography>
+                <Typography
+                  variant="bodySm"
+                  tone="inverse"
+                  className="text-white/70"
+                >
+                  {LANDING_WORKFLOW_HIGHLIGHT.description}
+                </Typography>
               </div>
             </div>
           </div>

@@ -1,5 +1,7 @@
-﻿import Link from "next/link";
+import Link from "next/link";
+
 import Container from "@/atomics/atoms/Container";
+import { Typography } from "@/atomics/atoms/Typography";
 import LandingFooter from "@/domains/home/components/LandingFooter";
 import LandingHeader from "@/domains/home/components/LandingHeader";
 
@@ -9,12 +11,29 @@ export default function NotFound() {
       <LandingHeader />
       <Container className="flex min-h-[calc(100vh-8rem)] items-center justify-center py-16">
         <div className="w-full max-w-xl rounded-4xl border border-border bg-surface-strong p-10 text-center shadow-sm shadow-prism-teal-500/10">
-          <p className="text-sm font-medium text-prism-teal-500">404 Error</p>
-          <h1 className="mt-3 text-5xl font-semibold tracking-tight text-primary sm:text-6xl">Page Not Found</h1>
-          <p className="mt-4 text-sm leading-6 text-muted sm:text-base">
+          <Typography
+            variant="bodySm"
+            tone="inherit"
+            weight="medium"
+            className="text-prism-teal-500"
+          >
+            404 Error
+          </Typography>
+          <Typography
+            variant="display"
+            tone="primary"
+            className="mt-3 sm:text-6xl"
+          >
+            Page Not Found
+          </Typography>
+          <Typography
+            variant="bodySm"
+            tone="inherit"
+            className="mt-4 text-muted sm:text-base"
+          >
             The page you requested may have been deleted or the address may have changed. Please go back to the home
             page and try again.
-          </p>
+          </Typography>
           <Link
             href="/"
             className="mt-8 inline-flex h-11 items-center justify-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-prism-navy-deep"

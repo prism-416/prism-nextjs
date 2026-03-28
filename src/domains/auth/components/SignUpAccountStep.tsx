@@ -5,6 +5,7 @@ import { FaGithub, FaGoogle } from "react-icons/fa";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
+import { Typography } from "@/atomics/atoms/Typography";
 import {
   Field,
   FieldDescription,
@@ -88,7 +89,15 @@ export function SignUpAccountStep({
       </FieldSet>
 
       <FieldSeparator className="py-1">
-        <span className="px-1 text-xs font-medium uppercase tracking-[0.2em] text-prism-body/50">Or</span>
+        <Typography
+          as="span"
+          variant="overline"
+          tone="inherit"
+          weight="medium"
+          className="px-1 text-prism-body/50 tracking-[0.2em]"
+        >
+          Or
+        </Typography>
       </FieldSeparator>
 
       <FieldGroup className="gap-5">

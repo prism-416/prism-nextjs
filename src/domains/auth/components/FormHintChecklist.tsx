@@ -1,5 +1,6 @@
 "use client";
 
+import { Typography } from "@/atomics/atoms/Typography";
 import { cn } from "@/shared/utils/cn";
 
 type FormHintChecklistProps = {
@@ -10,7 +11,13 @@ type FormHintChecklistProps = {
 export function FormHintChecklist({ title = "To continue", items }: FormHintChecklistProps) {
   return (
     <div className="space-y-2">
-      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-prism-body/46">{title}</p>
+      <Typography
+        variant="overline"
+        tone="inherit"
+        className="text-[0.7rem] text-prism-body/46 tracking-[0.22em]"
+      >
+        {title}
+      </Typography>
       <ul className="space-y-1.5">
         {items.map(item => (
           <li
@@ -23,9 +30,16 @@ export function FormHintChecklist({ title = "To continue", items }: FormHintChec
                 item.isValid ? "bg-primary text-white" : "bg-prism-danger-soft text-prism-danger",
               )}
             >
-              {item.isValid ? "✓" : "!"}
+              {item.isValid ? "??" : "!"}
             </span>
-            <span className={item.isValid ? "text-prism-body/72" : "text-prism-danger"}>{item.label}</span>
+            <Typography
+              as="span"
+              variant="bodySm"
+              tone="inherit"
+              className={item.isValid ? "text-prism-body/72" : "text-prism-danger"}
+            >
+              {item.label}
+            </Typography>
           </li>
         ))}
       </ul>

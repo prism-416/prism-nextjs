@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/shared/utils/cn";
+import { Typography } from "@/atomics/atoms/Typography";
 import type { SignUpStepContent } from "@/domains/auth/constants/content";
+import { cn } from "@/shared/utils/cn";
 
 type AuthStepIndicatorProps = {
   steps: readonly SignUpStepContent[];
@@ -17,14 +18,26 @@ export function AuthStepIndicator({ steps, currentStepIndex, tone = "light" }: A
     >
       <div
         className={cn(
-          "flex items-center justify-between text-[0.7rem] font-semibold uppercase tracking-[0.28em]",
+          "flex items-center justify-between",
           tone === "dark" ? "text-prism-cream/82" : "text-prism-body/48",
         )}
       >
-        <span>Onboarding</span>
-        <span>
+        <Typography
+          as="span"
+          variant="overline"
+          tone="inherit"
+          className="text-[0.7rem] tracking-[0.28em]"
+        >
+          Onboarding
+        </Typography>
+        <Typography
+          as="span"
+          variant="overline"
+          tone="inherit"
+          className="text-[0.7rem] tracking-[0.28em]"
+        >
           {currentStepIndex + 1} / {steps.length}
-        </span>
+        </Typography>
       </div>
 
       <ol
@@ -48,17 +61,17 @@ export function AuthStepIndicator({ steps, currentStepIndex, tone = "light" }: A
                 )}
               />
               <div className="space-y-0.5">
-                <p
-                  className={cn(
-                    "text-[0.68rem] font-semibold uppercase tracking-[0.24em]",
-                    tone === "dark" ? "text-prism-cream/62" : "text-prism-body/42",
-                  )}
+                <Typography
+                  variant="overline"
+                  tone="inherit"
+                  className={cn("text-[0.68rem]", tone === "dark" ? "text-prism-cream/62" : "text-prism-body/42")}
                 >
                   {step.step}
-                </p>
-                <p
+                </Typography>
+                <Typography
+                  variant="bodySm"
+                  tone="inherit"
                   className={cn(
-                    "text-sm transition-colors",
                     tone === "dark" &&
                       (isActive
                         ? "font-semibold text-white"
@@ -69,7 +82,7 @@ export function AuthStepIndicator({ steps, currentStepIndex, tone = "light" }: A
                   )}
                 >
                   {step.label}
-                </p>
+                </Typography>
               </div>
             </li>
           );

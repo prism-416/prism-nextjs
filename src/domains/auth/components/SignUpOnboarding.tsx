@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/atomics/atoms/Button";
+import { Typography } from "@/atomics/atoms/Typography";
 import { FieldSet } from "@/atomics/molecules/Field";
 import { SignUpAccountStep } from "@/domains/auth/components/SignUpAccountStep";
 import { AuthStepIndicator } from "@/domains/auth/components/AuthStepIndicator";
@@ -100,13 +101,29 @@ export function SignUpOnboarding() {
           <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.8fr)] lg:gap-12">
             <div className="space-y-8 pt-4 text-white lg:pr-8">
               <div className="space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-prism-cream/72">
+                <Typography
+                  variant="overline"
+                  tone="inverse"
+                  className="text-prism-cream/72 tracking-[0.3em]"
+                >
                   Prizmatic Onboarding
-                </p>
-                <h1 className="max-w-xl text-4xl font-semibold leading-tight tracking-[-0.04em] text-white xl:text-5xl">
+                </Typography>
+                <Typography
+                  variant="h1"
+                  tone="inverse"
+                  lineHeight="tight"
+                  className="max-w-xl tracking-[-0.04em] xl:text-5xl"
+                >
                   {currentStep.title}
-                </h1>
-                <p className="max-w-lg text-base leading-7 text-white/72">{currentStep.description}</p>
+                </Typography>
+                <Typography
+                  variant="body"
+                  tone="inverse"
+                  lineHeight="7"
+                  className="max-w-lg text-white/72"
+                >
+                  {currentStep.description}
+                </Typography>
               </div>
 
               <div className="rounded-[1.7rem] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
@@ -130,35 +147,81 @@ export function SignUpOnboarding() {
                       )}
                     >
                       <div className="flex items-center justify-between gap-4">
-                        <p className="text-sm font-semibold text-white">{step.label}</p>
-                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-prism-cream/68">
+                        <Typography
+                          variant="bodySm"
+                          tone="inverse"
+                          weight="semibold"
+                        >
+                          {step.label}
+                        </Typography>
+                        <Typography
+                          variant="overline"
+                          tone="inverse"
+                          className="text-[0.68rem] text-prism-cream/68 tracking-[0.28em]"
+                        >
                           {step.step}
-                        </p>
+                        </Typography>
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-white/70">{step.description}</p>
+                      <Typography
+                        variant="bodySm"
+                        tone="inverse"
+                        className="mt-2 text-white/70"
+                      >
+                        {step.description}
+                      </Typography>
                     </div>
                   );
                 })}
               </div>
 
               <div className="rounded-3xl border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-prism-cream/68">What comes next</p>
-                <p className="mt-3 max-w-lg text-sm leading-7 text-white/72">
+                <Typography
+                  variant="overline"
+                  tone="inverse"
+                  className="text-prism-cream/68"
+                >
+                  What comes next
+                </Typography>
+                <Typography
+                  variant="bodySm"
+                  tone="inverse"
+                  lineHeight="7"
+                  className="mt-3 max-w-lg text-white/72"
+                >
                   After setup, you can move into project creation, teammate invites, and GitHub connection without
                   loading all of that into the first form.
-                </p>
+                </Typography>
               </div>
             </div>
 
             <FieldSet className="gap-8 rounded-[1.65rem] border border-prism-sand/70 bg-(image:--gradient-panel-surface) p-6 shadow-(--shadow-auth-panel) backdrop-blur-md lg:sticky lg:top-10 lg:p-8">
               <div className="flex items-start justify-between gap-6">
                 <div className="space-y-1.5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-prism-body/45">Current step</p>
-                  <p className="text-2xl font-semibold tracking-[-0.03em] text-primary">{currentStep.label}</p>
+                  <Typography
+                    variant="overline"
+                    tone="inherit"
+                    className="text-prism-body/45 tracking-[0.28em]"
+                  >
+                    Current step
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    tone="primary"
+                    className="tracking-[-0.03em]"
+                  >
+                    {currentStep.label}
+                  </Typography>
                 </div>
 
-                <div className="rounded-full border border-prism-sand/80 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-prism-body/52">
-                  {currentStep.step} / {SIGN_UP_STEPS.length.toString().padStart(2, "0")}
+                <div className="rounded-full border border-prism-sand/80 bg-white/80 px-4 py-2">
+                  <Typography
+                    as="span"
+                    variant="overline"
+                    tone="inherit"
+                    className="text-prism-body/52"
+                  >
+                    {currentStep.step} / {SIGN_UP_STEPS.length.toString().padStart(2, "0")}
+                  </Typography>
                 </div>
               </div>
 
@@ -222,7 +285,12 @@ export function SignUpOnboarding() {
                 </div>
               </div>
 
-              <p className="text-center text-sm text-prism-body/70">
+              <Typography
+                variant="bodySm"
+                tone="inherit"
+                align="center"
+                className="text-prism-body/70"
+              >
                 Already have an account?{" "}
                 <Link
                   href="/sign-in"
@@ -230,7 +298,7 @@ export function SignUpOnboarding() {
                 >
                   Sign in
                 </Link>
-              </p>
+              </Typography>
             </FieldSet>
           </div>
         )}

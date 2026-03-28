@@ -8,6 +8,7 @@ import { FaGithub, FaGoogle } from "react-icons/fa";
 import { Button } from "@/atomics/atoms/Button";
 import { Checkbox } from "@/atomics/atoms/Checkbox";
 import { Input } from "@/atomics/atoms/Input";
+import { Typography } from "@/atomics/atoms/Typography";
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "@/atomics/molecules/Field";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import { GITHUB_LOGIN_URL, GOOGLE_LOGIN_URL } from "@/shared/constants/api";
@@ -33,8 +34,19 @@ export default function SignInPage() {
       <form className="w-full max-w-sm text-primary">
         <FieldSet className="gap-6">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight text-primary">Sign in</h1>
-            <p className="text-sm text-prism-body/70">Access your workspace.</p>
+            <Typography
+              variant="h3"
+              tone="primary"
+            >
+              Sign in
+            </Typography>
+            <Typography
+              variant="bodySm"
+              tone="inherit"
+              className="text-prism-body/70"
+            >
+              Access your workspace.
+            </Typography>
           </div>
 
           <FieldGroup className="gap-5">
@@ -74,9 +86,18 @@ export default function SignInPage() {
               </div>
             </Field>
 
-            <Field orientation="horizontal" className="items-center gap-3">
-              <Checkbox id="remember-me" name="rememberMe" />
-              <FieldLabel htmlFor="remember-me" className="text-sm font-medium text-prism-body/80">
+            <Field
+              orientation="horizontal"
+              className="items-center gap-3"
+            >
+              <Checkbox
+                id="remember-me"
+                name="rememberMe"
+              />
+              <FieldLabel
+                htmlFor="remember-me"
+                className="text-sm font-medium text-prism-body/80"
+              >
                 Keep me signed in
               </FieldLabel>
             </Field>
@@ -90,11 +111,22 @@ export default function SignInPage() {
           </FieldGroup>
 
           <FieldSeparator className="py-1">
-            <span className="px-1 text-xs font-medium uppercase tracking-[0.2em] text-prism-body/50">Or</span>
+            <Typography
+              as="span"
+              variant="overline"
+              tone="inherit"
+              weight="medium"
+              className="px-1 text-prism-body/50 tracking-[0.2em]"
+            >
+              Or
+            </Typography>
           </FieldSeparator>
 
           <FieldSet className="gap-2">
-            <FieldLegend variant="label" className="sr-only">
+            <FieldLegend
+              variant="label"
+              className="sr-only"
+            >
               Continue with a social account
             </FieldLegend>
             {SOCIAL_OPTIONS.map(option => {
@@ -117,12 +149,20 @@ export default function SignInPage() {
             })}
           </FieldSet>
 
-          <p className="text-center text-sm text-prism-body/70">
+          <Typography
+            variant="bodySm"
+            tone="inherit"
+            align="center"
+            className="text-prism-body/70"
+          >
             New to Prizmatic?{" "}
-            <Link href="/sign-up" className="font-semibold text-primary underline underline-offset-4">
+            <Link
+              href="/sign-up"
+              className="font-semibold text-primary underline underline-offset-4"
+            >
               Create an account
             </Link>
-          </p>
+          </Typography>
         </FieldSet>
       </form>
     </section>
