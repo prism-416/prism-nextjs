@@ -30,7 +30,7 @@ export function FormHintChecklist({ title = "To continue", items }: FormHintChec
                 item.isValid ? "bg-primary text-white" : "bg-prism-danger-soft text-prism-danger",
               )}
             >
-              {item.isValid ? "??" : "!"}
+              {item.isValid ? "✓" : "!"}
             </span>
             <Typography
               as="span"
