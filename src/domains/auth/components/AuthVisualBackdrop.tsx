@@ -10,7 +10,7 @@ type AuthVisualBackdropProps = {
 export function AuthVisualBackdrop({ withAurora = true }: AuthVisualBackdropProps) {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.06),transparent_24%),linear-gradient(180deg,#0c4767_0%,#08344b_100%)]" />
+      <div className="absolute inset-0 bg-(image:--gradient-auth-backdrop)" />
       {withAurora && (
         <div className="absolute inset-0 opacity-45 mix-blend-screen">
           <SoftAurora
@@ -33,11 +33,11 @@ export function AuthVisualBackdrop({ withAurora = true }: AuthVisualBackdropProp
       <div
         className={cn(
           "absolute inset-0",
-          withAurora ? "bg-[radial-gradient(circle_at_80%_18%,rgba(244,236,214,0.08),transparent_22%)]" : "bg-[radial-gradient(circle_at_78%_18%,rgba(244,236,214,0.12),transparent_20%),radial-gradient(circle_at_18%_78%,rgba(120,196,212,0.08),transparent_24%)]",
+          withAurora ? "bg-(image:--gradient-auth-highlight-aurora)" : "bg-(image:--gradient-auth-highlight-static)",
         )}
       />
       <div className="absolute inset-y-12 left-12 w-px bg-white/12" />
-      <div className="absolute right-[-8%] top-20 h-64 w-64 rounded-full bg-[#f4ecd6]/10 blur-3xl" />
+      <div className="absolute right-[-8%] top-20 h-64 w-64 rounded-full bg-prism-cream/10 blur-3xl" />
       <div className="absolute bottom-16 right-20 h-40 w-40 rounded-full border border-white/10" />
     </div>
   );

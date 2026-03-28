@@ -1,18 +1,17 @@
 import { Layers } from "lucide-react";
+
+import { Typography } from "@/atomics/atoms/Typography";
+
 import LandingOperatingStepCard from "./LandingOperatingStepCard";
 import LandingSectionIntro from "./LandingSectionIntro";
 import LandingSectionShell from "./LandingSectionShell";
-import {
-  LANDING_OPERATING_STEPS,
-  LANDING_WORKFLOW_HIGHLIGHT,
-  LANDING_WORKFLOW_INTRO,
-} from "../constants/content";
+import { LANDING_OPERATING_STEPS, LANDING_WORKFLOW_HIGHLIGHT, LANDING_WORKFLOW_INTRO } from "../constants/content";
 
 export default function LandingWorkflowSection() {
   return (
     <LandingSectionShell
       id="workflow"
-      className="scroll-mt-20 border-b border-border bg-[linear-gradient(180deg,rgba(217,232,231,0.42),rgba(252,248,239,0.85))] py-20 md:py-24"
+      className="scroll-mt-20 border-b border-border bg-(image:--gradient-workflow-surface) py-20 md:py-24"
     >
       <div className="grid gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
         <div>
@@ -27,8 +26,20 @@ export default function LandingWorkflowSection() {
                 />
               </div>
               <div>
-                <p className="text-sm font-semibold">{LANDING_WORKFLOW_HIGHLIGHT.title}</p>
-                <p className="text-sm text-white/70">{LANDING_WORKFLOW_HIGHLIGHT.description}</p>
+                <Typography
+                  variant="bodySm"
+                  tone="inverse"
+                  weight="semibold"
+                >
+                  {LANDING_WORKFLOW_HIGHLIGHT.title}
+                </Typography>
+                <Typography
+                  variant="bodySm"
+                  tone="inverse"
+                  className="text-white/70"
+                >
+                  {LANDING_WORKFLOW_HIGHLIGHT.description}
+                </Typography>
               </div>
             </div>
           </div>

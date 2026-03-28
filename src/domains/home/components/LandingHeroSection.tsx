@@ -1,6 +1,9 @@
 import { Sparkles } from "lucide-react";
+
 import ColorBends from "@/atomics/atoms/ColorBends";
 import Container from "@/atomics/atoms/Container";
+import { Typography } from "@/atomics/atoms/Typography";
+
 import LandingCtaLink from "./LandingCtaLink";
 import LandingSignalCard from "./LandingSignalCard";
 import { HERO_BACKGROUND, HERO_CONTENT, LANDING_SIGNALS } from "../constants/content";
@@ -9,7 +12,7 @@ export default function LandingHeroSection() {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative overflow-hidden border-b border-border bg-[linear-gradient(180deg,#fcf8ef_0%,#f4ecd6_46%,#eef4f1_100%)]"
+      className="relative overflow-hidden border-b border-border bg-[image:var(--gradient-hero-surface)]"
     >
       <ColorBends
         className="pointer-events-none absolute inset-0 opacity-[0.98] mask-[radial-gradient(circle_at_center,black,transparent_82%)]"
@@ -24,34 +27,50 @@ export default function LandingHeroSection() {
         noise={HERO_BACKGROUND.noise}
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-prism-teal-500/60 to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(255,241,168,0.48),transparent_18%),radial-gradient(circle_at_28%_74%,rgba(255,107,198,0.14),transparent_22%),radial-gradient(circle_at_84%_18%,rgba(157,123,255,0.3),transparent_18%),radial-gradient(circle_at_78%_70%,rgba(99,178,255,0.18),transparent_24%),linear-gradient(180deg,rgba(252,248,239,0.03),rgba(252,248,239,0.66))]" />
-      <div className="pointer-events-none absolute left-4 top-20 size-48 rounded-full bg-[#fff1a8]/22 blur-3xl" />
-      <div className="pointer-events-none absolute left-1/4 top-1/2 size-52 rounded-full bg-[#ff6bc6]/12 blur-3xl" />
-      <div className="pointer-events-none absolute right-10 top-14 size-56 rounded-full bg-[#9d7bff]/16 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-8 right-1/4 size-64 rounded-full bg-[#63b2ff]/12 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[image:var(--gradient-hero-overlay)]" />
+      <div className="pointer-events-none absolute left-4 top-20 size-48 rounded-full bg-prism-glow-gold/22 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/4 top-1/2 size-52 rounded-full bg-prism-glow-magenta/12 blur-3xl" />
+      <div className="pointer-events-none absolute right-10 top-14 size-56 rounded-full bg-prism-glow-violet/16 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-8 right-1/4 size-64 rounded-full bg-prism-glow-sky/12 blur-3xl" />
 
       <Container className="relative py-18 md:py-24 lg:py-28">
         <div className="mx-auto max-w-4xl text-center">
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-4 py-1.5 text-xs font-medium uppercase tracking-[0.24em] text-prism-navy shadow-sm backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface px-4 py-1.5 shadow-sm backdrop-blur">
               <Sparkles
                 className="size-3.5 text-prism-teal-500"
                 aria-hidden
               />
-              {HERO_CONTENT.badge}
+              <Typography
+                as="span"
+                variant="overline"
+                tone="inherit"
+                weight="medium"
+                className="text-prism-navy"
+              >
+                {HERO_CONTENT.badge}
+              </Typography>
             </div>
           </div>
 
-          <h1
+          <Typography
             id="hero-heading"
-            className="mt-6 text-balance text-5xl font-semibold tracking-[-0.04em] text-prism-navy md:text-6xl lg:text-[5rem] lg:leading-[0.96]"
+            variant="display"
+            tone="inherit"
+            wrap="balance"
+            className="mt-6 text-prism-navy"
           >
             {HERO_CONTENT.title}
-          </h1>
+          </Typography>
 
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-8 text-prism-muted md:text-xl">
+          <Typography
+            variant="bodyLg"
+            tone="muted"
+            wrap="pretty"
+            className="mx-auto mt-6 max-w-2xl"
+          >
             {HERO_CONTENT.description}
-          </p>
+          </Typography>
 
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <LandingCtaLink

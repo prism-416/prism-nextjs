@@ -2,9 +2,11 @@
 
 import { ButtonHTMLAttributes } from "react";
 
-import { Input } from "@/atomics/atoms/Input";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/atomics/molecules/Field";
-import { FormHintChecklist } from "@/domains/auth/components/FormHintChecklist";
+import { Typography } from "@/atomics/atoms/Typography";
+import { FieldGroup, FieldLegend, FieldSet } from "@/atomics/molecules/Field";
+import { AuthTextField } from "./AuthTextField";
+import { FormHintChecklist } from "./FormHintChecklist";
+import type { WorkspaceMode } from "../types";
 import { cn } from "@/shared/utils/cn";
 
 const WORKSPACE_MODES = [
@@ -18,9 +20,11 @@ const WORKSPACE_MODES = [
     label: "Just exploring",
     description: "Start alone and invite collaborators when the structure is ready.",
   },
-] as const;
-
-export type WorkspaceMode = (typeof WORKSPACE_MODES)[number]["value"];
+] as const satisfies ReadonlyArray<{
+  description: string;
+  label: string;
+  value: WorkspaceMode;
+}>;
 
 type SignUpWorkspaceStepProps = {
   workspaceName: string;
@@ -43,23 +47,22 @@ export function SignUpWorkspaceStep({
   return (
     <FieldSet className="gap-6">
       <FieldGroup className="gap-5">
-        <Field className="space-y-2">
-          <FieldLabel htmlFor="workspace">Workspace name</FieldLabel>
-          <Input
-            id="workspace"
-            name="workspace"
-            type="text"
-            autoComplete="organization"
-            value={workspaceName}
-            onChange={event => onWorkspaceNameChange(event.target.value)}
-            placeholder="Team or company name"
-            className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary placeholder:text-prism-body/45"
-          />
-        </Field>
+        <AuthTextField
+          id="workspace"
+          name="workspace"
+          label="Workspace name"
+          autoComplete="organization"
+          value={workspaceName}
+          onChange={onWorkspaceNameChange}
+          placeholder="Team or company name"
+        />
       </FieldGroup>
 
       <FieldSet className="gap-3">
-        <FieldLegend variant="label" className="text-sm font-medium text-primary">
+        <FieldLegend
+          variant="label"
+          className="text-sm font-medium text-primary"
+        >
           Who is this for?
         </FieldLegend>
 
@@ -93,12 +96,26 @@ function WorkspaceModeCard({ isSelected, label, description, onClick }: Workspac
       type="button"
       className={cn(
         "rounded-2xl border px-4 py-4 text-left transition-colors",
-        isSelected ? "border-primary bg-primary/6 shadow-[0_8px_24px_rgba(12,71,103,0.08)]" : "border-prism-sand bg-[rgba(252,248,239,0.7)] hover:border-primary/30 hover:bg-white/70",
+        isSelected
+          ? "border-primary bg-primary/6 shadow-(--shadow-soft-navy)"
+          : "border-prism-sand bg-prism-surface-field-soft hover:border-primary/30 hover:bg-white/70",
       )}
       onClick={onClick}
     >
-      <p className="text-sm font-semibold text-primary">{label}</p>
-      <p className="mt-1 text-sm leading-6 text-prism-body/68">{description}</p>
+      <Typography
+        variant="bodySm"
+        tone="primary"
+        weight="semibold"
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="bodySm"
+        tone="inherit"
+        className="mt-1 text-prism-body/68"
+      >
+        {description}
+      </Typography>
     </button>
   );
 }

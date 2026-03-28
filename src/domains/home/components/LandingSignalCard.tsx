@@ -1,3 +1,5 @@
+import { Typography } from "@/atomics/atoms/Typography";
+
 type LandingSignalCardProps = {
   label: string;
   value: string;
@@ -6,8 +8,20 @@ type LandingSignalCardProps = {
 export default function LandingSignalCard({ label, value }: LandingSignalCardProps) {
   return (
     <div className="rounded-2xl border border-border bg-surface px-4 py-4 shadow-sm backdrop-blur">
-      <p className="text-xs uppercase tracking-[0.18em] text-prism-muted">{label}</p>
-      <p className="mt-2 text-lg font-semibold text-prism-navy">{value}</p>
+      <Typography
+        variant="overline"
+        tone="muted"
+        className="tracking-[0.18em]"
+      >
+        {label}
+      </Typography>
+      <Typography
+        variant="title"
+        tone="inherit"
+        className="mt-2 text-prism-navy"
+      >
+        {value}
+      </Typography>
     </div>
   );
 }

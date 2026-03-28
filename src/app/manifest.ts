@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+
 import { METADATA } from "@/shared/constants/metadata";
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -8,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: METADATA.description,
     start_url: "/",
     display: "browser",
-    background_color: "#fcf8ef",
+    background_color: METADATA.themeColor,
     theme_color: METADATA.themeColor,
     icons: [
       {

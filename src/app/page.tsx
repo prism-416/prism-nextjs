@@ -17,7 +17,7 @@ export default function Home() {
         <section
           id="launch"
           aria-labelledby="launch-heading"
-          className="scroll-mt-20 bg-[linear-gradient(135deg,#08344b_0%,#0c4767_58%,#6ea9a7_160%)] py-20 md:py-24"
+          className="scroll-mt-20 bg-(image:--gradient-launch-surface) py-20 md:py-24"
         >
           <Container>
             <LandingLaunchSection />

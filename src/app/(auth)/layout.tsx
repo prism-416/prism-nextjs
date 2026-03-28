@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
   if (isSignUpPage) {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#0c4767_0%,#08344b_100%)]">
+      <main className="relative min-h-screen overflow-hidden bg-(image:--gradient-auth-main)">
         <AuthVisualBackdrop withAurora={false} />
         <div className="relative z-10 min-h-screen">{children}</div>
       </main>
