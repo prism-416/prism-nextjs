@@ -190,12 +190,14 @@ export default function SoftAurora({
       return;
     }
 
+    const currentContainer = container;
+
     const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
     const gl = renderer.gl;
 
     gl.clearColor(0, 0, 0, 0);
 
-    let currentMouse: [number, number] = [0.5, 0.5];
+    const currentMouse: [number, number] = [0.5, 0.5];
     let targetMouse: [number, number] = [0.5, 0.5];
 
     const program = new Program(gl, {
@@ -223,16 +225,13 @@ export default function SoftAurora({
     });
 
     function handleMouseMove(event: MouseEvent) {
-      const rect = container.getBoundingClientRect();
+      const rect = currentContainer.getBoundingClientRect();
 
       if (!rect.width || !rect.height) {
         return;
       }
 
-      targetMouse = [
-        (event.clientX - rect.left) / rect.width,
-        1 - (event.clientY - rect.top) / rect.height,
-      ];
+      targetMouse = [(event.clientX - rect.left) / rect.width, 1 - (event.clientY - rect.top) / rect.height];
     }
 
     function handleMouseLeave() {
@@ -240,7 +239,7 @@ export default function SoftAurora({
     }
 
     function resize() {
-      renderer.setSize(container.offsetWidth, container.offsetHeight);
+      renderer.setSize(currentContainer.offsetWidth, currentContainer.offsetHeight);
       program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
     }
 
@@ -250,7 +249,7 @@ export default function SoftAurora({
     const geometry = new Triangle(gl);
     const mesh = new Mesh(gl, { geometry, program });
 
-    container.appendChild(gl.canvas);
+    currentContainer.appendChild(gl.canvas);
 
     if (enableMouseInteraction) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -287,8 +286,8 @@ export default function SoftAurora({
         window.removeEventListener("mouseleave", handleMouseLeave);
       }
 
-      if (container.contains(gl.canvas)) {
-        container.removeChild(gl.canvas);
+      if (currentContainer.contains(gl.canvas)) {
+        currentContainer.removeChild(gl.canvas);
       }
 
       gl.getExtension("WEBGL_lose_context")?.loseContext();
@@ -310,5 +309,10 @@ export default function SoftAurora({
     mouseInfluence,
   ]);
 
-  return <div ref={containerRef} className="soft-aurora-container" />;
+  return (
+    <div
+      ref={containerRef}
+      className="soft-aurora-container"
+    />
+  );
 }
