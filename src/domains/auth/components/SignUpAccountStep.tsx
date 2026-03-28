@@ -1,36 +1,11 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
-import { FaGithub, FaGoogle } from "react-icons/fa";
-
-import { Button } from "@/atomics/atoms/Button";
-import { Input } from "@/atomics/atoms/Input";
-import { Typography } from "@/atomics/atoms/Typography";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
-} from "@/atomics/molecules/Field";
-import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
+import { FieldDescription, FieldGroup, FieldSet } from "@/atomics/molecules/Field";
+import { AuthFormSeparator } from "@/domains/auth/components/AuthFormSeparator";
+import { AuthPasswordField } from "@/domains/auth/components/AuthPasswordField";
+import { AuthSocialButtons } from "@/domains/auth/components/AuthSocialButtons";
+import { AuthTextField } from "@/domains/auth/components/AuthTextField";
 import { FormHintChecklist } from "@/domains/auth/components/FormHintChecklist";
-import { GITHUB_LOGIN_URL, GOOGLE_LOGIN_URL } from "@/shared/constants/api";
-
-const SOCIAL_OPTIONS = [
-  {
-    label: AUTH_SOCIAL_LABELS.github,
-    href: GITHUB_LOGIN_URL,
-    icon: FaGithub,
-  },
-  {
-    label: AUTH_SOCIAL_LABELS.google,
-    href: GOOGLE_LOGIN_URL,
-    icon: FaGoogle,
-  },
-] as const;
 
 type SignUpAccountStepProps = {
   email: string;
@@ -61,111 +36,45 @@ export function SignUpAccountStep({
 
   return (
     <FieldSet className="gap-6">
-      <FieldSet className="gap-2">
-        <FieldLegend
-          variant="label"
-          className="sr-only"
-        >
-          Create an account with a social provider
-        </FieldLegend>
-        {SOCIAL_OPTIONS.map(option => {
-          const Icon = option.icon;
+      <AuthSocialButtons legend="Create an account with a social provider" />
 
-          return (
-            <Button
-              key={option.label}
-              asChild
-              type="button"
-              variant="outline"
-              className="h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-prism-surface-field text-primary hover:bg-prism-sand"
-            >
-              <a href={option.href}>
-                <Icon className="size-4" />
-                {option.label}
-              </a>
-            </Button>
-          );
-        })}
-      </FieldSet>
-
-      <FieldSeparator className="py-1">
-        <Typography
-          as="span"
-          variant="overline"
-          tone="inherit"
-          weight="medium"
-          className="px-1 text-prism-body/50 tracking-[0.2em]"
-        >
-          Or
-        </Typography>
-      </FieldSeparator>
+      <AuthFormSeparator />
 
       <FieldGroup className="gap-5">
-        <Field className="space-y-2">
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={event => onEmailChange(event.target.value)}
-            placeholder="you@company.com"
-            className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
-          />
-        </Field>
+        <AuthTextField
+          id="email"
+          name="email"
+          type="email"
+          label="Email"
+          autoComplete="email"
+          value={email}
+          onChange={onEmailChange}
+          placeholder="you@company.com"
+        />
 
-        <Field className="space-y-2">
-          <FieldLabel htmlFor="password">Password</FieldLabel>
-          <div className="relative">
-            <Input
-              id="password"
-              name="password"
-              type={isPasswordVisible ? "text" : "password"}
-              autoComplete="new-password"
-              value={password}
-              onChange={event => onPasswordChange(event.target.value)}
-              placeholder="Create a password"
-              className="h-11 rounded-xl border-prism-sand bg-prism-surface-field pr-12 text-primary placeholder:text-prism-body/45"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-prism-sand hover:text-primary"
-              onClick={onPasswordToggle}
-              aria-label={isPasswordVisible ? "Hide password" : "Show password"}
-            >
-              {isPasswordVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </Button>
-          </div>
-        </Field>
+        <AuthPasswordField
+          id="password"
+          name="password"
+          label="Password"
+          autoComplete="new-password"
+          value={password}
+          onChange={onPasswordChange}
+          placeholder="Create a password"
+          isVisible={isPasswordVisible}
+          onVisibilityToggle={onPasswordToggle}
+        />
 
-        <Field className="space-y-2">
-          <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
-          <div className="relative">
-            <Input
-              id="confirm-password"
-              name="confirmPassword"
-              type={isPasswordVisible ? "text" : "password"}
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={event => onConfirmPasswordChange(event.target.value)}
-              placeholder="Confirm your password"
-              className="h-11 rounded-xl border-prism-sand bg-prism-surface-field pr-12 text-primary placeholder:text-prism-body/45"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-prism-sand hover:text-primary"
-              onClick={onPasswordToggle}
-              aria-label={isPasswordVisible ? "Hide password" : "Show password"}
-            >
-              {isPasswordVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </Button>
-          </div>
-        </Field>
+        <AuthPasswordField
+          id="confirm-password"
+          name="confirmPassword"
+          label="Confirm password"
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={onConfirmPasswordChange}
+          placeholder="Confirm your password"
+          isVisible={isPasswordVisible}
+          onVisibilityToggle={onPasswordToggle}
+        />
       </FieldGroup>
 
       <FormHintChecklist items={accountChecks} />

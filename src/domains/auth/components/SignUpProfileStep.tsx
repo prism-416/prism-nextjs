@@ -1,7 +1,7 @@
 "use client";
 
-import { Input } from "@/atomics/atoms/Input";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/atomics/molecules/Field";
+import { FieldDescription, FieldGroup } from "@/atomics/molecules/Field";
+import { AuthTextField } from "./AuthTextField";
 import { FormHintChecklist } from "@/domains/auth/components/FormHintChecklist";
 
 type SignUpProfileStepProps = {
@@ -19,33 +19,25 @@ export function SignUpProfileStep({ name, username, onNameChange, onUsernameChan
 
   return (
     <FieldGroup className="gap-5">
-      <Field className="space-y-2">
-        <FieldLabel htmlFor="name">Full name</FieldLabel>
-        <Input
-          id="name"
-          name="name"
-          type="text"
-          autoComplete="name"
-          value={name}
-          onChange={event => onNameChange(event.target.value)}
-          placeholder="Your name"
-          className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
-        />
-      </Field>
+      <AuthTextField
+        id="name"
+        name="name"
+        label="Full name"
+        autoComplete="name"
+        value={name}
+        onChange={onNameChange}
+        placeholder="Your name"
+      />
 
-      <Field className="space-y-2">
-        <FieldLabel htmlFor="username">Username</FieldLabel>
-        <Input
-          id="username"
-          name="username"
-          type="text"
-          autoComplete="nickname"
-          value={username}
-          onChange={event => onUsernameChange(event.target.value)}
-          placeholder="How your team will see you"
-          className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
-        />
-      </Field>
+      <AuthTextField
+        id="username"
+        name="username"
+        label="Username"
+        autoComplete="nickname"
+        value={username}
+        onChange={onUsernameChange}
+        placeholder="How your team will see you"
+      />
 
       <FormHintChecklist items={profileChecks} />
 
