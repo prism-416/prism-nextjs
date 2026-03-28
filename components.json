@@ -16,5 +16,8 @@
     "ui": "@/atomics",
     "lib": "@/shared/utils",
     "hooks": "@/shared"
+  },
+  "registries": {
+    "@react-bits": "https://shadcnregistry.com/r/react-bits/{name}"
   }
 }
