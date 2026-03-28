@@ -9,7 +9,7 @@ export default function LandingHeroSection() {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative overflow-hidden border-b border-border bg-[linear-gradient(180deg,#fcf8ef_0%,#f4ecd6_46%,#eef4f1_100%)]"
+      className="relative overflow-hidden border-b border-border bg-[image:var(--gradient-hero-surface)]"
     >
       <ColorBends
         className="pointer-events-none absolute inset-0 opacity-[0.98] mask-[radial-gradient(circle_at_center,black,transparent_82%)]"
@@ -24,11 +24,11 @@ export default function LandingHeroSection() {
         noise={HERO_BACKGROUND.noise}
       />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-prism-teal-500/60 to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(255,241,168,0.48),transparent_18%),radial-gradient(circle_at_28%_74%,rgba(255,107,198,0.14),transparent_22%),radial-gradient(circle_at_84%_18%,rgba(157,123,255,0.3),transparent_18%),radial-gradient(circle_at_78%_70%,rgba(99,178,255,0.18),transparent_24%),linear-gradient(180deg,rgba(252,248,239,0.03),rgba(252,248,239,0.66))]" />
-      <div className="pointer-events-none absolute left-4 top-20 size-48 rounded-full bg-[#fff1a8]/22 blur-3xl" />
-      <div className="pointer-events-none absolute left-1/4 top-1/2 size-52 rounded-full bg-[#ff6bc6]/12 blur-3xl" />
-      <div className="pointer-events-none absolute right-10 top-14 size-56 rounded-full bg-[#9d7bff]/16 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-8 right-1/4 size-64 rounded-full bg-[#63b2ff]/12 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[image:var(--gradient-hero-overlay)]" />
+      <div className="pointer-events-none absolute left-4 top-20 size-48 rounded-full bg-prism-glow-gold/22 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/4 top-1/2 size-52 rounded-full bg-prism-glow-magenta/12 blur-3xl" />
+      <div className="pointer-events-none absolute right-10 top-14 size-56 rounded-full bg-prism-glow-violet/16 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-8 right-1/4 size-64 rounded-full bg-prism-glow-sky/12 blur-3xl" />
 
       <Container className="relative py-18 md:py-24 lg:py-28">
         <div className="mx-auto max-w-4xl text-center">

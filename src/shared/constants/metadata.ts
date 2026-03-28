@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @description 사이트 기본 메타데이터
  */
 export const METADATA = {

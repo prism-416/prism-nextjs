@@ -1,4 +1,4 @@
-﻿import { Bot, CheckCheck, GitBranch, type LucideIcon } from "lucide-react";
+import { Bot, CheckCheck, GitBranch, type LucideIcon } from "lucide-react";
 
 export type LandingCapability = {
   title: string;
@@ -33,7 +33,15 @@ export const HERO_CONTENT = {
 } as const;
 
 export const HERO_BACKGROUND = {
-  colors: ["#fff1a8", "#ff9b73", "#ff6bc6", "#9d7bff", "#63b2ff", "#62d7c7", "#0c4767"],
+  colors: [
+    "#fff1a8",
+    "#ff9b73",
+    "#ff6bc6",
+    "#9d7bff",
+    "#63b2ff",
+    "#62d7c7",
+    "#0c4767",
+  ],
   speed: 0.2,
   scale: 0.84,
   frequency: 1.18,

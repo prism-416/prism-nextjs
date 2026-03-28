@@ -100,7 +100,7 @@ export function SignUpOnboarding() {
           <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.8fr)] lg:gap-12">
             <div className="space-y-8 pt-4 text-white lg:pr-8">
               <div className="space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f4ecd6]/72">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-prism-cream/72">
                   Prizmatic Onboarding
                 </p>
                 <h1 className="max-w-xl text-4xl font-semibold leading-tight tracking-[-0.04em] text-white xl:text-5xl">
@@ -131,7 +131,7 @@ export function SignUpOnboarding() {
                     >
                       <div className="flex items-center justify-between gap-4">
                         <p className="text-sm font-semibold text-white">{step.label}</p>
-                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-[#f4ecd6]/68">
+                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-prism-cream/68">
                           {step.step}
                         </p>
                       </div>
@@ -142,7 +142,7 @@ export function SignUpOnboarding() {
               </div>
 
               <div className="rounded-3xl border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#f4ecd6]/68">What comes next</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-prism-cream/68">What comes next</p>
                 <p className="mt-3 max-w-lg text-sm leading-7 text-white/72">
                   After setup, you can move into project creation, teammate invites, and GitHub connection without
                   loading all of that into the first form.
@@ -150,7 +150,7 @@ export function SignUpOnboarding() {
               </div>
             </div>
 
-            <FieldSet className="gap-8 rounded-[1.65rem] border border-prism-sand/70 bg-[linear-gradient(180deg,rgba(252,248,239,0.94)_0%,rgba(255,255,255,0.72)_100%)] p-6 shadow-[0_28px_120px_rgba(3,23,34,0.24)] backdrop-blur-md lg:sticky lg:top-10 lg:p-8">
+            <FieldSet className="gap-8 rounded-[1.65rem] border border-prism-sand/70 bg-(image:--gradient-panel-surface) p-6 shadow-(--shadow-auth-panel) backdrop-blur-md lg:sticky lg:top-10 lg:p-8">
               <div className="flex items-start justify-between gap-6">
                 <div className="space-y-1.5">
                   <p className="text-xs font-semibold uppercase tracking-[0.28em] text-prism-body/45">Current step</p>
@@ -164,7 +164,7 @@ export function SignUpOnboarding() {
 
               <div
                 key={currentStep.key}
-                className="space-y-7 rounded-3xl border border-white/75 bg-white/80 p-6 shadow-[0_14px_40px_rgba(12,71,103,0.08)]"
+                className="space-y-7 rounded-3xl border border-white/75 bg-white/80 p-6 shadow-(--shadow-soft-navy-card)"
               >
                 {currentStep.key === "account" && (
                   <SignUpAccountStep
@@ -203,7 +203,7 @@ export function SignUpOnboarding() {
                     variant="ghost"
                     onClick={handleBack}
                     className={cn(
-                      "rounded-xl px-4 text-prism-body/72 hover:bg-[#efe7d7] hover:text-primary",
+                      "rounded-xl px-4 text-prism-body/72 hover:bg-prism-sand-soft hover:text-primary",
                       currentStepIndex === 0 && "invisible",
                     )}
                   >
@@ -224,7 +224,10 @@ export function SignUpOnboarding() {
 
               <p className="text-center text-sm text-prism-body/70">
                 Already have an account?{" "}
-                <Link href="/sign-in" className="font-semibold text-primary underline underline-offset-4">
+                <Link
+                  href="/sign-in"
+                  className="font-semibold text-primary underline underline-offset-4"
+                >
                   Sign in
                 </Link>
               </p>

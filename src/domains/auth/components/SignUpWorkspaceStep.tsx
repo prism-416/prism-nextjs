@@ -53,13 +53,16 @@ export function SignUpWorkspaceStep({
             value={workspaceName}
             onChange={event => onWorkspaceNameChange(event.target.value)}
             placeholder="Team or company name"
-            className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary placeholder:text-prism-body/45"
+            className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
           />
         </Field>
       </FieldGroup>
 
       <FieldSet className="gap-3">
-        <FieldLegend variant="label" className="text-sm font-medium text-primary">
+        <FieldLegend
+          variant="label"
+          className="text-sm font-medium text-primary"
+        >
           Who is this for?
         </FieldLegend>
 
@@ -93,7 +96,9 @@ function WorkspaceModeCard({ isSelected, label, description, onClick }: Workspac
       type="button"
       className={cn(
         "rounded-2xl border px-4 py-4 text-left transition-colors",
-        isSelected ? "border-primary bg-primary/6 shadow-[0_8px_24px_rgba(12,71,103,0.08)]" : "border-prism-sand bg-[rgba(252,248,239,0.7)] hover:border-primary/30 hover:bg-white/70",
+        isSelected
+          ? "border-primary bg-primary/6 shadow-(--shadow-soft-navy)"
+          : "border-prism-sand bg-prism-surface-field-soft hover:border-primary/30 hover:bg-white/70",
       )}
       onClick={onClick}
     >

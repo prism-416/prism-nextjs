@@ -46,7 +46,7 @@ export default function SignInPage() {
                 type="email"
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary placeholder:text-prism-body/45"
+                className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
               />
             </Field>
 
@@ -59,13 +59,13 @@ export default function SignInPage() {
                   type={isPasswordVisible ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="Password"
-                  className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] pr-12 text-primary placeholder:text-prism-body/45"
+                  className="h-11 rounded-xl border-prism-sand bg-prism-surface-field pr-12 text-primary placeholder:text-prism-body/45"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-[#e8deca] hover:text-primary"
+                  className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-prism-sand hover:text-primary"
                   onClick={() => setIsPasswordVisible(prev => !prev)}
                   aria-label={isPasswordVisible ? "Hide password" : "Show password"}
                 >
@@ -106,7 +106,7 @@ export default function SignInPage() {
                   asChild
                   type="button"
                   variant="outline"
-                  className="h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary hover:bg-[#e8deca]"
+                  className="h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-prism-surface-field text-primary hover:bg-prism-sand"
                 >
                   <a href={option.href}>
                     <Icon className="size-4" />

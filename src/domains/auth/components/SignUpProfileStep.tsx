@@ -29,7 +29,7 @@ export function SignUpProfileStep({ name, username, onNameChange, onUsernameChan
           value={name}
           onChange={event => onNameChange(event.target.value)}
           placeholder="Your name"
-          className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary placeholder:text-prism-body/45"
+          className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
         />
       </Field>
 
@@ -43,7 +43,7 @@ export function SignUpProfileStep({ name, username, onNameChange, onUsernameChan
           value={username}
           onChange={event => onUsernameChange(event.target.value)}
           placeholder="How your team will see you"
-          className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary placeholder:text-prism-body/45"
+          className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
         />
       </Field>
 

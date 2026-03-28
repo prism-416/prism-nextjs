@@ -5,7 +5,15 @@ import { FaGithub, FaGoogle } from "react-icons/fa";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from "@/atomics/molecules/Field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from "@/atomics/molecules/Field";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import { FormHintChecklist } from "@/domains/auth/components/FormHintChecklist";
 import { GITHUB_LOGIN_URL, GOOGLE_LOGIN_URL } from "@/shared/constants/api";
@@ -53,7 +61,10 @@ export function SignUpAccountStep({
   return (
     <FieldSet className="gap-6">
       <FieldSet className="gap-2">
-        <FieldLegend variant="label" className="sr-only">
+        <FieldLegend
+          variant="label"
+          className="sr-only"
+        >
           Create an account with a social provider
         </FieldLegend>
         {SOCIAL_OPTIONS.map(option => {
@@ -65,7 +76,7 @@ export function SignUpAccountStep({
               asChild
               type="button"
               variant="outline"
-              className="h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary hover:bg-[#e8deca]"
+              className="h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-prism-surface-field text-primary hover:bg-prism-sand"
             >
               <a href={option.href}>
                 <Icon className="size-4" />
@@ -91,7 +102,7 @@ export function SignUpAccountStep({
             value={email}
             onChange={event => onEmailChange(event.target.value)}
             placeholder="you@company.com"
-            className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] text-primary placeholder:text-prism-body/45"
+            className="h-11 rounded-xl border-prism-sand bg-prism-surface-field text-primary placeholder:text-prism-body/45"
           />
         </Field>
 
@@ -106,13 +117,13 @@ export function SignUpAccountStep({
               value={password}
               onChange={event => onPasswordChange(event.target.value)}
               placeholder="Create a password"
-              className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] pr-12 text-primary placeholder:text-prism-body/45"
+              className="h-11 rounded-xl border-prism-sand bg-prism-surface-field pr-12 text-primary placeholder:text-prism-body/45"
             />
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-[#e8deca] hover:text-primary"
+              className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-prism-sand hover:text-primary"
               onClick={onPasswordToggle}
               aria-label={isPasswordVisible ? "Hide password" : "Show password"}
             >
@@ -132,13 +143,13 @@ export function SignUpAccountStep({
               value={confirmPassword}
               onChange={event => onConfirmPasswordChange(event.target.value)}
               placeholder="Confirm your password"
-              className="h-11 rounded-xl border-prism-sand bg-[rgba(252,248,239,0.88)] pr-12 text-primary placeholder:text-prism-body/45"
+              className="h-11 rounded-xl border-prism-sand bg-prism-surface-field pr-12 text-primary placeholder:text-prism-body/45"
             />
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-[#e8deca] hover:text-primary"
+              className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-full text-prism-body/70 hover:bg-prism-sand hover:text-primary"
               onClick={onPasswordToggle}
               aria-label={isPasswordVisible ? "Hide password" : "Show password"}
             >
