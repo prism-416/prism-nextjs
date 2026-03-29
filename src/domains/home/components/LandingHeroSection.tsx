@@ -58,7 +58,8 @@ export default function LandingHeroSection() {
             variant="display"
             tone="inherit"
             wrap="balance"
-            className="mt-6 text-prism-navy"
+            align="center"
+            className="mt-6 text-center text-prism-navy"
           >
             {HERO_CONTENT.title}
           </Typography>
@@ -68,6 +69,7 @@ export default function LandingHeroSection() {
             tone="muted"
             wrap="pretty"
             className="mx-auto mt-6 max-w-2xl"
+            align="center"
           >
             {HERO_CONTENT.description}
           </Typography>

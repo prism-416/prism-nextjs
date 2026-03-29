@@ -19,6 +19,7 @@ export default function LandingSignalCard({ label, value }: LandingSignalCardPro
         variant="title"
         tone="inherit"
         className="mt-2 text-prism-navy"
+        align="center"
       >
         {value}
       </Typography>
