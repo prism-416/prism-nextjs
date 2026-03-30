@@ -20,6 +20,7 @@ export default function LandingLaunchSection() {
         tone="inverse"
         wrap="balance"
         className="mx-auto mt-4 max-w-3xl md:text-5xl"
+        align="center"
       >
         {LANDING_LAUNCH.title}
       </Typography>
@@ -30,6 +31,7 @@ export default function LandingLaunchSection() {
         fontSize="lg"
         lineHeight="7"
         className="mx-auto mt-5 max-w-2xl text-white/76 md:text-lg"
+        align="center"
       >
         {LANDING_LAUNCH.description}
       </Typography>
