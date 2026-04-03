@@ -8,6 +8,8 @@ export interface AuthTokens {
 export interface AuthSessionResponse {
   authenticated: boolean;
   accessToken?: string;
+  isNewUser?: boolean;
+  emailVerified?: boolean;
 }
 
 export interface AuthSessionPayload extends Partial<AuthTokens> {

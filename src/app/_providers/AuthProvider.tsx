@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
+import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 import { getCookie } from "@/shared/utils/cookie";
 import { removeAuthToken, setAuthToken } from "@/shared/utils/axios-util";
 import type { ServerInitDataType } from "@/shared/utils/server-util";
@@ -9,6 +10,7 @@ import { AuthSessionPayload } from "@/shared/types/auth";
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  hydrateSession: (payload: AuthSessionPayload) => boolean;
   setSession: (payload: AuthSessionPayload) => Promise<boolean>;
   refreshSession: () => Promise<boolean>;
   clearSession: () => Promise<void>;
@@ -46,9 +48,24 @@ export default function AuthProvider({ children }: Props) {
     removeAuthToken();
   }, []);
 
+  function hydrateSession(payload: AuthSessionPayload) {
+    const tokens = normalizeAuthTokens(payload);
+
+    if (!tokens?.accessToken) {
+      removeAuthToken();
+      setIsAuthenticated(false);
+      return false;
+    }
+
+    setAuthToken(tokens.accessToken);
+    setIsAuthenticated(true);
+    return true;
+  }
+
   const value = useMemo<AuthContextType>(
     () => ({
       isAuthenticated,
+      hydrateSession,
       async setSession(payload) {
         const response = await fetch("/api/auth/session", {
           method: "POST",
@@ -65,9 +82,7 @@ export default function AuthProvider({ children }: Props) {
           return false;
         }
 
-        setAuthToken(result.accessToken);
-        setIsAuthenticated(true);
-        return true;
+        return hydrateSession(result);
       },
       async refreshSession() {
         const response = await fetch("/api/auth/refresh", {
@@ -83,9 +98,7 @@ export default function AuthProvider({ children }: Props) {
           return false;
         }
 
-        setAuthToken(result.accessToken);
-        setIsAuthenticated(true);
-        return true;
+        return hydrateSession(result);
       },
       async clearSession() {
         await fetch("/api/auth/logout", {

@@ -1,22 +1,18 @@
 "use client";
 
-import { FaGithub, FaGoogle } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
 
 import { Button } from "@/atomics/atoms/Button";
 import { FieldLegend, FieldSet } from "@/atomics/molecules/Field";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
-import { GITHUB_LOGIN_URL, GOOGLE_LOGIN_URL } from "@/shared/constants/api";
+import { GoogleSignInButton } from "@/domains/auth/components/GoogleSignInButton";
+import { GITHUB_SIGNIN_URL } from "@/shared/constants/api";
 
 const SOCIAL_OPTIONS = [
   {
     label: AUTH_SOCIAL_LABELS.github,
-    href: GITHUB_LOGIN_URL,
+    href: GITHUB_SIGNIN_URL,
     icon: FaGithub,
-  },
-  {
-    label: AUTH_SOCIAL_LABELS.google,
-    href: GOOGLE_LOGIN_URL,
-    icon: FaGoogle,
   },
 ] as const;
 
@@ -51,6 +47,8 @@ export function AuthSocialButtons({ legend }: AuthSocialButtonsProps) {
           </Button>
         );
       })}
+
+      <GoogleSignInButton />
     </FieldSet>
   );
 }

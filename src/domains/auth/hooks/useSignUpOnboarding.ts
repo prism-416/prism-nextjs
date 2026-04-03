@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { SIGN_UP_STEPS } from "../constants/content";
-import type { SignUpFormState } from "../types";
+import type { SignUpFormState, SignUpStepKey } from "../types";
 
 const INITIAL_FORM_STATE: SignUpFormState = {
   email: "",
@@ -15,8 +16,17 @@ const INITIAL_FORM_STATE: SignUpFormState = {
   workspaceMode: "team",
 };
 
+function resolveInitialStepIndex(stepParam: string | null): number {
+  if (!stepParam) return 0;
+  const index = SIGN_UP_STEPS.findIndex(s => s.key === (stepParam as SignUpStepKey));
+  return index >= 0 ? index : 0;
+}
+
 export function useSignUpOnboarding() {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const searchParams = useSearchParams();
+  const initialStepIndex = resolveInitialStepIndex(searchParams.get("step"));
+
+  const [currentStepIndex, setCurrentStepIndex] = useState(initialStepIndex);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isWelcomeStep, setIsWelcomeStep] = useState(false);
   const [formState, setFormState] = useState<SignUpFormState>(INITIAL_FORM_STATE);

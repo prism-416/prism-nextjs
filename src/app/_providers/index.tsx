@@ -6,6 +6,7 @@ import RenderProvider from "./RenderProvider";
 import ErrorHandleProvider from "./ErrorHandleProvider";
 import { DeviceInfoProvider } from "./DeviceInfoProvider";
 import AuthProvider from "./AuthProvider";
+import { OAuthProvider } from "./OAuthProvider";
 import { VersionProvider } from "./VersionProvider";
 
 interface Props {
@@ -15,16 +16,18 @@ interface Props {
 
 export default function Provider({ children, initData }: Props) {
   return (
-    <AuthProvider initData={initData}>
-      <DeviceInfoProvider initData={initData}>
-        <TanStackQueryProvider>
-          <RenderProvider initData={initData}>
-            <ErrorHandleProvider initData={initData}>
-              <VersionProvider initData={initData}>{children}</VersionProvider>
-            </ErrorHandleProvider>
-          </RenderProvider>
-        </TanStackQueryProvider>
-      </DeviceInfoProvider>
-    </AuthProvider>
+    <OAuthProvider initData={initData}>
+      <AuthProvider initData={initData}>
+        <DeviceInfoProvider initData={initData}>
+          <TanStackQueryProvider>
+            <RenderProvider initData={initData}>
+              <ErrorHandleProvider initData={initData}>
+                <VersionProvider initData={initData}>{children}</VersionProvider>
+              </ErrorHandleProvider>
+            </RenderProvider>
+          </TanStackQueryProvider>
+        </DeviceInfoProvider>
+      </AuthProvider>
+    </OAuthProvider>
   );
 }

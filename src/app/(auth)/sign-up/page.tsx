@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { SignUpOnboarding } from "@/domains/auth/components/SignUpOnboarding";
 
 export default function SignUpPage() {
-  return <SignUpOnboarding />;
+  return (
+    <Suspense>
+      <SignUpOnboarding />
+    </Suspense>
+  );
 }

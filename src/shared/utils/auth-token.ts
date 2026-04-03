@@ -1,40 +1,9 @@
 import { API_HOST } from "@/shared/constants/api";
 import { SERVER_ENV } from "@/shared/constants/server-env";
-import { AuthSessionPayload, AuthTokens } from "@/shared/types/auth";
+import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 
 const DEFAULT_REFRESH_ENDPOINT = "/api/auth/refresh";
 const DEFAULT_LOGOUT_ENDPOINT = "/api/auth/logout";
-
-function getTokenString(value: unknown) {
-  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
-}
-
-function getNumberValue(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-export function normalizeAuthTokens(payload: AuthSessionPayload | null | undefined): AuthTokens | null {
-  if (!payload) return null;
-
-  const accessToken = getTokenString(payload.accessToken) || getTokenString(payload.access_token);
-  const refreshToken = getTokenString(payload.refreshToken) || getTokenString(payload.refresh_token);
-  const accessTokenExpiresIn =
-    getNumberValue(payload.accessTokenExpiresIn) ||
-    getNumberValue(payload.expiresIn) ||
-    getNumberValue(payload.expires_in);
-  const refreshTokenExpiresIn = getNumberValue(payload.refreshTokenExpiresIn);
-
-  if (!accessToken) {
-    return null;
-  }
-
-  return {
-    accessToken,
-    refreshToken,
-    accessTokenExpiresIn,
-    refreshTokenExpiresIn,
-  };
-}
 
 export function resolveBackendAuthUrl(path: string | undefined, fallbackPath: string) {
   if (!API_HOST) {
@@ -47,7 +16,10 @@ export function resolveBackendAuthUrl(path: string | undefined, fallbackPath: st
     return targetPath;
   }
 
-  return new URL(targetPath, API_HOST).toString();
+  const base = API_HOST.endsWith("/") ? API_HOST : `${API_HOST}/`;
+  const relative = targetPath.startsWith("/") ? targetPath.slice(1) : targetPath;
+
+  return new URL(relative, base).toString();
 }
 
 export function getRefreshEndpoint() {
@@ -57,3 +29,13 @@ export function getRefreshEndpoint() {
 export function getLogoutEndpoint() {
   return resolveBackendAuthUrl(SERVER_ENV.AUTH_LOGOUT_PATH, DEFAULT_LOGOUT_ENDPOINT);
 }
+
+export function getGoogleIdTokenSigninEndpoint() {
+  if (!SERVER_ENV.AUTH_GOOGLE_SIGNIN_PATH) {
+    throw new Error("AUTH_GOOGLE_SIGNIN_PATH is required.");
+  }
+
+  return resolveBackendAuthUrl(SERVER_ENV.AUTH_GOOGLE_SIGNIN_PATH, SERVER_ENV.AUTH_GOOGLE_SIGNIN_PATH);
+}
+
+export { normalizeAuthTokens };
