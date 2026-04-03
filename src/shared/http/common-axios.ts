@@ -21,13 +21,13 @@ type ServerAxiosType<T> = ServerAxiosBase<T>;
 /**
  * @desc 노드 서버에서 사용하는 axios
  */
-export const commonAxios = async <T, R>({ url, data, config, method = "POST", version = "v3" }: ServerAxiosType<T>) => {
+export const commonAxios = async <T, R>({ url, data, config, method = "POST", version }: ServerAxiosType<T>) => {
   if (!url || !API_HOST) {
     return null;
   }
 
   const resolvedVersion = version || undefined;
-  const baseURL = `${API_HOST}/api`;
+  const baseURL = API_HOST;
   const defaultConfig: AxiosRequestType = {
     baseURL,
     isSsr: IS_SERVER,

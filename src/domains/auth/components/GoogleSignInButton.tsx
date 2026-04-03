@@ -7,6 +7,7 @@ import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
+import { signInWithGoogle } from "@/domains/auth/api";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import type { GoogleAccountsIdApi, GoogleCredentialResponse } from "@/domains/auth/types/google";
 
@@ -76,7 +77,7 @@ function loadGoogleIdentityScript() {
 }
 
 export function GoogleSignInButton() {
-  const { hydrateSession } = useAuth();
+  const { setSession } = useAuth();
   const { googleClientId: clientId } = useOAuth();
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -92,35 +93,27 @@ export function GoogleSignInButton() {
     setIsSubmitting(true);
 
     try {
-      const sessionResponse = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          credential: response.credential,
-        }),
-      });
+      const result = await signInWithGoogle(response.credential);
+      const userData = result?.data;
 
-      const payload = (await sessionResponse.json().catch(() => null)) as {
-        accessToken?: string;
-        authenticated?: boolean;
-        isNewUser?: boolean;
-        emailVerified?: boolean;
-        message?: string;
-      } | null;
-
-      if (!sessionResponse.ok || !payload?.accessToken) {
-        setErrorMessage(payload?.message || "Google sign-in failed.");
+      if (userData?.newUser) {
+        window.location.assign("/sign-up?step=profile");
         return;
       }
 
-      hydrateSession(payload);
+      if (!userData?.accessToken) {
+        setErrorMessage(result?.message || "Google sign-in failed.");
+        return;
+      }
 
-      if (payload.isNewUser) {
-        window.location.assign("/sign-up?step=profile");
-      } else if (payload.emailVerified === false) {
+      const ok = await setSession(userData);
+
+      if (!ok) {
+        setErrorMessage("Google sign-in failed.");
+        return;
+      }
+
+      if (userData.emailVerified === false) {
         window.location.assign("/verify-email");
       } else {
         window.location.assign("/");

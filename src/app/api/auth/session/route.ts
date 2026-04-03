@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { applyAuthCookies, clearAuthCookies } from "@/shared/utils/auth-cookie";
-import { normalizeAuthTokens } from "@/shared/utils/auth-token";
+import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 
 export async function GET() {
   const cookieStore = await cookies();
