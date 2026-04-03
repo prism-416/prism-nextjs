@@ -5,6 +5,7 @@ import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 import { getCookie } from "@/shared/utils/cookie";
 import { removeAuthToken, setAuthToken } from "@/shared/utils/axios-util";
+import { logout } from "@/domains/auth/api";
 import type { ServerInitDataType } from "@/shared/utils/server-util";
 import { AuthSessionPayload } from "@/shared/types/auth";
 
@@ -101,10 +102,12 @@ export default function AuthProvider({ children }: Props) {
         return hydrateSession(result);
       },
       async clearSession() {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          credentials: "include",
-        });
+        try {
+          await logout();
+        } catch {
+          // Backend logout is best-effort
+        }
+        await fetch("/api/auth/session", { method: "DELETE", credentials: "include" });
         removeAuthToken();
         setIsAuthenticated(false);
       },

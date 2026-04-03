@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
+import { API_HOST } from "@/shared/constants/api";
 import { clearAuthCookies, applyAuthCookies } from "@/shared/utils/auth-cookie";
-import { getRefreshEndpoint, normalizeAuthTokens } from "@/shared/utils/auth-token";
+import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 
 export async function POST() {
   const cookieStore = await cookies();
@@ -13,7 +14,7 @@ export async function POST() {
   }
 
   try {
-    const response = await fetch(getRefreshEndpoint(), {
+    const response = await fetch(`${API_HOST}/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
