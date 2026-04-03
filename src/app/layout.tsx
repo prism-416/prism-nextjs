@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { METADATA } from "@/shared/constants/metadata";
+import { SERVER_ENV } from "@/shared/constants/server-env";
 import { getCanonicalUrl, getRobots, getServerDeviceInfo, getPackageVersion } from "@/shared/utils/server-util";
 import Provider from "./_providers";
 import React from "react";
@@ -88,6 +89,7 @@ export default async function RootLayout({
 
   const initData = {
     deviceInfo,
+    googleClientId: SERVER_ENV.GOOGLE_CLIENT_ID,
     version,
   };
 
