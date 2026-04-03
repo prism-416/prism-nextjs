@@ -19,3 +19,7 @@ export type SignUpFormState = {
   workspaceName: string;
   workspaceMode: WorkspaceMode;
 };
+
+export interface SignUpRequestBody {
+  email: string;
+}

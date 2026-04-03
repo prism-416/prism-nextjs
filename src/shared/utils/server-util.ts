@@ -12,6 +12,7 @@ import { NextRequest } from "next/server";
 export interface ServerInitDataType {
   deviceInfo: ServerDeviceInfoType | null;
   // session: Session | null;
+  googleClientId?: string;
   version: string;
   // gnbMenu: GnbMenusContextType | null;
   // userProfile: ServerUserProfileType;

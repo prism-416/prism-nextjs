@@ -18,5 +18,4 @@ export const OCTET_STREAM_TYPE = "application/octet-stream";
 export const TOKEN_TYPE_BEARER = "Bearer";
 
 // Social Login Endpoints
-export const GOOGLE_LOGIN_URL = `${API_HOST}/api/auth/google/login`;
-export const GITHUB_LOGIN_URL = `${API_HOST}/api/auth/github/login`;
+export const GITHUB_SIGNIN_URL = `${API_HOST}/auth/github/signin`;
