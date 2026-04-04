@@ -9,12 +9,14 @@ import { useSignUpOnboarding } from "../hooks/useSignUpOnboarding";
 export function SignUpOnboarding() {
   const {
     canContinue,
+    continueError,
     currentStep,
     currentStepIndex,
     formState,
     handleBack,
     handleContinue,
     isCheckingUsername,
+    isContinueSubmitting,
     isPasswordVisible,
     isUsernameAvailable,
     isWelcomeStep,
@@ -38,8 +40,10 @@ export function SignUpOnboarding() {
 
             <SignUpOnboardingFormPanel
               canContinue={canContinue}
+              continueError={continueError}
               currentStep={currentStep}
               currentStepIndex={currentStepIndex}
+              isContinueSubmitting={isContinueSubmitting}
               onBack={handleBack}
               onContinue={handleContinue}
             >

@@ -13,17 +13,21 @@ import { cn } from "@/shared/utils/cn";
 type SignUpOnboardingFormPanelProps = {
   canContinue: boolean;
   children: ReactNode;
+  continueError: string | null;
   currentStep: SignUpStepContent;
   currentStepIndex: number;
+  isContinueSubmitting: boolean;
   onBack: () => void;
-  onContinue: () => void;
+  onContinue: () => void | Promise<void>;
 };
 
 export function SignUpOnboardingFormPanel({
   canContinue,
   children,
+  continueError,
   currentStep,
   currentStepIndex,
+  isContinueSubmitting,
   onBack,
   onContinue,
 }: SignUpOnboardingFormPanelProps) {
@@ -65,6 +69,16 @@ export function SignUpOnboardingFormPanel({
       >
         {children}
 
+        {continueError ? (
+          <Typography
+            variant="bodySm"
+            tone="inherit"
+            className="text-prism-danger"
+          >
+            {continueError}
+          </Typography>
+        ) : null}
+
         <div className="flex items-center justify-between gap-3 pt-1">
           <Button
             type="button"
@@ -82,8 +96,10 @@ export function SignUpOnboardingFormPanel({
             type="button"
             size="lg"
             className="rounded-xl px-6"
-            disabled={!canContinue}
-            onClick={onContinue}
+            disabled={!canContinue || isContinueSubmitting}
+            onClick={() => {
+              void onContinue();
+            }}
           >
             {currentStep.key === "workspace" ? "Create workspace" : "Continue"}
           </Button>
