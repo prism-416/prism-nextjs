@@ -1,3 +1,5 @@
+export type OAuthProvider = "google" | "github";
+
 export type WorkspaceMode = "team" | "solo";
 
 export type SignUpStepKey = "account" | "profile" | "workspace";
