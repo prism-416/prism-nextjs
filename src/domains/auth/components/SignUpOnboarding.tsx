@@ -14,8 +14,11 @@ export function SignUpOnboarding() {
     formState,
     handleBack,
     handleContinue,
+    isCheckingUsername,
     isPasswordVisible,
+    isUsernameAvailable,
     isWelcomeStep,
+    oauthProvider,
     setIsPasswordVisible,
     updateField,
   } = useSignUpOnboarding();
@@ -26,6 +29,7 @@ export function SignUpOnboarding() {
         {isWelcomeStep ? (
           <SignUpWelcomePanel
             workspaceName={formState.workspaceName}
+            oauthProvider={oauthProvider}
             onBack={handleBack}
           />
         ) : (
@@ -42,7 +46,10 @@ export function SignUpOnboarding() {
               <SignUpOnboardingStepContent
                 currentStepKey={currentStep.key}
                 formState={formState}
+                isCheckingUsername={isCheckingUsername}
                 isPasswordVisible={isPasswordVisible}
+                isUsernameAvailable={isUsernameAvailable}
+                oauthProvider={oauthProvider}
                 onFieldChange={updateField}
                 onPasswordToggle={() => setIsPasswordVisible(prev => !prev)}
               />

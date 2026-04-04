@@ -7,14 +7,36 @@ import { FormHintChecklist } from "@/domains/auth/components/FormHintChecklist";
 type SignUpProfileStepProps = {
   name: string;
   username: string;
+  isCheckingUsername: boolean;
+  isUsernameAvailable: boolean | null;
   onNameChange: (value: string) => void;
   onUsernameChange: (value: string) => void;
 };
 
-export function SignUpProfileStep({ name, username, onNameChange, onUsernameChange }: SignUpProfileStepProps) {
+function getUsernameCheckLabel(username: string, isChecking: boolean, isAvailable: boolean | null) {
+  if (!username.trim()) return "Choose a username";
+  if (isChecking) return "Checking availability…";
+  if (isAvailable === true) return "Username is available";
+  if (isAvailable === false) return "Username is already taken";
+  return "Choose a username";
+}
+
+export function SignUpProfileStep({
+  name,
+  username,
+  isCheckingUsername,
+  isUsernameAvailable,
+  onNameChange,
+  onUsernameChange,
+}: SignUpProfileStepProps) {
+  const hasUsername = username.trim().length > 0;
+
   const profileChecks = [
     { label: "Enter your full name", isValid: name.trim().length > 0 },
-    { label: "Choose a username", isValid: username.trim().length > 0 },
+    {
+      label: getUsernameCheckLabel(username, isCheckingUsername, isUsernameAvailable),
+      isValid: hasUsername && isUsernameAvailable === true,
+    },
   ] as const;
 
   return (

@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+
+import { checkUsernameAvailability } from "../api";
 
 import { SIGN_UP_STEPS } from "../constants/content";
-import type { SignUpFormState, SignUpStepKey } from "../types";
+import type { OAuthProvider, SignUpFormState } from "../types";
+import { clearSignUpOAuthResume, getStepIndexFromResume, readSignUpOAuthResume } from "../utils/sign-up-oauth-session";
 
 const INITIAL_FORM_STATE: SignUpFormState = {
   email: "",
@@ -16,25 +18,72 @@ const INITIAL_FORM_STATE: SignUpFormState = {
   workspaceMode: "team",
 };
 
-function resolveInitialStepIndex(stepParam: string | null): number {
-  if (!stepParam) return 0;
-  const index = SIGN_UP_STEPS.findIndex(s => s.key === (stepParam as SignUpStepKey));
-  return index >= 0 ? index : 0;
-}
-
 export function useSignUpOnboarding() {
-  const searchParams = useSearchParams();
-  const initialStepIndex = resolveInitialStepIndex(searchParams.get("step"));
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [oauthProvider, setOauthProvider] = useState<OAuthProvider | null>(null);
+  const oauthResumeApplied = useRef(false);
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(initialStepIndex);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isWelcomeStep, setIsWelcomeStep] = useState(false);
   const [formState, setFormState] = useState<SignUpFormState>(INITIAL_FORM_STATE);
 
   const currentStep = SIGN_UP_STEPS[currentStepIndex];
 
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState<boolean | null>(null);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const usernameCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const trimmedUsername = formState.username.trim();
+
+  useLayoutEffect(() => {
+    if (oauthResumeApplied.current) {
+      return;
+    }
+    oauthResumeApplied.current = true;
+
+    const resume = readSignUpOAuthResume();
+    if (resume) {
+      setCurrentStepIndex(getStepIndexFromResume(resume));
+      setOauthProvider(resume.provider);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (usernameCheckTimer.current) {
+      clearTimeout(usernameCheckTimer.current);
+    }
+
+    if (!trimmedUsername) {
+      setIsUsernameAvailable(null);
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    setIsCheckingUsername(true);
+    setIsUsernameAvailable(null);
+
+    usernameCheckTimer.current = setTimeout(async () => {
+      try {
+        await checkUsernameAvailability(trimmedUsername);
+        setIsUsernameAvailable(true);
+      } catch {
+        setIsUsernameAvailable(false);
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    }, 400);
+
+    return () => {
+      if (usernameCheckTimer.current) {
+        clearTimeout(usernameCheckTimer.current);
+      }
+    };
+  }, [trimmedUsername]);
+
   const canContinue = useMemo(() => {
     if (currentStep.key === "account") {
+      if (oauthProvider) return true;
+
       return (
         formState.email.trim().length > 0 &&
         formState.password.trim().length > 0 &&
@@ -44,11 +93,11 @@ export function useSignUpOnboarding() {
     }
 
     if (currentStep.key === "profile") {
-      return formState.name.trim().length > 0 && formState.username.trim().length > 0;
+      return formState.name.trim().length > 0 && trimmedUsername.length > 0 && isUsernameAvailable === true;
     }
 
     return formState.workspaceName.trim().length > 0;
-  }, [currentStep.key, formState]);
+  }, [currentStep.key, formState, trimmedUsername, isUsernameAvailable, oauthProvider]);
 
   function updateField<Key extends keyof SignUpFormState>(key: Key, value: SignUpFormState[Key]) {
     setFormState(prev => ({ ...prev, [key]: value }));
@@ -60,6 +109,7 @@ export function useSignUpOnboarding() {
     }
 
     if (currentStepIndex === SIGN_UP_STEPS.length - 1) {
+      clearSignUpOAuthResume();
       setIsWelcomeStep(true);
       return;
     }
@@ -87,8 +137,11 @@ export function useSignUpOnboarding() {
     formState,
     handleBack,
     handleContinue,
+    isCheckingUsername,
     isPasswordVisible,
+    isUsernameAvailable,
     isWelcomeStep,
+    oauthProvider,
     setIsPasswordVisible,
     updateField,
   };

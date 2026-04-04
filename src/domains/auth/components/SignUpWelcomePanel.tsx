@@ -3,13 +3,15 @@
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { FieldSet } from "@/atomics/molecules/Field";
+import type { OAuthProvider } from "../types";
 
 type SignUpWelcomePanelProps = {
   workspaceName: string;
+  oauthProvider: OAuthProvider | null;
   onBack: () => void;
 };
 
-export function SignUpWelcomePanel({ workspaceName, onBack }: SignUpWelcomePanelProps) {
+export function SignUpWelcomePanel({ workspaceName, oauthProvider, onBack }: SignUpWelcomePanelProps) {
   const resolvedWorkspaceName = workspaceName.trim() || "Your workspace";
 
   return (
@@ -53,14 +55,16 @@ export function SignUpWelcomePanel({ workspaceName, onBack }: SignUpWelcomePanel
           >
             {resolvedWorkspaceName}
           </Typography>
-          <Typography
-            variant="bodySm"
-            tone="inverse"
-            lineHeight="7"
-            className="mt-3 text-white/72"
-          >
-            Check your inbox to verify your email.
-          </Typography>
+          {!oauthProvider ? (
+            <Typography
+              variant="bodySm"
+              tone="inverse"
+              lineHeight="7"
+              className="mt-3 text-white/72"
+            >
+              Check your inbox to verify your email.
+            </Typography>
+          ) : null}
         </div>
       </div>
 
