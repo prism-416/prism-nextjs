@@ -31,3 +31,12 @@ export async function logout() {
     version: null,
   });
 }
+
+export async function checkUsernameAvailability(username: string) {
+  await commonAxios<null, unknown>({
+    url: `/auth/username/${encodeURIComponent(username)}`,
+    method: "GET",
+    version: null,
+  });
+  return true;
+}
