@@ -8,6 +8,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
+import { persistSignUpOAuthResume } from "@/domains/auth/utils/sign-up-oauth-session";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import type { GoogleAccountsIdApi, GoogleCredentialResponse } from "@/domains/auth/types/google";
 
@@ -97,7 +98,8 @@ export function GoogleSignInButton() {
       const userData = result?.data;
 
       if (userData?.newUser) {
-        window.location.assign("/sign-up?step=profile");
+        persistSignUpOAuthResume({ provider: "google", step: "profile" });
+        window.location.assign("/sign-up");
         return;
       }
 
@@ -113,11 +115,7 @@ export function GoogleSignInButton() {
         return;
       }
 
-      if (userData.emailVerified === false) {
-        window.location.assign("/verify-email");
-      } else {
-        window.location.assign("/");
-      }
+      window.location.assign("/");
     } catch {
       setErrorMessage("Google sign-in failed.");
     } finally {
