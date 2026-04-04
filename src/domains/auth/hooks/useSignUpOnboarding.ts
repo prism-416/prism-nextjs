@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { checkUsernameAvailability } from "../api";
+import { useAuth } from "@/app/_providers/AuthProvider";
+
+import {
+  checkUsernameAvailability,
+  signInWithEmail,
+  signInWithGoogle,
+  signUpWithEmail,
+  signUpWithOAuthGoogle,
+} from "../api";
 
 import { SIGN_UP_STEPS } from "../constants/content";
 import type { OAuthProvider, SignUpFormState } from "../types";
@@ -19,13 +27,19 @@ const INITIAL_FORM_STATE: SignUpFormState = {
 };
 
 export function useSignUpOnboarding() {
+  const { setSession } = useAuth();
+
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [oauthProvider, setOauthProvider] = useState<OAuthProvider | null>(null);
+  const [oauthIdToken, setOauthIdToken] = useState<string | null>(null);
   const oauthResumeApplied = useRef(false);
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isWelcomeStep, setIsWelcomeStep] = useState(false);
   const [formState, setFormState] = useState<SignUpFormState>(INITIAL_FORM_STATE);
+
+  const [isSubmittingSignup, setIsSubmittingSignup] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
 
   const currentStep = SIGN_UP_STEPS[currentStepIndex];
 
@@ -45,6 +59,9 @@ export function useSignUpOnboarding() {
     if (resume) {
       setCurrentStepIndex(getStepIndexFromResume(resume));
       setOauthProvider(resume.provider);
+      if (resume.idToken) {
+        setOauthIdToken(resume.idToken);
+      }
     }
   }, []);
 
@@ -93,17 +110,23 @@ export function useSignUpOnboarding() {
     }
 
     if (currentStep.key === "profile") {
-      return formState.name.trim().length > 0 && trimmedUsername.length > 0 && isUsernameAvailable === true;
+      return (
+        formState.name.trim().length > 0 &&
+        trimmedUsername.length > 0 &&
+        isUsernameAvailable === true &&
+        !isSubmittingSignup
+      );
     }
 
     return formState.workspaceName.trim().length > 0;
-  }, [currentStep.key, formState, trimmedUsername, isUsernameAvailable, oauthProvider]);
+  }, [currentStep.key, formState, trimmedUsername, isUsernameAvailable, oauthProvider, isSubmittingSignup]);
 
   function updateField<Key extends keyof SignUpFormState>(key: Key, value: SignUpFormState[Key]) {
+    setSignupError(null);
     setFormState(prev => ({ ...prev, [key]: value }));
   }
 
-  function handleContinue() {
+  const handleContinue = useCallback(async () => {
     if (!canContinue) {
       return;
     }
@@ -114,8 +137,105 @@ export function useSignUpOnboarding() {
       return;
     }
 
+    if (currentStep.key === "profile") {
+      setSignupError(null);
+      setIsSubmittingSignup(true);
+      try {
+        const fullName = formState.name.trim();
+        const username = trimmedUsername;
+
+        if (oauthProvider && oauthProvider !== "google") {
+          setSignupError("This sign-in method is not supported for registration yet.");
+          return;
+        }
+
+        if (oauthProvider === "google") {
+          if (!oauthIdToken) {
+            setSignupError("Your Google sign-in session expired. Please start again from sign in.");
+            return;
+          }
+
+          const signUpResult = await signUpWithOAuthGoogle({
+            idToken: oauthIdToken,
+            fullName,
+            username,
+          });
+
+          if (!signUpResult?.data?.userId) {
+            setSignupError(signUpResult?.message || "Sign up failed.");
+            return;
+          }
+
+          const signInResult = await signInWithGoogle(oauthIdToken);
+          const accessToken = signInResult?.data?.accessToken;
+          if (!accessToken) {
+            setSignupError(signInResult?.message || "Could not sign you in after sign up.");
+            return;
+          }
+
+          const ok = await setSession({ accessToken });
+          if (!ok) {
+            setSignupError("Could not save your session.");
+            return;
+          }
+
+          clearSignUpOAuthResume();
+          setOauthIdToken(null);
+          setCurrentStepIndex(prev => prev + 1);
+          return;
+        }
+
+        const email = formState.email.trim();
+        const password = formState.password;
+
+        const signUpResult = await signUpWithEmail({
+          email,
+          password,
+          fullName,
+          username,
+        });
+
+        if (!signUpResult?.data?.userId) {
+          setSignupError(signUpResult?.message || "Sign up failed.");
+          return;
+        }
+
+        const signInResult = await signInWithEmail({ email, password });
+        const accessToken = signInResult?.data?.accessToken;
+        if (!accessToken) {
+          setSignupError(signInResult?.message || "Could not sign you in after sign up.");
+          return;
+        }
+
+        const ok = await setSession({ accessToken });
+        if (!ok) {
+          setSignupError("Could not save your session.");
+          return;
+        }
+
+        clearSignUpOAuthResume();
+        setCurrentStepIndex(prev => prev + 1);
+      } catch {
+        setSignupError("Sign up failed.");
+      } finally {
+        setIsSubmittingSignup(false);
+      }
+      return;
+    }
+
     setCurrentStepIndex(prev => prev + 1);
-  }
+  }, [
+    canContinue,
+    currentStep.key,
+    currentStepIndex,
+    formState.email,
+    formState.name,
+    formState.password,
+    oauthIdToken,
+    oauthProvider,
+    setSession,
+    trimmedUsername,
+  ]);
 
   function handleBack() {
     if (isWelcomeStep) {
@@ -132,12 +252,14 @@ export function useSignUpOnboarding() {
 
   return {
     canContinue,
+    continueError: signupError,
     currentStep,
     currentStepIndex,
     formState,
     handleBack,
     handleContinue,
     isCheckingUsername,
+    isContinueSubmitting: isSubmittingSignup,
     isPasswordVisible,
     isUsernameAvailable,
     isWelcomeStep,
