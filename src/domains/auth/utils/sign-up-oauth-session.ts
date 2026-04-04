@@ -10,6 +10,8 @@ const MAX_AGE_MS = 60 * 60 * 1000;
 export type SignUpOAuthResumePayload = {
   provider: OAuthProvider;
   step: SignUpStepKey;
+  /** Google ID token (JWT) for completing OAuth signup */
+  idToken?: string;
   issuedAt: number;
 };
 
@@ -50,8 +52,23 @@ export function readSignUpOAuthResume(): SignUpOAuthResumePayload | null {
       return null;
     }
 
+    const provider = parsed.provider as OAuthProvider;
+    if (provider === "google") {
+      const idToken = typeof parsed.idToken === "string" ? parsed.idToken.trim() : "";
+      if (!idToken) {
+        sessionStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return {
+        provider,
+        step: parsed.step as SignUpStepKey,
+        idToken,
+        issuedAt: parsed.issuedAt,
+      };
+    }
+
     return {
-      provider: parsed.provider as OAuthProvider,
+      provider,
       step: parsed.step as SignUpStepKey,
       issuedAt: parsed.issuedAt,
     };

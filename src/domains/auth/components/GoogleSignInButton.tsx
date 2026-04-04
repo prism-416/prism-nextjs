@@ -10,7 +10,7 @@ import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
 import { persistSignUpOAuthResume } from "@/domains/auth/utils/sign-up-oauth-session";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
-import type { GoogleAccountsIdApi, GoogleCredentialResponse } from "@/domains/auth/types/google";
+import type { GoogleAccountsIdApi, GoogleCredentialResponse } from "@/domains/auth/types";
 
 const GOOGLE_IDENTITY_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 
@@ -98,7 +98,7 @@ export function GoogleSignInButton() {
       const userData = result?.data;
 
       if (userData?.newUser) {
-        persistSignUpOAuthResume({ provider: "google", step: "profile" });
+        persistSignUpOAuthResume({ provider: "google", step: "profile", idToken: response.credential });
         window.location.assign("/sign-up");
         return;
       }
