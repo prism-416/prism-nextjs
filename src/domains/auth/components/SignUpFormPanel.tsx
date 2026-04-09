@@ -10,7 +10,9 @@ import { SIGN_UP_STEPS } from "../constants/content";
 import type { SignUpStepContent } from "../types";
 import { cn } from "@/shared/utils/cn";
 
-type SignUpOnboardingFormPanelProps = {
+const LAST_STEP_INDEX = SIGN_UP_STEPS.length - 1;
+
+type SignUpFormPanelProps = {
   canContinue: boolean;
   children: ReactNode;
   continueError: string | null;
@@ -21,7 +23,7 @@ type SignUpOnboardingFormPanelProps = {
   onContinue: () => void | Promise<void>;
 };
 
-export function SignUpOnboardingFormPanel({
+export function SignUpFormPanel({
   canContinue,
   children,
   continueError,
@@ -30,7 +32,7 @@ export function SignUpOnboardingFormPanel({
   isContinueSubmitting,
   onBack,
   onContinue,
-}: SignUpOnboardingFormPanelProps) {
+}: SignUpFormPanelProps) {
   return (
     <FieldSet className="gap-8 rounded-[1.65rem] border border-prism-sand/70 bg-(image:--gradient-panel-surface) p-6 shadow-(--shadow-auth-panel) backdrop-blur-md lg:sticky lg:top-10 lg:p-8">
       <div className="flex items-start justify-between gap-6">
@@ -101,7 +103,7 @@ export function SignUpOnboardingFormPanel({
               void onContinue();
             }}
           >
-            {currentStep.key === "workspace" ? "Create workspace" : "Continue"}
+            {currentStepIndex === LAST_STEP_INDEX ? "Sign up" : "Continue"}
           </Button>
         </div>
       </div>

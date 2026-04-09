@@ -28,7 +28,7 @@ export function AuthStepIndicator({ steps, currentStepIndex, tone = "light" }: A
           tone="inherit"
           className="text-[0.7rem] tracking-[0.28em]"
         >
-          Onboarding
+          Sign Up
         </Typography>
         <Typography
           as="span"
@@ -41,7 +41,7 @@ export function AuthStepIndicator({ steps, currentStepIndex, tone = "light" }: A
       </div>
 
       <ol
-        className="grid grid-cols-3 gap-2"
+        className="grid grid-cols-2 gap-2"
         aria-label="Sign up steps"
       >
         {steps.map((step, index) => {

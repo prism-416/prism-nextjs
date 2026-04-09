@@ -1,5 +1,5 @@
-import { SignUpOnboarding } from "@/domains/auth/components/SignUpOnboarding";
+import { SignUpFlow } from "@/domains/auth/components/SignUpFlow";
 
 export default function SignUpPage() {
-  return <SignUpOnboarding />;
+  return <SignUpFlow />;
 }

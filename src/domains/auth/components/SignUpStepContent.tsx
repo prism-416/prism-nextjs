@@ -2,12 +2,11 @@
 
 import { SignUpAccountStep } from "./SignUpAccountStep";
 import { SignUpProfileStep } from "./SignUpProfileStep";
-import { SignUpWorkspaceStep } from "./SignUpWorkspaceStep";
 import type { OAuthProvider, SignUpFormState, SignUpStepKey } from "../types";
 
 type UpdateField = <Key extends keyof SignUpFormState>(key: Key, value: SignUpFormState[Key]) => void;
 
-type SignUpOnboardingStepContentProps = {
+type SignUpStepContentProps = {
   currentStepKey: SignUpStepKey;
   formState: SignUpFormState;
   isCheckingUsername: boolean;
@@ -18,7 +17,7 @@ type SignUpOnboardingStepContentProps = {
   onPasswordToggle: () => void;
 };
 
-export function SignUpOnboardingStepContent({
+export function SignUpStepContent({
   currentStepKey,
   formState,
   isCheckingUsername,
@@ -27,7 +26,7 @@ export function SignUpOnboardingStepContent({
   oauthProvider,
   onFieldChange,
   onPasswordToggle,
-}: SignUpOnboardingStepContentProps) {
+}: SignUpStepContentProps) {
   if (currentStepKey === "account") {
     return (
       <SignUpAccountStep
@@ -44,25 +43,14 @@ export function SignUpOnboardingStepContent({
     );
   }
 
-  if (currentStepKey === "profile") {
-    return (
-      <SignUpProfileStep
-        name={formState.name}
-        username={formState.username}
-        isCheckingUsername={isCheckingUsername}
-        isUsernameAvailable={isUsernameAvailable}
-        onNameChange={value => onFieldChange("name", value)}
-        onUsernameChange={value => onFieldChange("username", value)}
-      />
-    );
-  }
-
   return (
-    <SignUpWorkspaceStep
-      workspaceName={formState.workspaceName}
-      workspaceMode={formState.workspaceMode}
-      onWorkspaceNameChange={value => onFieldChange("workspaceName", value)}
-      onWorkspaceModeChange={value => onFieldChange("workspaceMode", value)}
+    <SignUpProfileStep
+      name={formState.name}
+      username={formState.username}
+      isCheckingUsername={isCheckingUsername}
+      isUsernameAvailable={isUsernameAvailable}
+      onNameChange={value => onFieldChange("name", value)}
+      onUsernameChange={value => onFieldChange("username", value)}
     />
   );
 }

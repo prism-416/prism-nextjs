@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/app/_providers/AuthProvider";
 
@@ -22,11 +23,10 @@ const INITIAL_FORM_STATE: SignUpFormState = {
   confirmPassword: "",
   name: "",
   username: "",
-  workspaceName: "",
-  workspaceMode: "team",
 };
 
-export function useSignUpOnboarding() {
+export function useSignUp() {
+  const router = useRouter();
   const { setSession } = useAuth();
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -35,7 +35,6 @@ export function useSignUpOnboarding() {
   const oauthResumeApplied = useRef(false);
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isWelcomeStep, setIsWelcomeStep] = useState(false);
   const [formState, setFormState] = useState<SignUpFormState>(INITIAL_FORM_STATE);
 
   const [isSubmittingSignup, setIsSubmittingSignup] = useState(false);
@@ -109,16 +108,12 @@ export function useSignUpOnboarding() {
       );
     }
 
-    if (currentStep.key === "profile") {
-      return (
-        formState.name.trim().length > 0 &&
-        trimmedUsername.length > 0 &&
-        isUsernameAvailable === true &&
-        !isSubmittingSignup
-      );
-    }
-
-    return formState.workspaceName.trim().length > 0;
+    return (
+      formState.name.trim().length > 0 &&
+      trimmedUsername.length > 0 &&
+      isUsernameAvailable === true &&
+      !isSubmittingSignup
+    );
   }, [currentStep.key, formState, trimmedUsername, isUsernameAvailable, oauthProvider, isSubmittingSignup]);
 
   function updateField<Key extends keyof SignUpFormState>(key: Key, value: SignUpFormState[Key]) {
@@ -128,12 +123,6 @@ export function useSignUpOnboarding() {
 
   const handleContinue = useCallback(async () => {
     if (!canContinue) {
-      return;
-    }
-
-    if (currentStepIndex === SIGN_UP_STEPS.length - 1) {
-      clearSignUpOAuthResume();
-      setIsWelcomeStep(true);
       return;
     }
 
@@ -181,7 +170,7 @@ export function useSignUpOnboarding() {
 
           clearSignUpOAuthResume();
           setOauthIdToken(null);
-          setCurrentStepIndex(prev => prev + 1);
+          router.push("/workspace");
           return;
         }
 
@@ -214,7 +203,7 @@ export function useSignUpOnboarding() {
         }
 
         clearSignUpOAuthResume();
-        setCurrentStepIndex(prev => prev + 1);
+        router.push("/workspace");
       } catch {
         setSignupError("Sign up failed.");
       } finally {
@@ -227,22 +216,17 @@ export function useSignUpOnboarding() {
   }, [
     canContinue,
     currentStep.key,
-    currentStepIndex,
     formState.email,
     formState.name,
     formState.password,
     oauthIdToken,
     oauthProvider,
+    router,
     setSession,
     trimmedUsername,
   ]);
 
   function handleBack() {
-    if (isWelcomeStep) {
-      setIsWelcomeStep(false);
-      return;
-    }
-
     if (currentStepIndex === 0) {
       return;
     }
@@ -262,7 +246,6 @@ export function useSignUpOnboarding() {
     isContinueSubmitting: isSubmittingSignup,
     isPasswordVisible,
     isUsernameAvailable,
-    isWelcomeStep,
     oauthProvider,
     setIsPasswordVisible,
     updateField,
