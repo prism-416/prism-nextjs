@@ -5,11 +5,11 @@ import { AuthStepIndicator } from "./AuthStepIndicator";
 import { SIGN_UP_STEPS } from "../constants/content";
 import { cn } from "@/shared/utils/cn";
 
-type SignUpOnboardingSidebarProps = {
+type SignUpSidebarProps = {
   currentStepIndex: number;
 };
 
-export function SignUpOnboardingSidebar({ currentStepIndex }: SignUpOnboardingSidebarProps) {
+export function SignUpSidebar({ currentStepIndex }: SignUpSidebarProps) {
   const currentStep = SIGN_UP_STEPS[currentStepIndex];
 
   return (
@@ -20,7 +20,7 @@ export function SignUpOnboardingSidebar({ currentStepIndex }: SignUpOnboardingSi
           tone="inverse"
           className="text-prism-cream/72 tracking-[0.3em]"
         >
-          Prizmatic Onboarding
+          Get Started
         </Typography>
         <Typography
           variant="h1"
@@ -102,8 +102,8 @@ export function SignUpOnboardingSidebar({ currentStepIndex }: SignUpOnboardingSi
           lineHeight="7"
           className="mt-3 max-w-lg text-white/72"
         >
-          After setup, you can move into project creation, teammate invites, and GitHub connection without loading all
-          of that into the first form.
+          Once you sign up, your workspace will be created automatically. From there you can create projects, invite
+          teammates, and connect integrations.
         </Typography>
       </div>
     </div>
