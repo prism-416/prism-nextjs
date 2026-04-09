@@ -81,9 +81,7 @@ export interface GoogleAccountsIdApi {
 
 export type OAuthProvider = "google" | "github";
 
-export type WorkspaceMode = "team" | "solo";
-
-export type SignUpStepKey = "account" | "profile" | "workspace";
+export type SignUpStepKey = "account" | "profile";
 
 export type SignUpStepContent = {
   key: SignUpStepKey;
@@ -99,6 +97,4 @@ export type SignUpFormState = {
   confirmPassword: string;
   name: string;
   username: string;
-  workspaceName: string;
-  workspaceMode: WorkspaceMode;
 };

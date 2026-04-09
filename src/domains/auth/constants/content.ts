@@ -11,7 +11,7 @@ export const SIGN_UP_STEPS: readonly SignUpStepContent[] = [
     step: "01",
     label: "Account",
     title: "Create your account",
-    description: "Start with a secure sign-up for your Prizmatic workspace.",
+    description: "Start with a secure sign-up to get into Prizmatic.",
   },
   {
     key: "profile",
@@ -19,13 +19,6 @@ export const SIGN_UP_STEPS: readonly SignUpStepContent[] = [
     label: "Profile",
     title: "Set up your profile",
     description: "This is how teammates will recognize you across projects and work items.",
-  },
-  {
-    key: "workspace",
-    step: "03",
-    label: "Workspace",
-    title: "Name your workspace",
-    description: "Create the shared space where projects, sprints, and work items live.",
   },
 ] as const;
 
