@@ -3,15 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAuth } from "@/app/_providers/AuthProvider";
-
-import {
-  checkUsernameAvailability,
-  signInWithEmail,
-  signInWithGoogle,
-  signUpWithEmail,
-  signUpWithOAuthGoogle,
-} from "../api";
+import { checkUsernameAvailability, signUpWithEmail, signUpWithOAuthGoogle } from "../api";
 
 import { SIGN_UP_STEPS } from "../constants/content";
 import type { OAuthProvider, SignUpFormState } from "../types";
@@ -27,8 +19,6 @@ const INITIAL_FORM_STATE: SignUpFormState = {
 
 export function useSignUp() {
   const router = useRouter();
-  const { setSession } = useAuth();
-
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [oauthProvider, setOauthProvider] = useState<OAuthProvider | null>(null);
   const [oauthIdToken, setOauthIdToken] = useState<string | null>(null);
@@ -155,22 +145,9 @@ export function useSignUp() {
             return;
           }
 
-          const signInResult = await signInWithGoogle(oauthIdToken);
-          const accessToken = signInResult?.data?.accessToken;
-          if (!accessToken) {
-            setSignupError(signInResult?.message || "Could not sign you in after sign up.");
-            return;
-          }
-
-          const ok = await setSession({ accessToken });
-          if (!ok) {
-            setSignupError("Could not save your session.");
-            return;
-          }
-
           clearSignUpOAuthResume();
           setOauthIdToken(null);
-          router.push("/workspace");
+          router.push("/sign-in");
           return;
         }
 
@@ -189,21 +166,8 @@ export function useSignUp() {
           return;
         }
 
-        const signInResult = await signInWithEmail({ email, password });
-        const accessToken = signInResult?.data?.accessToken;
-        if (!accessToken) {
-          setSignupError(signInResult?.message || "Could not sign you in after sign up.");
-          return;
-        }
-
-        const ok = await setSession({ accessToken });
-        if (!ok) {
-          setSignupError("Could not save your session.");
-          return;
-        }
-
         clearSignUpOAuthResume();
-        router.push("/workspace");
+        router.push("/sign-in");
       } catch {
         setSignupError("Sign up failed.");
       } finally {
@@ -222,7 +186,6 @@ export function useSignUp() {
     oauthIdToken,
     oauthProvider,
     router,
-    setSession,
     trimmedUsername,
   ]);
 
