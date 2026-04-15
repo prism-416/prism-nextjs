@@ -77,6 +77,11 @@ export interface GoogleAccountsIdApi {
   cancel?: () => void;
 }
 
+/** `POST /auth/verify` response `data` */
+export interface EmailVerificationResult {
+  verified: boolean;
+}
+
 // --- Sign-up onboarding ---
 
 export type OAuthProvider = "google" | "github";

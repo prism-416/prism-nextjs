@@ -5,6 +5,7 @@ import type {
   AccessTokenBundle,
   EmailSignInPayload,
   EmailSignUpPayload,
+  EmailVerificationResult,
   GoogleOAuthSignInRequest,
   GoogleOAuthSignInResult,
   GoogleSignUpPayload,
@@ -60,6 +61,14 @@ export async function signUpWithEmail(body: EmailSignUpPayload) {
     url: "/auth/signup",
     method: "POST",
     data: body,
+    version: null,
+  });
+}
+
+export async function verifyEmail(token: string) {
+  return commonAxios<null, ApiResponse<EmailVerificationResult>>({
+    url: `/auth/verify?token=${encodeURIComponent(token)}`,
+    method: "POST",
     version: null,
   });
 }
