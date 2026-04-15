@@ -5,11 +5,12 @@
  * - QUERY_KEYS.user.detail()
  * - QUERY_KEYS.product.list({ category: 'something' })
  */
-const templateStatusKeys = {
-  all: ["template-status"] as const,
-  detail: () => [...templateStatusKeys.all, "detail"] as const,
-};
 
 export const QUERY_KEYS = {
-  templateStatus: templateStatusKeys,
+  workspace: {
+    all: ["workspace"] as const,
+    list: () => ["workspace", "list"] as const,
+    detail: (id: string) => ["workspace", "detail", id] as const,
+    members: (id: string) => ["workspace", "members", id] as const,
+  },
 } as const;
