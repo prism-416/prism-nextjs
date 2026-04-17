@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 
-const PUBLIC_ROUTES = ["/sign-in", "/sign-up", "/verify"];
+/** Routes anyone can visit (authenticated or not). */
+const PUBLIC_ROUTES = ["/", "/sign-in", "/sign-up", "/verify"];
+
+/** Routes that authenticated users are bounced away from (back to "/"). */
+const GUEST_ONLY_ROUTES = ["/sign-in", "/sign-up"];
+
+function matchesRoute(pathname: string, routes: readonly string[]) {
+  return routes.some(route =>
+    route === "/" ? pathname === "/" : pathname === route || pathname.startsWith(`${route}/`),
+  );
+}
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+  const isPublicRoute = matchesRoute(pathname, PUBLIC_ROUTES);
+  const isGuestOnlyRoute = matchesRoute(pathname, GUEST_ONLY_ROUTES);
   const hasAccessToken = request.cookies.has(ACCESS_TOKEN_COOKIE_NAME);
   const hasRefreshToken = request.cookies.has(REFRESH_TOKEN_COOKIE_NAME);
   const isAuthenticated = hasAccessToken || hasRefreshToken;
@@ -17,7 +28,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  if (isAuthenticated && isPublicRoute) {
+  if (isAuthenticated && isGuestOnlyRoute) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
