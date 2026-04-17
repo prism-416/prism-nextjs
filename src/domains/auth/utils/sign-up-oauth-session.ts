@@ -1,17 +1,15 @@
 import { SIGN_UP_STEPS } from "../constants/content";
-import type { OAuthProvider, SignUpStepKey } from "../types";
+import type { SignUpStepKey } from "../types";
 
 const STORAGE_KEY = "prism:sign-up:oauth-resume";
-
-const OAUTH_PROVIDERS = new Set<string>(["google", "github"]);
 
 const MAX_AGE_MS = 60 * 60 * 1000;
 
 export type SignUpOAuthResumePayload = {
-  provider: OAuthProvider;
+  provider: "google";
   step: SignUpStepKey;
   /** Google ID token (JWT) for completing OAuth signup */
-  idToken?: string;
+  idToken: string;
   issuedAt: number;
 };
 
@@ -38,8 +36,7 @@ export function readSignUpOAuthResume(): SignUpOAuthResumePayload | null {
     if (
       typeof parsed.issuedAt !== "number" ||
       Date.now() - parsed.issuedAt > MAX_AGE_MS ||
-      !parsed.provider ||
-      !OAUTH_PROVIDERS.has(parsed.provider) ||
+      parsed.provider !== "google" ||
       !parsed.step
     ) {
       sessionStorage.removeItem(STORAGE_KEY);
@@ -52,24 +49,16 @@ export function readSignUpOAuthResume(): SignUpOAuthResumePayload | null {
       return null;
     }
 
-    const provider = parsed.provider as OAuthProvider;
-    if (provider === "google") {
-      const idToken = typeof parsed.idToken === "string" ? parsed.idToken.trim() : "";
-      if (!idToken) {
-        sessionStorage.removeItem(STORAGE_KEY);
-        return null;
-      }
-      return {
-        provider,
-        step: parsed.step as SignUpStepKey,
-        idToken,
-        issuedAt: parsed.issuedAt,
-      };
+    const idToken = typeof parsed.idToken === "string" ? parsed.idToken.trim() : "";
+    if (!idToken) {
+      sessionStorage.removeItem(STORAGE_KEY);
+      return null;
     }
 
     return {
-      provider,
+      provider: "google",
       step: parsed.step as SignUpStepKey,
+      idToken,
       issuedAt: parsed.issuedAt,
     };
   } catch {

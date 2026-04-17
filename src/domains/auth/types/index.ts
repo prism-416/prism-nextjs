@@ -8,11 +8,21 @@ export interface GoogleOAuthSignInRequest {
 /** `POST /auth/oauth/google` response `data` */
 export interface GoogleOAuthSignInResult {
   accessToken?: string;
+  /**
+   * Present when the OAuth sign-in produced a new account (or for OAuth sign-up flows).
+   * Clients should exchange it via `/auth/refresh` to obtain an access token.
+   */
+  refreshToken?: string;
   /** Present when this Google account is not linked to a user yet */
   newUser?: boolean;
 }
 
-/** `POST /auth/signup` · `POST /auth/oauth/google/signup` response `data` */
+/** `POST /auth/oauth/google/signup` · `POST /auth/oauth/github` (signup state) response `data` */
+export interface OAuthSignUpResult {
+  refreshToken: string;
+}
+
+/** `POST /auth/signup` response `data` */
 export interface SignUpCreatedUser {
   userId: string;
   email: string;
@@ -76,6 +86,24 @@ export interface GoogleAccountsIdApi {
   renderButton: (parent: HTMLElement, options: GoogleButtonConfiguration) => void;
   cancel?: () => void;
 }
+
+// --- GitHub OAuth ---
+
+/** `GET /auth/oauth/github/authorize` · `GET /auth/oauth/github/signup/authorize` response `data` */
+export interface GithubOAuthAuthorizeResult {
+  authorizationUrl: string;
+  state: string;
+  expiresAt: string;
+}
+
+/** `POST /auth/oauth/github` request body */
+export interface GithubOAuthSignInRequest {
+  code: string;
+  state: string;
+}
+
+/** `POST /auth/oauth/github` response `data` (same shape as Google) */
+export type GithubOAuthSignInResult = GoogleOAuthSignInResult;
 
 /** `POST /auth/verify` response `data` */
 export interface EmailVerificationResult {
