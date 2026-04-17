@@ -13,7 +13,7 @@ import { clearGithubOAuthState, readGithubOAuthState } from "@/domains/auth/util
 
 export function GitHubCallbackHandler() {
   const searchParams = useSearchParams();
-  const { setSession, refreshSession } = useAuth();
+  const { setSession } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const processed = useRef(false);
 
@@ -48,34 +48,18 @@ export function GitHubCallbackHandler() {
       const result = await signInWithGithub({ code, state });
       const data = result?.data;
 
-      if (data?.accessToken) {
-        const ok = await setSession(data);
-        if (!ok) {
-          setError("Failed to establish session.");
-          return;
-        }
-
-        window.location.assign("/");
+      if (!data?.accessToken) {
+        setError(result?.message || "GitHub sign-in failed.");
         return;
       }
 
-      if (data?.refreshToken) {
-        const ok = await refreshSession(data.refreshToken);
-        if (!ok) {
-          setError("Failed to establish session.");
-          return;
-        }
-
-        window.location.assign("/");
+      const ok = await setSession(data);
+      if (!ok) {
+        setError("Failed to establish session.");
         return;
       }
 
-      if (data?.newUser) {
-        setError("This GitHub account isn’t registered yet. Please sign up first.");
-        return;
-      }
-
-      setError(result?.message || "GitHub sign-in failed.");
+      window.location.assign("/");
     } catch {
       setError("GitHub sign-in failed. Please try again.");
     }

@@ -18,7 +18,6 @@ export function SignUpFlow() {
     isContinueSubmitting,
     isPasswordVisible,
     isUsernameAvailable,
-    oauthProvider,
     setIsPasswordVisible,
     updateField,
   } = useSignUp();
@@ -44,7 +43,6 @@ export function SignUpFlow() {
               isCheckingUsername={isCheckingUsername}
               isPasswordVisible={isPasswordVisible}
               isUsernameAvailable={isUsernameAvailable}
-              oauthProvider={oauthProvider}
               onFieldChange={updateField}
               onPasswordToggle={() => setIsPasswordVisible(prev => !prev)}
             />

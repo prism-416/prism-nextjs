@@ -1,14 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAuth } from "@/app/_providers/AuthProvider";
-import { checkUsernameAvailability, signUpWithEmail, signUpWithOAuthGoogle } from "../api";
+import { checkUsernameAvailability, signUpWithEmail } from "../api";
 
 import { SIGN_UP_STEPS } from "../constants/content";
-import type { OAuthProvider, SignUpFormState } from "../types";
-import { clearSignUpOAuthResume, getStepIndexFromResume, readSignUpOAuthResume } from "../utils/sign-up-oauth-session";
+import type { SignUpFormState } from "../types";
 
 const INITIAL_FORM_STATE: SignUpFormState = {
   email: "",
@@ -20,11 +18,7 @@ const INITIAL_FORM_STATE: SignUpFormState = {
 
 export function useSignUp() {
   const router = useRouter();
-  const { refreshSession } = useAuth();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [oauthProvider, setOauthProvider] = useState<OAuthProvider | null>(null);
-  const [oauthIdToken, setOauthIdToken] = useState<string | null>(null);
-  const oauthResumeApplied = useRef(false);
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [formState, setFormState] = useState<SignUpFormState>(INITIAL_FORM_STATE);
@@ -39,20 +33,6 @@ export function useSignUp() {
   const usernameCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const trimmedUsername = formState.username.trim();
-
-  useLayoutEffect(() => {
-    if (oauthResumeApplied.current) {
-      return;
-    }
-    oauthResumeApplied.current = true;
-
-    const resume = readSignUpOAuthResume();
-    if (resume) {
-      setCurrentStepIndex(getStepIndexFromResume(resume));
-      setOauthProvider(resume.provider);
-      setOauthIdToken(resume.idToken);
-    }
-  }, []);
 
   useEffect(() => {
     if (usernameCheckTimer.current) {
@@ -88,8 +68,6 @@ export function useSignUp() {
 
   const canContinue = useMemo(() => {
     if (currentStep.key === "account") {
-      if (oauthProvider) return true;
-
       return (
         formState.email.trim().length > 0 &&
         formState.password.trim().length > 0 &&
@@ -104,7 +82,7 @@ export function useSignUp() {
       isUsernameAvailable === true &&
       !isSubmittingSignup
     );
-  }, [currentStep.key, formState, trimmedUsername, isUsernameAvailable, oauthProvider, isSubmittingSignup]);
+  }, [currentStep.key, formState, trimmedUsername, isUsernameAvailable, isSubmittingSignup]);
 
   function updateField<Key extends keyof SignUpFormState>(key: Key, value: SignUpFormState[Key]) {
     setSignupError(null);
@@ -122,38 +100,6 @@ export function useSignUp() {
       try {
         const fullName = formState.name.trim();
         const username = trimmedUsername;
-
-        if (oauthProvider === "google") {
-          if (!oauthIdToken) {
-            setSignupError("Your Google sign-in session expired. Please start again from sign in.");
-            return;
-          }
-
-          const signUpResult = await signUpWithOAuthGoogle({
-            idToken: oauthIdToken,
-            fullName,
-            username,
-          });
-
-          const refreshToken = signUpResult?.data?.refreshToken;
-          if (!refreshToken) {
-            setSignupError(signUpResult?.message || "Sign up failed.");
-            return;
-          }
-
-          clearSignUpOAuthResume();
-          setOauthIdToken(null);
-
-          const ok = await refreshSession(refreshToken);
-          if (!ok) {
-            setSignupError("Failed to establish session after sign up.");
-            return;
-          }
-
-          window.location.assign("/");
-          return;
-        }
-
         const email = formState.email.trim();
         const password = formState.password;
 
@@ -169,7 +115,6 @@ export function useSignUp() {
           return;
         }
 
-        clearSignUpOAuthResume();
         router.push("/sign-in");
       } catch {
         setSignupError("Sign up failed.");
@@ -180,18 +125,7 @@ export function useSignUp() {
     }
 
     setCurrentStepIndex(prev => prev + 1);
-  }, [
-    canContinue,
-    currentStep.key,
-    formState.email,
-    formState.name,
-    formState.password,
-    oauthIdToken,
-    oauthProvider,
-    refreshSession,
-    router,
-    trimmedUsername,
-  ]);
+  }, [canContinue, currentStep.key, formState.email, formState.name, formState.password, router, trimmedUsername]);
 
   function handleBack() {
     if (currentStepIndex === 0) {
@@ -213,7 +147,6 @@ export function useSignUp() {
     isContinueSubmitting: isSubmittingSignup,
     isPasswordVisible,
     isUsernameAvailable,
-    oauthProvider,
     setIsPasswordVisible,
     updateField,
   };

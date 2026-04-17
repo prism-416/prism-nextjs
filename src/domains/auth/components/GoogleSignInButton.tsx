@@ -8,7 +8,6 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
-import { persistSignUpOAuthResume } from "@/domains/auth/utils/sign-up-oauth-session";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import type { GoogleAccountsIdApi, GoogleCredentialResponse } from "@/domains/auth/types";
 
@@ -96,12 +95,6 @@ export function GoogleSignInButton() {
     try {
       const result = await signInWithGoogle(response.credential);
       const userData = result?.data;
-
-      if (userData?.newUser) {
-        persistSignUpOAuthResume({ provider: "google", step: "profile", idToken: response.credential });
-        window.location.assign("/sign-up");
-        return;
-      }
 
       if (!userData?.accessToken) {
         setErrorMessage(result?.message || "Google sign-in failed.");

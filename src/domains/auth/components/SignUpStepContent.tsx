@@ -2,7 +2,7 @@
 
 import { SignUpAccountStep } from "./SignUpAccountStep";
 import { SignUpProfileStep } from "./SignUpProfileStep";
-import type { OAuthProvider, SignUpFormState, SignUpStepKey } from "../types";
+import type { SignUpFormState, SignUpStepKey } from "../types";
 
 type UpdateField = <Key extends keyof SignUpFormState>(key: Key, value: SignUpFormState[Key]) => void;
 
@@ -12,7 +12,6 @@ type SignUpStepContentProps = {
   isCheckingUsername: boolean;
   isPasswordVisible: boolean;
   isUsernameAvailable: boolean | null;
-  oauthProvider: OAuthProvider | null;
   onFieldChange: UpdateField;
   onPasswordToggle: () => void;
 };
@@ -23,7 +22,6 @@ export function SignUpStepContent({
   isCheckingUsername,
   isPasswordVisible,
   isUsernameAvailable,
-  oauthProvider,
   onFieldChange,
   onPasswordToggle,
 }: SignUpStepContentProps) {
@@ -34,7 +32,6 @@ export function SignUpStepContent({
         password={formState.password}
         confirmPassword={formState.confirmPassword}
         isPasswordVisible={isPasswordVisible}
-        oauthProvider={oauthProvider}
         onEmailChange={value => onFieldChange("email", value)}
         onPasswordChange={value => onFieldChange("password", value)}
         onConfirmPasswordChange={value => onFieldChange("confirmPassword", value)}
