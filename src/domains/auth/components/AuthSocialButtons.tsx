@@ -8,16 +8,14 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { FieldLegend, FieldSet } from "@/atomics/molecules/Field";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import { GoogleSignInButton } from "@/domains/auth/components/GoogleSignInButton";
-import { getGithubAuthorizationUrl, getGithubSignUpAuthorizationUrl } from "@/domains/auth/api";
+import { getGithubAuthorizationUrl } from "@/domains/auth/api";
 import { persistGithubOAuthState } from "@/domains/auth/utils/github-oauth-session";
-import type { GithubOAuthIntent } from "@/domains/auth/utils/github-oauth-session";
 
 type AuthSocialButtonsProps = {
   legend: string;
-  githubIntent?: GithubOAuthIntent;
 };
 
-export function AuthSocialButtons({ legend, githubIntent = "signin" }: AuthSocialButtonsProps) {
+export function AuthSocialButtons({ legend }: AuthSocialButtonsProps) {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -28,8 +26,7 @@ export function AuthSocialButtons({ legend, githubIntent = "signin" }: AuthSocia
     setIsRedirecting(true);
 
     try {
-      const authorize = githubIntent === "signup" ? getGithubSignUpAuthorizationUrl : getGithubAuthorizationUrl;
-      const result = await authorize();
+      const result = await getGithubAuthorizationUrl();
       const data = result?.data;
 
       if (!data?.authorizationUrl || !data.state) {
@@ -38,7 +35,7 @@ export function AuthSocialButtons({ legend, githubIntent = "signin" }: AuthSocia
         return;
       }
 
-      persistGithubOAuthState(data.state, githubIntent);
+      persistGithubOAuthState(data.state);
       window.location.assign(data.authorizationUrl);
     } catch {
       setErrorMessage("Failed to connect to GitHub.");

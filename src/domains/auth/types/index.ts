@@ -5,21 +5,9 @@ export interface GoogleOAuthSignInRequest {
   idToken: string;
 }
 
-/** `POST /auth/oauth/google` response `data` */
-export interface GoogleOAuthSignInResult {
-  accessToken?: string;
-  /**
-   * Present when the OAuth sign-in produced a new account (or for OAuth sign-up flows).
-   * Clients should exchange it via `/auth/refresh` to obtain an access token.
-   */
-  refreshToken?: string;
-  /** Present when this Google account is not linked to a user yet */
-  newUser?: boolean;
-}
-
-/** `POST /auth/oauth/google/signup` · `POST /auth/oauth/github` (signup state) response `data` */
-export interface OAuthSignUpResult {
-  refreshToken: string;
+/** `POST /auth/oauth/google` · `POST /auth/oauth/github` response `data` (AuthTokenResponseDto) */
+export interface OAuthTokenResult {
+  accessToken: string;
 }
 
 /** `POST /auth/signup` response `data` */
@@ -33,13 +21,6 @@ export interface SignUpCreatedUser {
 export interface EmailSignUpPayload {
   email: string;
   password: string;
-  fullName: string;
-  username: string;
-}
-
-/** `POST /auth/oauth/google/signup` body */
-export interface GoogleSignUpPayload {
-  idToken: string;
   fullName: string;
   username: string;
 }
@@ -102,17 +83,12 @@ export interface GithubOAuthSignInRequest {
   state: string;
 }
 
-/** `POST /auth/oauth/github` response `data` (same shape as Google) */
-export type GithubOAuthSignInResult = GoogleOAuthSignInResult;
-
 /** `POST /auth/verify` response `data` */
 export interface EmailVerificationResult {
   verified: boolean;
 }
 
 // --- Sign-up onboarding ---
-
-export type OAuthProvider = "google" | "github";
 
 export type SignUpStepKey = "account" | "profile";
 
