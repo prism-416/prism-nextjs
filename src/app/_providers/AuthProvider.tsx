@@ -13,7 +13,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   hydrateSession: (payload: AuthSessionPayload) => boolean;
   setSession: (payload: AuthSessionPayload) => Promise<boolean>;
-  refreshSession: () => Promise<boolean>;
+  refreshSession: (refreshToken?: string) => Promise<boolean>;
   clearSession: () => Promise<void>;
 }
 
@@ -85,11 +85,17 @@ export default function AuthProvider({ children }: Props) {
 
         return hydrateSession(result);
       },
-      async refreshSession() {
+      async refreshSession(refreshToken) {
         const response = await fetch("/api/auth/refresh", {
           method: "POST",
           credentials: "include",
           cache: "no-store",
+          ...(refreshToken
+            ? {
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refreshToken }),
+              }
+            : {}),
         });
         const result = await parseAuthResponse(response);
 

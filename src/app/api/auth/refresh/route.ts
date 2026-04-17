@@ -1,13 +1,27 @@
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { API_HOST } from "@/shared/constants/api";
 import { clearAuthCookies, applyAuthCookies } from "@/shared/utils/auth-cookie";
 import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 
-export async function POST() {
+async function readRefreshTokenFromBody(request: NextRequest) {
+  const contentType = request.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    return undefined;
+  }
+
+  const payload = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  const token = payload?.refreshToken ?? payload?.refresh_token;
+
+  return typeof token === "string" && token.trim().length > 0 ? token : undefined;
+}
+
+export async function POST(request: NextRequest) {
+  const bodyRefreshToken = await readRefreshTokenFromBody(request);
   const cookieStore = await cookies();
-  const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
+  const cookieRefreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE_NAME)?.value;
+  const refreshToken = bodyRefreshToken || cookieRefreshToken;
 
   if (!refreshToken) {
     return clearAuthCookies(NextResponse.json({ message: "Refresh token is missing." }, { status: 401 }));
@@ -40,12 +54,14 @@ export async function POST() {
       );
     }
 
+    const nextTokens = tokens.refreshToken ? tokens : { ...tokens, refreshToken };
+
     const refreshResponse = NextResponse.json({
       authenticated: true,
-      accessToken: tokens.accessToken,
+      accessToken: nextTokens.accessToken,
     });
 
-    return applyAuthCookies(refreshResponse, tokens);
+    return applyAuthCookies(refreshResponse, nextTokens);
   } catch {
     return clearAuthCookies(
       NextResponse.json(

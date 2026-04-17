@@ -6,9 +6,13 @@ import type {
   EmailSignInPayload,
   EmailSignUpPayload,
   EmailVerificationResult,
+  GithubOAuthAuthorizeResult,
+  GithubOAuthSignInRequest,
+  GithubOAuthSignInResult,
   GoogleOAuthSignInRequest,
   GoogleOAuthSignInResult,
   GoogleSignUpPayload,
+  OAuthSignUpResult,
   SignUpCreatedUser,
 } from "../types";
 
@@ -48,7 +52,7 @@ export async function checkUsernameAvailability(username: string) {
 }
 
 export async function signUpWithOAuthGoogle(body: GoogleSignUpPayload) {
-  return commonAxios<GoogleSignUpPayload, ApiResponse<SignUpCreatedUser>>({
+  return commonAxios<GoogleSignUpPayload, ApiResponse<OAuthSignUpResult>>({
     url: "/auth/oauth/google/signup",
     method: "POST",
     data: body,
@@ -69,6 +73,33 @@ export async function verifyEmail(token: string) {
   return commonAxios<null, ApiResponse<EmailVerificationResult>>({
     url: `/auth/verify?token=${encodeURIComponent(token)}`,
     method: "POST",
+    version: null,
+  });
+}
+
+// --- GitHub OAuth ---
+
+export async function getGithubAuthorizationUrl() {
+  return commonAxios<null, ApiResponse<GithubOAuthAuthorizeResult>>({
+    url: "/auth/oauth/github/authorize",
+    method: "GET",
+    version: null,
+  });
+}
+
+export async function getGithubSignUpAuthorizationUrl() {
+  return commonAxios<null, ApiResponse<GithubOAuthAuthorizeResult>>({
+    url: "/auth/oauth/github/signup/authorize",
+    method: "GET",
+    version: null,
+  });
+}
+
+export async function signInWithGithub(body: GithubOAuthSignInRequest) {
+  return commonAxios<GithubOAuthSignInRequest, ApiResponse<GithubOAuthSignInResult>>({
+    url: "/auth/oauth/github",
+    method: "POST",
+    data: body,
     version: null,
   });
 }

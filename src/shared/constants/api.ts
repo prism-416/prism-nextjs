@@ -1,5 +1,3 @@
-import { API_HOST } from "@/shared/constants/env";
-
 export { API_HOST } from "@/shared/constants/env";
 
 // Content-Type (JSON)
@@ -16,6 +14,3 @@ export const OCTET_STREAM_TYPE = "application/octet-stream";
 
 // Bearer 토큰 타입
 export const TOKEN_TYPE_BEARER = "Bearer";
-
-// Social Login Endpoints
-export const GITHUB_SIGNIN_URL = `${API_HOST}/auth/github/signin`;

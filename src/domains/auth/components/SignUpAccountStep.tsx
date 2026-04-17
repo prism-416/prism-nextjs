@@ -83,7 +83,10 @@ export function SignUpAccountStep({
 
   return (
     <FieldSet className="gap-6">
-      <AuthSocialButtons legend="Create an account with a social provider" />
+      <AuthSocialButtons
+        legend="Create an account with a social provider"
+        githubIntent="signup"
+      />
 
       <AuthFormSeparator />
 

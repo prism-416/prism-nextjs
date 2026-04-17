@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { useAuth } from "@/app/_providers/AuthProvider";
 import { checkUsernameAvailability, signUpWithEmail, signUpWithOAuthGoogle } from "../api";
 
 import { SIGN_UP_STEPS } from "../constants/content";
@@ -19,6 +20,7 @@ const INITIAL_FORM_STATE: SignUpFormState = {
 
 export function useSignUp() {
   const router = useRouter();
+  const { refreshSession } = useAuth();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [oauthProvider, setOauthProvider] = useState<OAuthProvider | null>(null);
   const [oauthIdToken, setOauthIdToken] = useState<string | null>(null);
@@ -48,9 +50,7 @@ export function useSignUp() {
     if (resume) {
       setCurrentStepIndex(getStepIndexFromResume(resume));
       setOauthProvider(resume.provider);
-      if (resume.idToken) {
-        setOauthIdToken(resume.idToken);
-      }
+      setOauthIdToken(resume.idToken);
     }
   }, []);
 
@@ -123,11 +123,6 @@ export function useSignUp() {
         const fullName = formState.name.trim();
         const username = trimmedUsername;
 
-        if (oauthProvider && oauthProvider !== "google") {
-          setSignupError("This sign-in method is not supported for registration yet.");
-          return;
-        }
-
         if (oauthProvider === "google") {
           if (!oauthIdToken) {
             setSignupError("Your Google sign-in session expired. Please start again from sign in.");
@@ -140,14 +135,22 @@ export function useSignUp() {
             username,
           });
 
-          if (!signUpResult?.data?.userId) {
+          const refreshToken = signUpResult?.data?.refreshToken;
+          if (!refreshToken) {
             setSignupError(signUpResult?.message || "Sign up failed.");
             return;
           }
 
           clearSignUpOAuthResume();
           setOauthIdToken(null);
-          router.push("/sign-in");
+
+          const ok = await refreshSession(refreshToken);
+          if (!ok) {
+            setSignupError("Failed to establish session after sign up.");
+            return;
+          }
+
+          window.location.assign("/");
           return;
         }
 
@@ -185,6 +188,7 @@ export function useSignUp() {
     formState.password,
     oauthIdToken,
     oauthProvider,
+    refreshSession,
     router,
     trimmedUsername,
   ]);
