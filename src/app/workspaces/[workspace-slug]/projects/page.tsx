@@ -4,14 +4,14 @@ import { AppHeader } from "@/domains/workspace/components/AppHeader";
 import AppSidebar from "@/domains/workspace/components/AppSidebar";
 import { Suspense } from "react";
 
-export default function ProjectsPage() {
+export default function ProjectsPage({ params }: { params: { "workspace-slug": string } }) {
   return (
     <MainLayout
       header={<AppHeader />}
       sidebar={<AppSidebar />}
     >
       <Suspense>
-        <ProjectsContent />
+        <ProjectsContent slug={params["workspace-slug"]} />
       </Suspense>
     </MainLayout>
   );
