@@ -1,12 +1,12 @@
 # Responsive Website Starter
 
-Next.js 16 App Router 기반의 반응형 웹사이트 스타터 템플릿입니다.
+A responsive website starter template built with Next.js 16 App Router.
 
-웹뷰 전용 브리지 없이 브라우저 환경을 기준으로 정리되어 있으며, 레이어 구조는 아래 원칙을 따릅니다.
+This template is designed for browser environments without relying on a webview bridge. The project structure follows a layered architecture with the following principles:
 
-- `src/domains`: 비즈니스 로직
-- `src/atomics`: UI 전용 컴포넌트
-- `src/shared`: 공통 유틸리티와 범용 코드
+- `src/domains`: Business logic
+- `src/atomics`: UI components
+- `src/shared`: Shared utilities and common code
 
 ## Scripts
 
@@ -20,27 +20,27 @@ pnpm type-check
 
 ## Start Point
 
-- 메인 페이지: `src/app/page.tsx`
-- 루트 레이아웃: `src/app/layout.tsx`
-- 글로벌 스타일: `src/app/globals.css`
+- Main page: `src/app/page.tsx`
+- Root layout: `src/app/layout.tsx`
+- Global styles: `src/app/globals.css`
 
 ## Environment
 
-프로젝트 시작 전 `.env.example`을 기준으로 `.env.local`을 준비하세요.
+Before starting the project, create a `.env.example`file based on `.env.local`.
 
-- `NEXT_PUBLIC_API_HOST`: 백엔드 API 호스트
-- `NEXT_PUBLIC_SITE_URL`: 프론트엔드 사이트 기준 URL
-- `AUTH_REFRESH_PATH`: refresh token 재발급 엔드포인트
-- `AUTH_LOGOUT_PATH`: 로그아웃 엔드포인트
-- `PASSWORD_VERIFY_SECRET`: 서버 유틸 검증용 시크릿
+- `NEXT_PUBLIC_API_HOST`: Backend API host
+- `NEXT_PUBLIC_SITE_URL`: Frontend base URL
+- `AUTH_REFRESH_PATH`: Refresh token endpoint
+- `AUTH_LOGOUT_PATH`: Logout endpoint
+- `PASSWORD_VERIFY_SECRET`: Secret key for server-side validation
 
 ## Auth Flow
 
-- 클라이언트 로그인 성공 후 `useAuth().setSession()`으로 access/refresh token 저장
-- access token은 짧은 수명 쿠키로 유지
-- refresh token은 `HttpOnly` 쿠키로 유지
-- 401 응답 시 `/api/auth/refresh`를 통해 access token 자동 재발급
-- 로그아웃 시 `/api/auth/logout`으로 서버 쿠키 정리
+- After a successful login, store access/refresh tokens using `useAuth().setSession()`
+- The access token is stored in a short-lived cookie
+- The refresh token is stored in an `HttpOnly` cookie
+- On a `401` response, the access token is automatically refreshed via `/api/auth/refresh`
+- On logout, cookies are cleared via `/api/auth/logout`
 
 ```tsx
 "use client";
@@ -65,13 +65,13 @@ export function LoginExample() {
         type="button"
         onClick={handleLogin}
       >
-        로그인 저장
+        Save Login
       </button>
       <button
         type="button"
         onClick={clearSession}
       >
-        로그아웃
+        Logout
       </button>
     </>
   );
@@ -80,7 +80,7 @@ export function LoginExample() {
 
 ## Query Example
 
-`QUERY_KEYS`와 query wrapper는 `src/domains/template-status` 예시를 참고하면 됩니다.
+Refer to `src/domains/template-status` for examples of `QUERY_KEYS` and query wrappers.
 
 ```tsx
 "use client";
@@ -98,19 +98,19 @@ export function TemplateStatusExample() {
 
 ## Template Structure Example
 
-- `src/domains/template-status/model`: 도메인 타입
-- `src/domains/template-status/api`: API 호출 함수
-- `src/domains/template-status/hooks`: query wrapper 사용 훅
-- `src/atomics/organisms/TemplateStatusCard.tsx`: UI 소비 예시
+- `src/domains/template-status/model`: Domain types
+- `src/domains/template-status/api`: API functions
+- `src/domains/template-status/hooks`: Query wrapper hooks
+- `src/atomics/organisms/TemplateStatusCard.tsx`: UI usage example
 
 ## CI
 
-- `.github/workflows/ci.yml`에서 `lint`, `type-check`, `build`를 검증합니다.
+- CI checks for `linting`, `type-checking`, and `build` are configured in `.github/workflows/ci.yml`.
 
 ## Notes
 
-- Next.js 16 App Router 기준
-- TanStack Query는 직접 `useQuery` 계열 대신 프로젝트 래퍼 훅 사용
-- 웹사이트 템플릿 기준으로 메타데이터와 기본 UI를 세팅
-- `zod` 기반 env 검증 포함
-- `robots`, `sitemap`, `manifest`, 기본 OG 이미지 포함
+- Built with Next.js 16 App Router
+- Uses wrapper hooks instead of directly calling TanStack Query (useQuery, etc.)
+- Includes default metadata and base UI for a website template
+- Environment variables are validated using `zod`
+- Includes `robots`, `sitemap`, `manifest`, and default Open Graph images
