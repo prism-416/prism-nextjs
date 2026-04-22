@@ -8,6 +8,8 @@ export interface Workspace {
   slug: string;
   description?: string;
   createdAt: string;
+  memberCount?: number;
+  projectCount?: number;
 }
 
 /** `GET /workspaces/{workspaceId}/members` response item */
