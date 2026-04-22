@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { prefetchWorkspaces } from "@/domains/workspace/api";
+import { getWorkspaces } from "@/domains/workspace/api";
 import { WorkspaceContent } from "@/domains/workspace/components/WorkspaceContent";
 
 export const metadata: Metadata = {
@@ -8,7 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkspacePage() {
-  const initialData = await prefetchWorkspaces();
+  const initialData = await getWorkspaces()
+    .then(response => response?.data ?? [])
+    .catch(() => []);
 
   return <WorkspaceContent initialData={initialData} />;
 }

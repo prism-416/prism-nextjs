@@ -42,11 +42,3 @@ export interface CreateInvitationPayload {
 export interface AcceptInvitationPayload {
   token: string;
 }
-
-// --- Hook result types ---
-
-/** Return shape of `useWorkspaceAccess` */
-export type UseWorkspaceAccessResult = {
-  isCheckingAccess: boolean;
-  hasAccess: boolean;
-};

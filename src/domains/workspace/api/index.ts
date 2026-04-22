@@ -69,12 +69,3 @@ export async function acceptInvitation(body: AcceptInvitationPayload) {
     version: null,
   });
 }
-
-export async function prefetchWorkspaces(): Promise<Workspace[]> {
-  try {
-    const response = await getWorkspaces();
-    return response?.data ?? [];
-  } catch {
-    return [];
-  }
-}
