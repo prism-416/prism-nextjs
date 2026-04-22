@@ -20,9 +20,9 @@ pnpm type-check
 
 ## Start Point
 
-- 메인 페이지: `src/app/page.tsx`
-- 루트 레이아웃: `src/app/layout.tsx`
-- 글로벌 스타일: `src/app/globals.css`
+- Main page: `src/app/page.tsx`
+- Root layout: `src/app/layout.tsx`
+- Global styles: `src/app/globals.css`
 
 ## Environment
 
