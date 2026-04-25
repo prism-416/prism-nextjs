@@ -17,9 +17,46 @@ export interface WorkspaceMember {
   userId: string;
   fullName: string;
   username: string;
-  role: string;
-  joinedAt: string;
-  invitedAt: string;
+  role: InvitationRole;
+  joinedAt: string | null;
+  invitedAt: string | null;
+}
+
+export type InvitationRole = "admin" | "member" | "viewer";
+
+export type WorkspaceMemberCandidateKind = "existing" | "external";
+
+export type WorkspaceMemberCandidateSearchReason = "success" | "self" | "already_member" | "no_results";
+
+export interface WorkspaceInvitationRoleOption {
+  value: InvitationRole;
+  label: string;
+  description: string;
+}
+
+/** `GET /workspaces/member-candidates` response item */
+export interface WorkspaceMemberCandidate {
+  kind: WorkspaceMemberCandidateKind;
+  userId: string | null;
+  email: string;
+  fullName: string | null;
+  username: string | null;
+}
+
+export type InviteMember = WorkspaceMemberCandidate & {
+  role: InvitationRole;
+};
+
+/** `GET /workspaces/member-candidates` response `data` */
+export interface WorkspaceMemberCandidateSearchResult {
+  reason: WorkspaceMemberCandidateSearchReason;
+  items: WorkspaceMemberCandidate[];
+}
+
+/** `GET /workspaces/member-candidates` query */
+export interface SearchWorkspaceMemberCandidatesPayload {
+  keyword: string;
+  workspaceId?: string;
 }
 
 /** `POST /workspaces` body */
@@ -37,7 +74,7 @@ export interface UpdateWorkspacePayload {
 /** `POST /workspaces/{workspaceId}/invitations` body */
 export interface CreateInvitationPayload {
   receiverId: string;
-  role: string;
+  role: InvitationRole;
 }
 
 /** `POST /workspaces/invitations/accept` body */

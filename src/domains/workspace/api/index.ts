@@ -5,8 +5,10 @@ import type {
   AcceptInvitationPayload,
   CreateInvitationPayload,
   CreateWorkspacePayload,
+  SearchWorkspaceMemberCandidatesPayload,
   UpdateWorkspacePayload,
   Workspace,
+  WorkspaceMemberCandidateSearchResult,
   WorkspaceMember,
 } from "../types";
 
@@ -48,6 +50,15 @@ export async function getWorkspaceMembers(workspaceId: string) {
   return commonAxios<null, ApiResponse<WorkspaceMember[]>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/members`,
     method: "GET",
+    version: null,
+  });
+}
+
+export async function searchWorkspaceMemberCandidates(query: SearchWorkspaceMemberCandidatesPayload) {
+  return commonAxios<SearchWorkspaceMemberCandidatesPayload, ApiResponse<WorkspaceMemberCandidateSearchResult>>({
+    url: "/workspaces/member-candidates",
+    method: "GET",
+    data: query,
     version: null,
   });
 }
