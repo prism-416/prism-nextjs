@@ -5,7 +5,8 @@ import Link from "next/link";
 import { cn } from "@/shared/utils/cn";
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
-import { WorkspacePath, type WorkspacePathSegment } from "@/domains/workspace/components/WorkspacePath";
+import { WorkspacePath } from "@/domains/workspace/components/WorkspacePath";
+import type { WorkspacePathSegment } from "@/domains/workspace/types/path";
 
 type AppHeaderProps = {
   workspace?: WorkspacePathSegment;
