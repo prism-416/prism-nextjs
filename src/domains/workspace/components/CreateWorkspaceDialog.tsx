@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent } from "@/atomics/atoms/Dialog";
-import { CreateWorkspaceDialogForm } from "@/domains/workspace/components/create-workspace-dialog/CreateWorkspaceDialogForm";
+import { CreateWorkspaceDialogForm } from "@/domains/workspace/components/create-dialog/CreateWorkspaceDialogForm";
 import type { Workspace } from "@/domains/workspace/types";
 
 type CreateWorkspaceDialogProps = {
