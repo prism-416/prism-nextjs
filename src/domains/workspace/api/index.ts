@@ -56,7 +56,7 @@ export async function getWorkspaceMembers(workspaceId: string) {
 
 export async function searchWorkspaceMemberCandidates(query: SearchWorkspaceMemberCandidatesPayload) {
   return commonAxios<SearchWorkspaceMemberCandidatesPayload, ApiResponse<WorkspaceMemberCandidateSearchResult>>({
-    url: "/workspaces/member-candidates",
+    url: "/workspaces/members/search",
     method: "GET",
     data: query,
     version: null,
