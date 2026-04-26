@@ -13,70 +13,89 @@ import type {
 } from "../types";
 
 export async function getWorkspaces() {
-  return commonAxios<null, ApiResponse<Workspace[]>>({
+  const response = await commonAxios<null, ApiResponse<Workspace[]>>({
     url: "/workspaces",
     method: "GET",
     version: null,
   });
+
+  return response?.data ?? [];
 }
 
 export async function getWorkspaceById(workspaceId: string) {
-  return commonAxios<null, ApiResponse<Workspace>>({
+  const response = await commonAxios<null, ApiResponse<Workspace>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}`,
     method: "GET",
     version: null,
   });
+
+  return response?.data;
 }
 
 export async function createWorkspace(body: CreateWorkspacePayload) {
-  return commonAxios<CreateWorkspacePayload, ApiResponse<Workspace>>({
+  const response = await commonAxios<CreateWorkspacePayload, ApiResponse<Workspace>>({
     url: "/workspaces",
     method: "POST",
     data: body,
     version: null,
   });
+
+  return response?.data;
 }
 
 export async function updateWorkspace(workspaceId: string, body: UpdateWorkspacePayload) {
-  return commonAxios<UpdateWorkspacePayload, ApiResponse<Workspace>>({
+  const response = await commonAxios<UpdateWorkspacePayload, ApiResponse<Workspace>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}`,
     method: "PATCH",
     data: body,
     version: null,
   });
+
+  return response?.data;
 }
 
 export async function getWorkspaceMembers(workspaceId: string) {
-  return commonAxios<null, ApiResponse<WorkspaceMember[]>>({
+  const response = await commonAxios<null, ApiResponse<WorkspaceMember[]>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/members`,
     method: "GET",
     version: null,
   });
+
+  return response?.data ?? [];
 }
 
 export async function searchWorkspaceMemberCandidates(query: SearchWorkspaceMemberCandidatesPayload) {
-  return commonAxios<SearchWorkspaceMemberCandidatesPayload, ApiResponse<WorkspaceMemberCandidateSearchResult>>({
+  const response = await commonAxios<
+    SearchWorkspaceMemberCandidatesPayload,
+    ApiResponse<WorkspaceMemberCandidateSearchResult>
+  >({
     url: "/workspaces/members/search",
     method: "GET",
     data: query,
     version: null,
   });
+
+  return response?.data;
 }
 
 export async function createInvitation(workspaceId: string, body: CreateInvitationPayload) {
-  return commonAxios<CreateInvitationPayload, ApiResponse<unknown>>({
+  const response = await commonAxios<CreateInvitationPayload, ApiResponse<unknown>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/invitations`,
     method: "POST",
     data: body,
     version: null,
   });
+
+  return response?.data;
 }
 
 export async function acceptInvitation(body: AcceptInvitationPayload) {
-  return commonAxios<AcceptInvitationPayload, ApiResponse<unknown>>({
+  const response = await commonAxios<AcceptInvitationPayload, ApiResponse<unknown>>({
     url: "/workspaces/invitations/accept",
     method: "POST",
     data: body,
     version: null,
   });
+
+  return response?.data;
 }

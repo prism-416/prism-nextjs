@@ -11,15 +11,8 @@ type UseWorkspaceListParams = {
 export function useWorkspaceList({ initialData }: UseWorkspaceListParams) {
   return useApiQuery<Workspace[]>({
     queryKey: QUERY_KEYS.workspace.list(),
-    queryFn: async () => {
-      const response = await getWorkspaces();
-
-      if (!response?.data) {
-        throw new Error("Failed to fetch workspace list.");
-      }
-
-      return response.data;
-    },
+    queryFn: getWorkspaces,
     initialData: initialData ?? undefined,
+    staleTime: 5 * 60 * 1000,
   });
 }
