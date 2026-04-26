@@ -2,9 +2,9 @@
 
 import { Label } from "@/atomics/atoms/Label";
 import { Typography } from "@/atomics/atoms/Typography";
-import { InviteMemberChip } from "@/domains/workspace/components/create-workspace-dialog/InviteMemberChip";
-import { InviteMemberInput } from "@/domains/workspace/components/create-workspace-dialog/InviteMemberInput";
-import { InviteMemberSearchResults } from "@/domains/workspace/components/create-workspace-dialog/InviteMemberSearchResults";
+import { InviteMemberChip } from "@/domains/workspace/components/create-dialog/InviteMemberChip";
+import { InviteMemberInput } from "@/domains/workspace/components/create-dialog/InviteMemberInput";
+import { InviteMemberSearchResults } from "@/domains/workspace/components/create-dialog/InviteMemberSearchResults";
 import type {
   InvitationRole,
   InviteMember,

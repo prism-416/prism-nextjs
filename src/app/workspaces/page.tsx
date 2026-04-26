@@ -1,16 +1,17 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { getWorkspaces } from "@/domains/workspace/api";
 import { WorkspaceContent } from "@/domains/workspace/components/WorkspaceContent";
+import { WorkspaceSkeleton } from "@/domains/workspace/components/WorkspaceSkeleton";
 
 export const metadata: Metadata = {
-  title: "Workspace",
+  title: "Workspaces",
 };
 
-export default async function WorkspacePage() {
-  const initialData = await getWorkspaces()
-    .then(response => response?.data ?? [])
-    .catch(() => []);
-
-  return <WorkspaceContent initialData={initialData} />;
+export default function WorkspacesPage() {
+  return (
+    <Suspense fallback={<WorkspaceSkeleton />}>
+      <WorkspaceContent />
+    </Suspense>
+  );
 }

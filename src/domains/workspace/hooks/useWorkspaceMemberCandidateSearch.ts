@@ -129,11 +129,11 @@ export function useWorkspaceMemberCandidateSearch() {
 
   async function searchCandidates(keyword: string) {
     const trimmedKeyword = keyword.trim();
-    const response = await searchWorkspaceMemberCandidates({
+    const result = await searchWorkspaceMemberCandidates({
       keyword: trimmedKeyword,
     });
 
-    return response?.data ?? createEmptySearchResult();
+    return result ?? createEmptySearchResult();
   }
 
   function handleMemberQueryChange(value: string) {

@@ -12,13 +12,13 @@ export function useCreateWorkspace() {
 
   return useApiMutation<Workspace, Error, CreateWorkspacePayload>({
     mutationFn: async payload => {
-      const response = await createWorkspace(payload);
+      const workspace = await createWorkspace(payload);
 
-      if (!response?.data) {
+      if (!workspace) {
         throw new Error("Failed to create workspace.");
       }
 
-      return response.data;
+      return workspace;
     },
     onSuccess: workspace => {
       queryClient.setQueryData<Workspace[]>(QUERY_KEYS.workspace.list(), previous => {
