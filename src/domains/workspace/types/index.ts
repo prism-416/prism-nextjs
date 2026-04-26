@@ -34,7 +34,7 @@ export interface WorkspaceInvitationRoleOption {
   description: string;
 }
 
-/** `GET /workspaces/member-candidates` response item */
+/** `GET /workspaces/members/search` response item */
 export interface WorkspaceMemberCandidate {
   kind: WorkspaceMemberCandidateKind;
   userId: string | null;
@@ -47,13 +47,13 @@ export type InviteMember = WorkspaceMemberCandidate & {
   role: InvitationRole;
 };
 
-/** `GET /workspaces/member-candidates` response `data` */
+/** `GET /workspaces/members/search` response `data` */
 export interface WorkspaceMemberCandidateSearchResult {
   reason: WorkspaceMemberCandidateSearchReason;
   items: WorkspaceMemberCandidate[];
 }
 
-/** `GET /workspaces/member-candidates` query */
+/** `GET /workspaces/members/search` query */
 export interface SearchWorkspaceMemberCandidatesPayload {
   keyword: string;
   workspaceId?: string;
