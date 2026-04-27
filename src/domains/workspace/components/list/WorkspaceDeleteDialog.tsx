@@ -19,6 +19,29 @@ type WorkspaceDeleteDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+type DeleteWorkspaceError = {
+  message?: unknown;
+  status?: unknown;
+  data?: { message?: unknown } | null;
+  response?: {
+    status?: unknown;
+    data?: { message?: unknown } | null;
+  };
+};
+
+function getDeleteWorkspaceErrorMessage(error: unknown) {
+  const candidate = error as DeleteWorkspaceError | null;
+  const status = candidate?.response?.status ?? candidate?.status;
+
+  if (status === 403) {
+    return "Only the workspace owner can delete this workspace.";
+  }
+
+  const message = candidate?.response?.data?.message ?? candidate?.data?.message ?? candidate?.message;
+
+  return typeof message === "string" && message.trim().length > 0 ? message : "Failed to delete workspace.";
+}
+
 export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: WorkspaceDeleteDialogProps) {
   const { mutateAsync: removeWorkspace, isPending, error } = useDeleteWorkspace();
 
@@ -74,7 +97,7 @@ export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: Workspa
               tone="inherit"
               className="text-red-700"
             >
-              {error.message || "Failed to delete workspace."}
+              {getDeleteWorkspaceErrorMessage(error)}
             </Typography>
           </div>
         )}

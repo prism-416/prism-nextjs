@@ -9,34 +9,26 @@ import { getCookie } from "@/shared/utils/cookie";
 
 const CANDIDATE_SEARCH_DEBOUNCE_MS = 250;
 
-type JwtPayload = Record<string, unknown>;
-
-function decodeBase64Url(value: string) {
-  if (typeof window === "undefined" || typeof window.atob !== "function") {
-    return null;
-  }
-
-  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-
-  return window.atob(padded);
-}
-
-function parseJwtPayload(token: string | null | undefined): JwtPayload | null {
-  if (!token) {
-    return null;
+function parseJwtEmail(token: string | null) {
+  if (!token || typeof window === "undefined" || typeof window.atob !== "function") {
+    return "";
   }
 
   const [, payloadSegment] = token.split(".");
   if (!payloadSegment) {
-    return null;
+    return "";
   }
 
   try {
-    const decoded = decodeBase64Url(payloadSegment);
-    return decoded ? (JSON.parse(decoded) as JwtPayload) : null;
+    const normalized = payloadSegment.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const payload = JSON.parse(window.atob(padded)) as { email?: unknown };
+
+    return typeof payload.email === "string" && payload.email.trim().length > 0
+      ? payload.email.trim().toLowerCase()
+      : "";
   } catch {
-    return null;
+    return "";
   }
 }
 
@@ -46,9 +38,7 @@ function readCurrentUserEmailFromAccessToken() {
   }
 
   const accessToken = getCookie(ACCESS_TOKEN_COOKIE_NAME);
-  const value = parseJwtPayload(accessToken)?.email;
-
-  return typeof value === "string" && value.trim().length > 0 ? value.trim().toLowerCase() : "";
+  return parseJwtEmail(accessToken);
 }
 
 function createEmptySearchResult(): WorkspaceMemberCandidateSearchResult {
