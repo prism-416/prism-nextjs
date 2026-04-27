@@ -18,3 +18,14 @@ export interface AuthSessionPayload extends Partial<AuthTokens> {
   expiresIn?: number;
   expires_in?: number;
 }
+
+export interface CurrentUser {
+  userId: string;
+  email: string;
+  fullName: string;
+  username: string;
+}
+
+export interface AuthMeResponse {
+  user: CurrentUser;
+}
