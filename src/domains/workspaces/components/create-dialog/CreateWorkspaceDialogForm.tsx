@@ -20,8 +20,8 @@ type CreateWorkspaceDialogFormProps = {
   onCreated?: (workspace: Workspace) => void;
 };
 
-const NAME_MAX = 48;
-const DESCRIPTION_MAX = 180;
+const NAME_MAX = 20;
+const DESCRIPTION_MAX = 1000;
 
 function pluralize(count: number, singular: string, plural = `${singular}s`) {
   return count === 1 ? singular : plural;
