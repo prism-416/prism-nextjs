@@ -1,7 +1,17 @@
-import { useProjects } from "../hooks/useProjects";
+import { getProjects } from "../api";
 import { ProjectsClient } from "./ProjectsClient";
 
-export function ProjectsContent({ slug }: { slug: string }) {
-  const { data: initialData } = useProjects(slug ?? "");
-  return <ProjectsClient initialData={initialData ?? []} />;
+type ProjectsContentProps = {
+  slug: string;
+};
+
+export async function ProjectsContent({ slug }: ProjectsContentProps) {
+  const initialData = await getProjects(slug);
+
+  return (
+    <ProjectsClient
+      slug={slug}
+      initialData={initialData}
+    />
+  );
 }
