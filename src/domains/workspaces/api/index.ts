@@ -54,6 +54,14 @@ export async function updateWorkspace(workspaceId: string, body: UpdateWorkspace
   return response?.data;
 }
 
+export async function deleteWorkspace(workspaceId: string) {
+  await commonAxios<null, ApiResponse<null>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
 export async function getWorkspaceMembers(workspaceId: string) {
   const response = await commonAxios<null, ApiResponse<WorkspaceMember[]>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/members`,
