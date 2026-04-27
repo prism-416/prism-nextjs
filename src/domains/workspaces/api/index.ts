@@ -8,6 +8,7 @@ import type {
   SearchWorkspaceMemberCandidatesPayload,
   UpdateWorkspacePayload,
   Workspace,
+  WorkspaceInvitation,
   WorkspaceMemberCandidateSearchResult,
   WorkspaceMember,
 } from "../types";
@@ -79,7 +80,7 @@ export async function searchWorkspaceMemberCandidates(query: SearchWorkspaceMemb
 }
 
 export async function createInvitation(workspaceId: string, body: CreateInvitationPayload) {
-  const response = await commonAxios<CreateInvitationPayload, ApiResponse<unknown>>({
+  const response = await commonAxios<CreateInvitationPayload, ApiResponse<WorkspaceInvitation>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/invitations`,
     method: "POST",
     data: body,
@@ -90,7 +91,7 @@ export async function createInvitation(workspaceId: string, body: CreateInvitati
 }
 
 export async function acceptInvitation(body: AcceptInvitationPayload) {
-  const response = await commonAxios<AcceptInvitationPayload, ApiResponse<unknown>>({
+  const response = await commonAxios<AcceptInvitationPayload, ApiResponse<Workspace>>({
     url: "/workspaces/invitations/accept",
     method: "POST",
     data: body,
