@@ -6,7 +6,7 @@ export interface Workspace {
   ownerId: string;
   name: string;
   slug: string;
-  description?: string;
+  description?: string | null;
   createdAt: string;
   memberCount?: number;
   projectCount?: number;
@@ -68,7 +68,7 @@ export interface CreateWorkspacePayload {
 /** `PATCH /workspaces/{workspaceId}` body */
 export interface UpdateWorkspacePayload {
   name?: string;
-  description?: string;
+  description?: string | null;
 }
 
 /** `POST /workspaces/{workspaceId}/invitations` body */
