@@ -1,6 +1,6 @@
-import { FolderKanban, MoreVertical, Users } from "lucide-react";
+import { FolderKanban, Users } from "lucide-react";
 
-import { Button } from "@/atomics/atoms/Button";
+import { WorkspaceActionsMenu } from "@/domains/workspace/components/list/WorkspaceActionsMenu";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceAvatar } from "@/domains/workspace/components/list/WorkspaceAvatar";
 import { WorkspaceMetaItem } from "@/domains/workspace/components/list/WorkspaceMetaItem";
@@ -14,9 +14,11 @@ import { cn } from "@/shared/utils/cn";
 
 type WorkspaceCardProps = {
   workspace: Workspace;
+  onEdit: (workspace: Workspace) => void;
+  onDelete: (workspace: Workspace) => void;
 };
 
-export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
+export function WorkspaceCard({ workspace, onEdit, onDelete }: WorkspaceCardProps) {
   return (
     <article
       className={cn(
@@ -51,14 +53,11 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
             </Typography>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0 text-prism-muted"
-          aria-label={`${workspace.name} options`}
-        >
-          <MoreVertical className="size-4" />
-        </Button>
+        <WorkspaceActionsMenu
+          workspaceName={workspace.name}
+          onEdit={() => onEdit(workspace)}
+          onDelete={() => onDelete(workspace)}
+        />
       </div>
 
       <div className="mt-3 flex items-center gap-4">

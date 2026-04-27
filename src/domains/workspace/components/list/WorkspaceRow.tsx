@@ -1,7 +1,7 @@
-import { FolderKanban, MoreVertical, Users } from "lucide-react";
+import { FolderKanban, Users } from "lucide-react";
 
-import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
+import { WorkspaceActionsMenu } from "@/domains/workspace/components/list/WorkspaceActionsMenu";
 import { WorkspaceAvatar } from "@/domains/workspace/components/list/WorkspaceAvatar";
 import { WorkspaceMetaItem } from "@/domains/workspace/components/list/WorkspaceMetaItem";
 import type { Workspace } from "@/domains/workspace/types";
@@ -10,9 +10,11 @@ import { cn } from "@/shared/utils/cn";
 
 type WorkspaceRowProps = {
   workspace: Workspace;
+  onEdit: (workspace: Workspace) => void;
+  onDelete: (workspace: Workspace) => void;
 };
 
-export function WorkspaceRow({ workspace }: WorkspaceRowProps) {
+export function WorkspaceRow({ workspace, onEdit, onDelete }: WorkspaceRowProps) {
   return (
     <article
       className={cn(
@@ -57,14 +59,11 @@ export function WorkspaceRow({ workspace }: WorkspaceRowProps) {
           {formatWorkspaceRelativeDate(workspace.createdAt)}
         </Typography>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 shrink-0 text-prism-muted"
-        aria-label={`${workspace.name} options`}
-      >
-        <MoreVertical className="size-4" />
-      </Button>
+      <WorkspaceActionsMenu
+        workspaceName={workspace.name}
+        onEdit={() => onEdit(workspace)}
+        onDelete={() => onDelete(workspace)}
+      />
     </article>
   );
 }

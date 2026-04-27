@@ -96,7 +96,7 @@ export function CreateWorkspaceDetailsSection({
           placeholder="What is this workspace for?"
           value={description}
           onChange={event => onDescriptionChange(event.target.value)}
-          className="rounded-xl border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
+          className="rounded-xl border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0"
         />
       </div>
     </>
