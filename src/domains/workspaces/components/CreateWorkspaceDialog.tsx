@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/atomics/atoms/Dialog";
+import { Dialog, DialogContent } from "@/atomics/molecules/Dialog";
 import { CreateWorkspaceDialogForm } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDialogForm";
 import type { Workspace } from "@/domains/workspaces/types";
 

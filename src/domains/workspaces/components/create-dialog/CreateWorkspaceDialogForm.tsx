@@ -3,7 +3,7 @@
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/atomics/atoms/Button";
-import { DialogFooter } from "@/atomics/atoms/Dialog";
+import { DialogFooter } from "@/atomics/molecules/Dialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { createInvitation } from "@/domains/workspaces/api";
 import { CreateWorkspaceDetailsSection } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDetailsSection";
@@ -20,8 +20,8 @@ type CreateWorkspaceDialogFormProps = {
   onCreated?: (workspace: Workspace) => void;
 };
 
-const NAME_MAX = 48;
-const DESCRIPTION_MAX = 180;
+const NAME_MAX = 20;
+const DESCRIPTION_MAX = 1000;
 
 function pluralize(count: number, singular: string, plural = `${singular}s`) {
   return count === 1 ? singular : plural;

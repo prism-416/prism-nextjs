@@ -5,7 +5,9 @@ import { useMemo, useState } from "react";
 import { CreateWorkspaceDialog } from "@/domains/workspaces/components/CreateWorkspaceDialog";
 import { WorkspacesSkeleton } from "@/domains/workspaces/components/WorkspacesSkeleton";
 import { WorkspaceCard } from "@/domains/workspaces/components/list/WorkspaceCard";
+import { WorkspaceDeleteDialog } from "@/domains/workspaces/components/list/WorkspaceDeleteDialog";
 import { WorkspaceEmptyState } from "@/domains/workspaces/components/list/WorkspaceEmptyState";
+import { WorkspaceEditDialog } from "@/domains/workspaces/components/list/WorkspaceEditDialog";
 import { WorkspaceErrorState } from "@/domains/workspaces/components/list/WorkspaceErrorState";
 import { WorkspaceNoResults } from "@/domains/workspaces/components/list/WorkspaceNoResults";
 import { WorkspaceRow } from "@/domains/workspaces/components/list/WorkspaceRow";
@@ -27,6 +29,8 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [query, setQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingWorkspace, setEditingWorkspace] = useState<Workspace | null>(null);
+  const [deletingWorkspace, setDeletingWorkspace] = useState<Workspace | null>(null);
 
   const workspaces = data ?? EMPTY_WORKSPACES;
   const filteredWorkspaces = useMemo(() => filterWorkspaces(workspaces, query), [query, workspaces]);
@@ -59,6 +63,8 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
                 <WorkspaceCard
                   key={workspace.workspaceId}
                   workspace={workspace}
+                  onEdit={setEditingWorkspace}
+                  onDelete={setDeletingWorkspace}
                 />
               ))}
             </div>
@@ -70,6 +76,8 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
                 <WorkspaceRow
                   key={workspace.workspaceId}
                   workspace={workspace}
+                  onEdit={setEditingWorkspace}
+                  onDelete={setDeletingWorkspace}
                 />
               ))}
             </div>
@@ -80,6 +88,27 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
       <CreateWorkspaceDialog
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
+      />
+      {editingWorkspace && (
+        <WorkspaceEditDialog
+          key={editingWorkspace.workspaceId}
+          workspace={editingWorkspace}
+          open
+          onOpenChange={open => {
+            if (!open) {
+              setEditingWorkspace(null);
+            }
+          }}
+        />
+      )}
+      <WorkspaceDeleteDialog
+        workspace={deletingWorkspace}
+        open={deletingWorkspace !== null}
+        onOpenChange={open => {
+          if (!open) {
+            setDeletingWorkspace(null);
+          }
+        }}
       />
     </>
   );
