@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { WorkspaceContent } from "@/domains/workspace/components/WorkspaceContent";
-import { WorkspaceSkeleton } from "@/domains/workspace/components/WorkspaceSkeleton";
+import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
+import { WorkspacesContent } from "@/domains/workspaces/components/WorkspacesContent";
+import { WorkspacesSkeleton } from "@/domains/workspaces/components/WorkspacesSkeleton";
 
 export const metadata: Metadata = {
   title: "Workspaces",
@@ -10,8 +11,13 @@ export const metadata: Metadata = {
 
 export default function WorkspacesPage() {
   return (
-    <Suspense fallback={<WorkspaceSkeleton />}>
-      <WorkspaceContent />
-    </Suspense>
+    <WorkspaceShell
+      workspace={{ name: "Workspace" }}
+      contentClassName="bg-background"
+    >
+      <Suspense fallback={<WorkspacesSkeleton />}>
+        <WorkspacesContent />
+      </Suspense>
+    </WorkspaceShell>
   );
 }

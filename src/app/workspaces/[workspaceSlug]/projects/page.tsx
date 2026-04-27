@@ -1,18 +1,22 @@
-import MainLayout from "@/atomics/templates/MainLayout";
 import { ProjectsContent } from "@/domains/projects/components/ProjectsContent";
-import { AppHeader } from "@/domains/workspace/components/AppHeader";
-import AppSidebar from "@/domains/workspace/components/AppSidebar";
+import { ProjectsSkeleton } from "@/domains/projects/components/ProjectsSkeleton";
+import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
 import { Suspense } from "react";
 
-export default async function ProjectsPage({ workspaceSlug }: { workspaceSlug: string }) {
+type ProjectsPageProps = {
+  params: Promise<{
+    workspaceSlug: string;
+  }>;
+};
+
+export default async function ProjectsPage({ params }: ProjectsPageProps) {
+  const { workspaceSlug } = await params;
+
   return (
-    <MainLayout
-      header={<AppHeader />}
-      sidebar={<AppSidebar />}
-    >
-      <Suspense>
+    <WorkspaceShell workspace={{ name: workspaceSlug }}>
+      <Suspense fallback={<ProjectsSkeleton />}>
         <ProjectsContent slug={workspaceSlug} />
       </Suspense>
-    </MainLayout>
+    </WorkspaceShell>
   );
 }
