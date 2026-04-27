@@ -31,6 +31,16 @@ export interface EmailSignInPayload {
   password: string;
 }
 
+/** `POST /auth/email-verification` body */
+export interface RequestEmailVerificationPayload {
+  email: string;
+}
+
+/** `POST /auth/email-verification` response `data` */
+export interface RequestEmailVerificationResult {
+  requested: boolean;
+}
+
 /** `POST /auth/signin` response `data` */
 export interface AccessTokenBundle {
   accessToken: string;

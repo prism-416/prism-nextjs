@@ -10,6 +10,8 @@ import type {
   GithubOAuthSignInRequest,
   GoogleOAuthSignInRequest,
   OAuthTokenResult,
+  RequestEmailVerificationPayload,
+  RequestEmailVerificationResult,
   SignUpCreatedUser,
 } from "../types";
 
@@ -25,6 +27,15 @@ export async function signInWithGoogle(idToken: string) {
 export async function signInWithEmail(body: EmailSignInPayload) {
   return commonAxios<EmailSignInPayload, ApiResponse<AccessTokenBundle>>({
     url: "/auth/signin",
+    method: "POST",
+    data: body,
+    version: null,
+  });
+}
+
+export async function requestEmailVerification(body: RequestEmailVerificationPayload) {
+  return commonAxios<RequestEmailVerificationPayload, ApiResponse<RequestEmailVerificationResult>>({
+    url: "/auth/email-verification",
     method: "POST",
     data: body,
     version: null,

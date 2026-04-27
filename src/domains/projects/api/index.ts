@@ -3,6 +3,8 @@ import type { ApiResponse } from "@/shared/types/api";
 
 import type {
   CreateProjectPayload,
+  ProjectAssignableMember,
+  ProjectJob,
   Project,
   ProjectMember,
   ProjectMemberListItem,
@@ -33,6 +35,26 @@ export async function getProjectsByWorkspaceSlug(workspaceSlug: string) {
 }
 
 export const getProjects = getProjectsByWorkspaceSlug;
+
+export async function getProjectAssignableMembers(workspaceId: string) {
+  const response = await commonAxios<null, ApiResponse<ProjectAssignableMember[]>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/members`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? [];
+}
+
+export async function getWorkspaceJobs(workspaceId: string) {
+  const response = await commonAxios<null, ApiResponse<ProjectJob[]>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/jobs`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? [];
+}
 
 export async function getProject(projectId: string) {
   const response = await commonAxios<null, ApiResponse<Project>>({

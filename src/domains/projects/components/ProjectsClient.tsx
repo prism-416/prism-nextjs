@@ -1,69 +1,118 @@
 "use client";
 
-import { Button } from "@/atomics/atoms/Button";
+import { useState } from "react";
+import { Plus } from "lucide-react";
 
-import { ProjectSummary } from "../types";
+import { Button } from "@/atomics/atoms/Button";
+import { CreateProjectDialog } from "@/domains/projects/components/CreateProjectDialog";
+
 import { useProjects } from "../hooks/useProjects";
+import type { ProjectSummary } from "../types";
 import { ProjectsSkeleton } from "./ProjectsSkeleton";
 
 type ProjectsClientProps = {
   slug: string;
+  workspaceId?: string;
   initialData?: ProjectSummary[];
 };
 
-export function ProjectsClient({ slug, initialData }: ProjectsClientProps) {
+export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClientProps) {
   const {
     data,
     isPending: isProjectsPending,
     isError: isProjectsError,
     refetch: refetchProjects,
   } = useProjects(slug, initialData);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const projects = data ?? [];
+  const canCreateProject = Boolean(slug);
 
   const handleRetry = () => {
     void refetchProjects();
+  };
+
+  const handleCreate = () => {
+    if (!canCreateProject) {
+      return;
+    }
+
+    setIsCreateOpen(true);
   };
 
   if (isProjectsPending && projects.length === 0) {
     return <ProjectsSkeleton />;
   }
 
-  if (isProjectsError) {
-    return (
-      <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
-        <p>Projects could not be loaded.</p>
-        <Button
-          className="mt-3 h-9 rounded-lg border-prism-danger-soft bg-surface px-4 text-prism-danger hover:bg-prism-danger-soft/40"
-          onClick={handleRetry}
-          variant="outline"
-        >
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
-  if (projects.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border-strong/60 bg-surface px-6 py-10 text-center">
-        <h2 className="text-base font-semibold text-prism-heading">No projects yet</h2>
-        <p className="mt-2 text-sm text-prism-muted">Create a project to start organizing work in this workspace.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-      {projects.map(project => (
-        <article
-          className="rounded-xl border border-border/80 bg-surface p-5"
-          key={project.projectId}
-        >
-          <h2 className="text-base font-semibold text-prism-heading">{project.name}</h2>
-          {project.description && <p className="mt-2 text-sm text-prism-muted">{project.description}</p>}
-        </article>
-      ))}
-    </div>
+    <>
+      <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-prism-heading">Projects</h1>
+            <p className="mt-1 text-sm text-prism-muted">Create and organize projects in this workspace.</p>
+          </div>
+          <Button
+            onClick={handleCreate}
+            disabled={!canCreateProject}
+            className="h-10 gap-1.5 rounded-lg px-4"
+          >
+            <Plus className="size-4" />
+            Create project
+          </Button>
+        </div>
+
+        {isProjectsError && (
+          <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
+            <p>Projects could not be loaded.</p>
+            <Button
+              className="mt-3 h-9 rounded-lg border-prism-danger-soft bg-surface px-4 text-prism-danger hover:bg-prism-danger-soft/40"
+              onClick={handleRetry}
+              variant="outline"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {!isProjectsError && projects.length === 0 && (
+          <div className="rounded-xl border border-dashed border-border-strong/60 bg-surface px-6 py-10 text-center">
+            <h2 className="text-base font-semibold text-prism-heading">No projects yet</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-prism-muted">
+              Create a project to start organizing work in this workspace.
+            </p>
+            <Button
+              onClick={handleCreate}
+              disabled={!canCreateProject}
+              className="mt-5 h-10 gap-1.5 rounded-lg px-5"
+            >
+              <Plus className="size-4" />
+              Create project
+            </Button>
+          </div>
+        )}
+
+        {!isProjectsError && projects.length > 0 && (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {projects.map(project => (
+              <article
+                className="rounded-xl border border-border/80 bg-surface p-5"
+                key={project.projectId}
+              >
+                <h2 className="text-base font-semibold text-prism-heading">{project.name}</h2>
+                {project.description && <p className="mt-2 text-sm text-prism-muted">{project.description}</p>}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <CreateProjectDialog
+        open={isCreateOpen}
+        workspaceId={workspaceId}
+        workspaceSlug={slug}
+        onOpenChange={setIsCreateOpen}
+      />
+    </>
   );
 }
