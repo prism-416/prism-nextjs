@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
     const tokens = normalizeAuthTokens((payload?.data as Record<string, unknown> | undefined) || payload || undefined);
 
-    if (!response.ok || !tokens) {
+    if (response.status === 401 || response.status === 403) {
       return clearAuthCookies(
         NextResponse.json(
           {
@@ -51,6 +51,15 @@ export async function POST(request: NextRequest) {
           },
           { status: 401 },
         ),
+      );
+    }
+
+    if (!response.ok || !tokens) {
+      return NextResponse.json(
+        {
+          message: "Failed to refresh access token.",
+        },
+        { status: 502 },
       );
     }
 
@@ -63,13 +72,11 @@ export async function POST(request: NextRequest) {
 
     return applyAuthCookies(refreshResponse, nextTokens);
   } catch {
-    return clearAuthCookies(
-      NextResponse.json(
-        {
-          message: "Failed to refresh access token.",
-        },
-        { status: 500 },
-      ),
+    return NextResponse.json(
+      {
+        message: "Failed to refresh access token.",
+      },
+      { status: 500 },
     );
   }
 }

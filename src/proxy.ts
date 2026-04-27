@@ -11,6 +11,18 @@ const PUBLIC_ROUTES = ["/", "/sign-in", "/sign-up", "/verify"];
 /** Routes that authenticated users are bounced away from (back to "/"). */
 const GUEST_ONLY_ROUTES = ["/sign-in", "/sign-up"];
 
+type RefreshSessionResult =
+  | {
+      status: "success";
+      tokens: AuthTokens;
+    }
+  | {
+      status: "invalid";
+    }
+  | {
+      status: "failed";
+    };
+
 function matchesRoute(pathname: string, routes: readonly string[]) {
   return routes.some(route =>
     route === "/" ? pathname === "/" : pathname === route || pathname.startsWith(`${route}/`),
@@ -47,30 +59,42 @@ function shouldRefreshAccessToken(accessToken: string | undefined) {
   return payload.exp * 1000 <= Date.now() + 30 * 1000;
 }
 
-async function refreshAuthSession(refreshToken: string): Promise<AuthTokens | null> {
-  const response = await fetch(`${API_HOST}/auth/refresh`, {
-    method: "POST",
-    headers: {
-      "Content-Type": JSON_CONTENT_TYPE,
-      Cookie: `${REFRESH_TOKEN_COOKIE_NAME}=${refreshToken}`,
-    },
-    body: JSON.stringify({ refreshToken }),
-    cache: "no-store",
-  });
-  const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-  const tokens = normalizeAuthTokens((payload?.data as Record<string, unknown> | undefined) || payload || undefined);
+async function refreshAuthSession(refreshToken: string): Promise<RefreshSessionResult> {
+  try {
+    const response = await fetch(`${API_HOST}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": JSON_CONTENT_TYPE,
+        Cookie: `${REFRESH_TOKEN_COOKIE_NAME}=${refreshToken}`,
+      },
+      body: JSON.stringify({ refreshToken }),
+      cache: "no-store",
+    });
+    const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+    const tokens = normalizeAuthTokens((payload?.data as Record<string, unknown> | undefined) || payload || undefined);
 
-  if (!response.ok || !tokens) {
-    return null;
+    if (response.status === 401 || response.status === 403) {
+      return { status: "invalid" };
+    }
+
+    if (!response.ok || !tokens) {
+      return { status: "failed" };
+    }
+
+    return {
+      status: "success",
+      tokens: tokens.refreshToken ? tokens : { ...tokens, refreshToken },
+    };
+  } catch {
+    return { status: "failed" };
   }
-
-  return tokens.refreshToken ? tokens : { ...tokens, refreshToken };
 }
 
-function getRedirectToSignInResponse(request: NextRequest) {
+function getRedirectToSignInResponse(request: NextRequest, shouldClearCookies = true) {
   const signInUrl = new URL("/sign-in", request.url);
   signInUrl.searchParams.set("callbackUrl", `${request.nextUrl.pathname}${request.nextUrl.search}`);
-  return clearAuthCookies(NextResponse.redirect(signInUrl));
+  const response = NextResponse.redirect(signInUrl);
+  return shouldClearCookies ? clearAuthCookies(response) : response;
 }
 
 function getRequestCookieHeader(request: NextRequest, tokens: AuthTokens) {
@@ -110,16 +134,19 @@ export async function proxy(request: NextRequest) {
   const accessTokenNeedsRefresh = shouldRefreshAccessToken(accessToken);
   let refreshedTokens: AuthTokens | null = null;
   let didRefreshFail = false;
+  let isRefreshTokenInvalid = false;
 
   if (refreshToken && accessTokenNeedsRefresh) {
-    refreshedTokens = await refreshAuthSession(refreshToken);
-    didRefreshFail = !refreshedTokens;
+    const refreshResult = await refreshAuthSession(refreshToken);
+    refreshedTokens = refreshResult.status === "success" ? refreshResult.tokens : null;
+    didRefreshFail = refreshResult.status === "failed";
+    isRefreshTokenInvalid = refreshResult.status === "invalid";
   }
 
   const isAuthenticated = Boolean(refreshedTokens || (accessToken && !accessTokenNeedsRefresh));
 
   if (!isAuthenticated && !isPublicRoute) {
-    return getRedirectToSignInResponse(request);
+    return getRedirectToSignInResponse(request, isRefreshTokenInvalid || !refreshToken);
   }
 
   if (isAuthenticated && isGuestOnlyRoute) {
@@ -131,8 +158,12 @@ export async function proxy(request: NextRequest) {
     return getNextResponseWithSession(request, refreshedTokens);
   }
 
-  if (didRefreshFail) {
+  if (isRefreshTokenInvalid) {
     return clearAuthCookies(NextResponse.next());
+  }
+
+  if (didRefreshFail) {
+    return NextResponse.next();
   }
 
   return NextResponse.next();
