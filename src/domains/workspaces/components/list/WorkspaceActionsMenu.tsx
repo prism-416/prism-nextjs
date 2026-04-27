@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/atomics/atoms/DropdownMenu";
+} from "@/atomics/molecules/DropdownMenu";
 
 type WorkspaceActionsMenuProps = {
   workspaceName: string;

@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/atomics/atoms/Dialog";
+} from "@/atomics/molecules/Dialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { CreateWorkspaceDetailsSection } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDetailsSection";
 import { useUpdateWorkspace } from "@/domains/workspaces/hooks/useUpdateWorkspace";

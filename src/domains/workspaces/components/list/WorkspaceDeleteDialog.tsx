@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/atomics/atoms/Dialog";
+} from "@/atomics/molecules/Dialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { useDeleteWorkspace } from "@/domains/workspaces/hooks/useDeleteWorkspace";
 import type { Workspace } from "@/domains/workspaces/types";

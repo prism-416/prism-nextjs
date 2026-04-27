@@ -2,7 +2,7 @@
 
 import { Sparkles } from "lucide-react";
 
-import { DialogDescription, DialogHeader, DialogTitle } from "@/atomics/atoms/Dialog";
+import { DialogDescription, DialogHeader, DialogTitle } from "@/atomics/molecules/Dialog";
 
 export function CreateWorkspaceDialogHero() {
   return (

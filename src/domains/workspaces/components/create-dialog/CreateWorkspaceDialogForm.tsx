@@ -3,7 +3,7 @@
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/atomics/atoms/Button";
-import { DialogFooter } from "@/atomics/atoms/Dialog";
+import { DialogFooter } from "@/atomics/molecules/Dialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { createInvitation } from "@/domains/workspaces/api";
 import { CreateWorkspaceDetailsSection } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDetailsSection";
