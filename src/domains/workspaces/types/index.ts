@@ -19,7 +19,6 @@ export interface WorkspaceMember {
   username: string;
   role: InvitationRole;
   joinedAt: string | null;
-  invitedAt: string | null;
 }
 
 export type InvitationRole = "admin" | "member" | "viewer";
@@ -27,6 +26,7 @@ export type InvitationRole = "admin" | "member" | "viewer";
 export type WorkspaceMemberCandidateKind = "existing" | "external";
 
 export type WorkspaceMemberCandidateSearchReason = "success" | "self" | "already_member" | "no_results";
+export type WorkspaceInvitationStatus = "pending" | "accepted" | "declined" | "expired";
 
 export interface WorkspaceInvitationRoleOption {
   value: InvitationRole;
@@ -77,7 +77,27 @@ export interface CreateInvitationPayload {
   role: InvitationRole;
 }
 
+/** `GET /workspaces/invitations` query */
+export interface GetWorkspaceInvitationPayload {
+  token: string;
+}
+
 /** `POST /workspaces/invitations/accept` body */
 export interface AcceptInvitationPayload {
   token: string;
+}
+
+/** `POST /workspaces/invitations/decline` body */
+export interface DeclineInvitationPayload {
+  token: string;
+}
+
+/** `GET /workspaces/invitations` response `data` */
+export interface WorkspaceInvitationPreview {
+  workspaceId: string;
+  workspaceName: string;
+  workspaceSlug: string;
+  role: InvitationRole;
+  expiresAt: string;
+  status: WorkspaceInvitationStatus;
 }

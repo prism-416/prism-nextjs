@@ -5,9 +5,12 @@ import type {
   AcceptInvitationPayload,
   CreateInvitationPayload,
   CreateWorkspacePayload,
+  DeclineInvitationPayload,
+  GetWorkspaceInvitationPayload,
   SearchWorkspaceMemberCandidatesPayload,
   UpdateWorkspacePayload,
   Workspace,
+  WorkspaceInvitationPreview,
   WorkspaceMemberCandidateSearchResult,
   WorkspaceMember,
 } from "../types";
@@ -97,8 +100,19 @@ export async function createInvitation(workspaceId: string, body: CreateInvitati
   return response?.data;
 }
 
+export async function getWorkspaceInvitation(query: GetWorkspaceInvitationPayload) {
+  const response = await commonAxios<GetWorkspaceInvitationPayload, ApiResponse<WorkspaceInvitationPreview>>({
+    url: "/workspaces/invitations",
+    method: "GET",
+    data: query,
+    version: null,
+  });
+
+  return response?.data;
+}
+
 export async function acceptInvitation(body: AcceptInvitationPayload) {
-  const response = await commonAxios<AcceptInvitationPayload, ApiResponse<unknown>>({
+  const response = await commonAxios<AcceptInvitationPayload, ApiResponse<Workspace>>({
     url: "/workspaces/invitations/accept",
     method: "POST",
     data: body,
@@ -106,4 +120,13 @@ export async function acceptInvitation(body: AcceptInvitationPayload) {
   });
 
   return response?.data;
+}
+
+export async function declineInvitation(body: DeclineInvitationPayload) {
+  await commonAxios<DeclineInvitationPayload, ApiResponse<null>>({
+    url: "/workspaces/invitations/decline",
+    method: "POST",
+    data: body,
+    version: null,
+  });
 }
