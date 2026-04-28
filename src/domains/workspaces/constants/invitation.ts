@@ -2,6 +2,12 @@ import type { InvitationRole, WorkspaceInvitationRoleOption } from "@/domains/wo
 
 export const DEFAULT_WORKSPACE_INVITATION_ROLE: InvitationRole = "member";
 
+export const WORKSPACE_INVITATION_ERROR_MESSAGES = {
+  load: "Invitation could not be loaded. The link may be invalid or expired.",
+  action: "Invitation action failed. Please try again.",
+  accept: "Invitation acceptance failed. Please try again.",
+} as const;
+
 export const WORKSPACE_INVITATION_ROLE_OPTIONS: WorkspaceInvitationRoleOption[] = [
   {
     value: "admin",

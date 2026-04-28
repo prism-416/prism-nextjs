@@ -1,7 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-
 import {
   WorkspaceInvitationAcceptedSection,
   WorkspaceInvitationDeclinedSection,
@@ -12,21 +10,40 @@ import {
   WorkspaceInvitationReadySection,
 } from "@/domains/workspaces/components/invitation/WorkspaceInvitationSections";
 import { useWorkspaceInvitationAcceptance } from "@/domains/workspaces/hooks/useWorkspaceInvitationAcceptance";
+import type { WorkspaceInvitationPreview } from "@/domains/workspaces/types";
 
-export function WorkspaceInvitationAcceptance() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+type WorkspaceInvitationClientProps = {
+  token?: string;
+  initialData?: WorkspaceInvitationPreview;
+  initialErrorMessage?: string;
+};
 
+type WorkspaceInvitationDecisionProps = {
+  token: string;
+  initialData?: WorkspaceInvitationPreview;
+  initialErrorMessage?: string;
+};
+
+export function WorkspaceInvitationClient({ token, initialData, initialErrorMessage }: WorkspaceInvitationClientProps) {
   if (!token) {
     return <WorkspaceInvitationMissingTokenSection />;
   }
 
-  return <WorkspaceInvitationAcceptanceContent token={token} />;
+  return (
+    <WorkspaceInvitationDecision
+      token={token}
+      initialData={initialData}
+      initialErrorMessage={initialErrorMessage}
+    />
+  );
 }
 
-function WorkspaceInvitationAcceptanceContent({ token }: { token: string }) {
-  const { accept, decline, errorMessage, invitation, retry, status, workspace } =
-    useWorkspaceInvitationAcceptance(token);
+function WorkspaceInvitationDecision({ token, initialData, initialErrorMessage }: WorkspaceInvitationDecisionProps) {
+  const { accept, decline, errorMessage, invitation, retry, status, workspace } = useWorkspaceInvitationAcceptance({
+    token,
+    initialData,
+    initialErrorMessage,
+  });
 
   const workspaceName = workspace?.name ?? invitation?.workspaceName;
   const workspaceSlug = workspace?.slug ?? invitation?.workspaceSlug;
