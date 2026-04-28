@@ -13,9 +13,27 @@ export interface Project extends ProjectSummary {
 }
 
 export interface CreateProjectPayload {
-  workspaceId: string;
+  workspaceSlug: string;
   name: string;
   description?: string;
+}
+
+export interface ProjectJob {
+  jobId: string;
+  workspaceId: string;
+  name: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface ProjectAssignableMember {
+  userId: string;
+  fullName: string;
+  username: string;
+}
+
+export interface CreateProjectMemberSelection extends ProjectAssignableMember {
+  jobIds: string[];
 }
 
 export interface UpdateProjectPayload {

@@ -82,6 +82,18 @@ export interface GetWorkspaceInvitationPayload {
   token: string;
 }
 
+/** `POST /workspaces/{workspaceId}/invitations` response `data` */
+export interface WorkspaceInvitation {
+  invitationId: string;
+  workspaceId: string;
+  senderId: string;
+  receiverId: string;
+  role: InvitationRole;
+  expiresAt: string;
+  token: string;
+  invitationLink: string;
+}
+
 /** `POST /workspaces/invitations/accept` body */
 export interface AcceptInvitationPayload {
   token: string;

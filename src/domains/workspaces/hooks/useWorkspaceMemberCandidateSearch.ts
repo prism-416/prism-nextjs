@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { searchWorkspaceMemberCandidates } from "@/domains/workspaces/api";
-import type { WorkspaceMemberCandidateSearchResult } from "@/domains/workspaces/types";
+import type { WorkspaceMemberCandidate, WorkspaceMemberCandidateSearchResult } from "@/domains/workspaces/types";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
+import type { CurrentUser } from "@/shared/types/auth";
 
 const CANDIDATE_SEARCH_DEBOUNCE_MS = 250;
 
@@ -14,7 +16,40 @@ function createEmptySearchResult(): WorkspaceMemberCandidateSearchResult {
   };
 }
 
+function isCurrentUserCandidate(candidate: WorkspaceMemberCandidate, currentUser?: CurrentUser) {
+  if (!currentUser) {
+    return false;
+  }
+
+  const normalizedEmail = candidate.email.trim().toLowerCase();
+  const normalizedUsername = candidate.username?.trim().toLowerCase();
+
+  return (
+    candidate.userId === currentUser.userId ||
+    normalizedEmail === currentUser.email.trim().toLowerCase() ||
+    normalizedUsername === currentUser.username.trim().toLowerCase()
+  );
+}
+
+function excludeCurrentUser(
+  result: WorkspaceMemberCandidateSearchResult,
+  currentUser?: CurrentUser,
+): WorkspaceMemberCandidateSearchResult {
+  if (!currentUser) {
+    return result;
+  }
+
+  const items = result.items.filter(candidate => !isCurrentUserCandidate(candidate, currentUser));
+
+  return {
+    ...result,
+    items,
+    reason: result.reason === "success" && items.length === 0 ? "no_results" : result.reason,
+  };
+}
+
 export function useWorkspaceMemberCandidateSearch() {
+  const { data: currentUser, isPending: isCurrentUserPending } = useCurrentUser();
   const [memberQuery, setMemberQuery] = useState("");
   const [candidateSearchResult, setCandidateSearchResult] = useState<WorkspaceMemberCandidateSearchResult | null>(null);
   const [candidateSearchError, setCandidateSearchError] = useState<string | null>(null);
@@ -22,9 +57,21 @@ export function useWorkspaceMemberCandidateSearch() {
   const [searchedKeyword, setSearchedKeyword] = useState("");
 
   const trimmedMemberQuery = memberQuery.trim();
-  const shouldSearchCandidates = trimmedMemberQuery.length >= 2;
+  const shouldSearchCandidates = trimmedMemberQuery.length >= 2 && !isCurrentUserPending;
   const shouldShowCandidateResults =
     shouldSearchCandidates && (isSearchingCandidates || searchedKeyword === trimmedMemberQuery);
+
+  const searchCandidates = useCallback(
+    async (keyword: string) => {
+      const trimmedKeyword = keyword.trim();
+      const result = await searchWorkspaceMemberCandidates({
+        keyword: trimmedKeyword,
+      });
+
+      return excludeCurrentUser(result ?? createEmptySearchResult(), currentUser);
+    },
+    [currentUser],
+  );
 
   useEffect(() => {
     if (!shouldSearchCandidates) {
@@ -68,16 +115,7 @@ export function useWorkspaceMemberCandidateSearch() {
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [shouldSearchCandidates, trimmedMemberQuery]);
-
-  async function searchCandidates(keyword: string) {
-    const trimmedKeyword = keyword.trim();
-    const result = await searchWorkspaceMemberCandidates({
-      keyword: trimmedKeyword,
-    });
-
-    return result ?? createEmptySearchResult();
-  }
+  }, [searchCandidates, shouldSearchCandidates, trimmedMemberQuery]);
 
   function handleMemberQueryChange(value: string) {
     setMemberQuery(value);
