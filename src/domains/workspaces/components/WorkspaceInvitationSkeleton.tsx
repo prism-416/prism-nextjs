@@ -1,5 +1,5 @@
 import { Skeleton } from "@/atomics/atoms/Skeleton";
-import { WorkspaceInvitationShell } from "@/domains/workspaces/components/invitation/WorkspaceInvitationLayout";
+import { WorkspaceInvitationShell } from "@/domains/workspaces/components/invitation/WorkspaceInvitationShell";
 
 export function WorkspaceInvitationSkeleton() {
   return (
