@@ -16,6 +16,7 @@ export const QUERY_KEYS = {
     list: () => ["workspace", "list"] as const,
     detail: (id: string) => ["workspace", "detail", id] as const,
     members: (id: string) => ["workspace", "members", id] as const,
+    invitation: (token: string) => ["workspace", "invitation", token] as const,
   },
   project: {
     all: ["project"] as const,

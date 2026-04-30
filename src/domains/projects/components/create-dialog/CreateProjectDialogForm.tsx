@@ -3,7 +3,7 @@
 import { type FormEvent, useMemo, useState } from "react";
 
 import { Button } from "@/atomics/atoms/Button";
-import { DialogFooter } from "@/atomics/atoms/Dialog";
+import { DialogFooter } from "@/atomics/molecules/Dialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { upsertProjectMembers } from "@/domains/projects/api";
 import { CreateProjectDetailsSection } from "@/domains/projects/components/create-dialog/CreateProjectDetailsSection";

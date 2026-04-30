@@ -6,7 +6,7 @@ import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 import type { AuthTokens } from "@/shared/types/auth";
 
 /** Routes anyone can visit (authenticated or not). */
-const PUBLIC_ROUTES = ["/", "/sign-in", "/sign-up", "/verify"];
+const PUBLIC_ROUTES = ["/", "/sign-in", "/sign-up", "/verify", "/workspaces/invitations/accept"];
 
 /** Routes that authenticated users are bounced away from (back to "/"). */
 const GUEST_ONLY_ROUTES = ["/sign-in", "/sign-up"];

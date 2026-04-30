@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/atomics/atoms/Dialog";
+import { Dialog, DialogContent } from "@/atomics/molecules/Dialog";
 import { CreateProjectDialogForm } from "@/domains/projects/components/create-dialog/CreateProjectDialogForm";
 import type { Project } from "@/domains/projects/types";
 
