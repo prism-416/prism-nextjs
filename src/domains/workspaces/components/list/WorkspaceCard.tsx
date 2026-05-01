@@ -1,5 +1,7 @@
-import { FolderKanban, Users } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, FolderKanban, Users } from "lucide-react";
 
+import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceActionsMenu } from "@/domains/workspaces/components/list/WorkspaceActionsMenu";
 import { WorkspaceAvatar } from "@/domains/workspaces/components/list/WorkspaceAvatar";
@@ -19,6 +21,8 @@ type WorkspaceCardProps = {
 };
 
 export function WorkspaceCard({ workspace, onEdit, onDelete }: WorkspaceCardProps) {
+  const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
+
   return (
     <article
       className={cn(
@@ -74,7 +78,7 @@ export function WorkspaceCard({ workspace, onEdit, onDelete }: WorkspaceCardProp
       <Typography
         variant="bodySm"
         tone="muted"
-        className={cn("relative mt-4 line-clamp-2 min-h-[2.5rem]", !workspace.description && "italic opacity-60")}
+        className={cn("relative mt-4 line-clamp-2 min-h-10", !workspace.description && "italic opacity-60")}
       >
         {workspace.description || "No description yet."}
       </Typography>
@@ -100,6 +104,16 @@ export function WorkspaceCard({ workspace, onEdit, onDelete }: WorkspaceCardProp
             Created {formatWorkspaceRelativeDate(workspace.createdAt)}
           </Typography>
         </div>
+        <Button
+          asChild
+          variant="outline"
+          className="h-9 w-full rounded-lg bg-surface"
+        >
+          <Link href={workspaceHref}>
+            Open workspace
+            <ArrowUpRight className="size-4" />
+          </Link>
+        </Button>
       </div>
     </article>
   );

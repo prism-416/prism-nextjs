@@ -1,5 +1,7 @@
-import { FolderKanban, Users } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, FolderKanban, Users } from "lucide-react";
 
+import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceActionsMenu } from "@/domains/workspaces/components/list/WorkspaceActionsMenu";
 import { WorkspaceAvatar } from "@/domains/workspaces/components/list/WorkspaceAvatar";
@@ -15,6 +17,8 @@ type WorkspaceRowProps = {
 };
 
 export function WorkspaceRow({ workspace, onEdit, onDelete }: WorkspaceRowProps) {
+  const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
+
   return (
     <article
       className={cn(
@@ -59,6 +63,16 @@ export function WorkspaceRow({ workspace, onEdit, onDelete }: WorkspaceRowProps)
           {formatWorkspaceRelativeDate(workspace.createdAt)}
         </Typography>
       </div>
+      <Button
+        asChild
+        variant="outline"
+        className="hidden h-9 rounded-lg bg-surface px-3 lg:inline-flex"
+      >
+        <Link href={workspaceHref}>
+          Open
+          <ArrowUpRight className="size-4" />
+        </Link>
+      </Button>
       <WorkspaceActionsMenu
         workspaceName={workspace.name}
         onEdit={() => onEdit(workspace)}

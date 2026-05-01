@@ -11,7 +11,7 @@ type ProjectCardProps = {
 };
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const projectHref = `/projects/${project.slug}`;
+  const projectHref = `/projects/${encodeURIComponent(project.slug)}`;
 
   return (
     <Link

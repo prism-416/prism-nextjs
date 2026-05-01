@@ -64,7 +64,7 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange }: Workspace
         workspaceId: workspace.workspaceId,
         payload: {
           name: trimmedName,
-          description: trimmedDescription || null,
+          description: trimmedDescription || undefined,
         },
       });
 
