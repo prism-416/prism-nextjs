@@ -5,12 +5,29 @@ export function ProjectsSkeleton() {
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 6 }).map((_, index) => (
         <div
-          className="rounded-xl border border-border/80 bg-surface p-5"
+          className="overflow-hidden rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.05)]"
           key={index}
         >
-          <Skeleton className="h-5 w-2/3 bg-prism-navy/5" />
-          <Skeleton className="mt-3 h-4 w-full bg-prism-navy/5" />
-          <Skeleton className="mt-2 h-4 w-4/5 bg-prism-navy/5" />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <Skeleton className="size-11 rounded-xl bg-prism-navy/5" />
+              <div>
+                <Skeleton className="h-5 w-32 bg-prism-navy/5" />
+                <Skeleton className="mt-2 h-3 w-20 bg-prism-navy/5" />
+              </div>
+            </div>
+            <Skeleton className="size-9 rounded-full bg-prism-navy/5" />
+          </div>
+          <div className="mt-3 flex items-center gap-4">
+            <Skeleton className="h-5 w-16 bg-prism-navy/5" />
+            <Skeleton className="h-5 w-14 bg-prism-navy/5" />
+          </div>
+          <Skeleton className="mt-4 h-4 w-full bg-prism-navy/5" />
+          <Skeleton className="mt-2 h-4 w-11/12 bg-prism-navy/5" />
+          <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+            <Skeleton className="h-4 w-16 bg-prism-navy/5" />
+            <Skeleton className="h-4 w-24 bg-prism-navy/5" />
+          </div>
         </div>
       ))}
     </div>

@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { CreateProjectDialog } from "@/domains/projects/components/CreateProjectDialog";
+import { ProjectCard } from "@/domains/projects/components/ProjectCard";
 
 import { useProjects } from "../hooks/useProjects";
 import type { ProjectSummary } from "../types";
@@ -95,13 +96,10 @@ export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClien
         {!isProjectsError && projects.length > 0 && (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {projects.map(project => (
-              <article
-                className="rounded-xl border border-border/80 bg-surface p-5"
+              <ProjectCard
                 key={project.projectId}
-              >
-                <h2 className="text-base font-semibold text-prism-heading">{project.name}</h2>
-                {project.description && <p className="mt-2 text-sm text-prism-muted">{project.description}</p>}
-              </article>
+                project={project}
+              />
             ))}
           </div>
         )}
