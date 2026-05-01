@@ -46,6 +46,7 @@ export function WorkspaceInvitationDecision({
       <WorkspaceInvitationReadySection
         workspaceName={invitation.workspaceName}
         role={invitation.role}
+        signupLink={invitation.requiresSignup ? "/sign-up" : undefined}
         onAccept={accept}
         onDecline={decline}
       />

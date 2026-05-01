@@ -38,7 +38,6 @@ export function useInviteMemberSelection({
 
   const roleOptions = WORKSPACE_INVITATION_ROLE_OPTIONS;
   const selectedRoleDescription = roleOptions.find(option => option.value === inviteRole)?.description ?? null;
-  const hasExternalInvites = selectedInvites.some(invite => invite.kind === "external");
 
   function clearInviteFieldError() {
     setInviteFieldError(null);
@@ -113,7 +112,6 @@ export function useInviteMemberSelection({
   }
 
   return {
-    hasExternalInvites,
     inviteFieldError,
     inviteRole,
     isResolvingMember,
