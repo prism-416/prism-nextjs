@@ -10,9 +10,12 @@ import { cn } from "@/shared/utils/cn";
 
 type ProjectHeroProps = {
   project: Project;
+  workspaceSlug?: string;
 };
 
-export function ProjectHero({ project }: ProjectHeroProps) {
+export function ProjectHero({ project, workspaceSlug }: ProjectHeroProps) {
+  const backHref = workspaceSlug ? `/workspaces/${encodeURIComponent(workspaceSlug)}/projects` : "/workspaces";
+
   return (
     <div
       className={cn(
@@ -57,9 +60,9 @@ export function ProjectHero({ project }: ProjectHeroProps) {
           variant="outline"
           className="h-10 rounded-lg bg-surface/80"
         >
-          <Link href="/workspaces">
+          <Link href={backHref}>
             <ArrowLeft className="size-4" />
-            Workspaces
+            Projects
           </Link>
         </Button>
       </div>

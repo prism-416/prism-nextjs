@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function WorkspacesPage() {
   return (
     <WorkspaceShell
-      workspace={{ name: "Workspace" }}
+      workspace={{ name: "Workspaces", href: "/workspaces" }}
       contentClassName="bg-background"
     >
       <Suspense fallback={<WorkspacesSkeleton />}>

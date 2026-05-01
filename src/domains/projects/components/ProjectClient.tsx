@@ -11,11 +11,12 @@ import type { Project, ProjectMemberListItem } from "@/domains/projects/types";
 
 type ProjectClientProps = {
   slug: string;
+  workspaceSlug?: string;
   initialData?: Project;
   initialMembers?: ProjectMemberListItem[];
 };
 
-export function ProjectClient({ slug, initialData, initialMembers }: ProjectClientProps) {
+export function ProjectClient({ slug, workspaceSlug, initialData, initialMembers }: ProjectClientProps) {
   const {
     data: project,
     isPending: isProjectPending,
@@ -45,7 +46,10 @@ export function ProjectClient({ slug, initialData, initialMembers }: ProjectClie
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
-      <ProjectHero project={project} />
+      <ProjectHero
+        project={project}
+        workspaceSlug={workspaceSlug}
+      />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <ProjectOverviewPanel project={project} />

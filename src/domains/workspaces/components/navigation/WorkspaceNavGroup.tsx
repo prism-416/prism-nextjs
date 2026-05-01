@@ -18,6 +18,10 @@ type WorkspaceNavGroupProps = {
 };
 
 export function WorkspaceNavGroup({ label, items, pathname }: WorkspaceNavGroupProps) {
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{label}</SidebarGroupLabel>
@@ -25,7 +29,7 @@ export function WorkspaceNavGroup({ label, items, pathname }: WorkspaceNavGroupP
         <SidebarMenu>
           {items.map(item => {
             const Icon = item.icon;
-            const active = isActiveWorkspaceHref(pathname, item.href);
+            const active = isActiveWorkspaceHref(pathname, item.href, item.exact);
 
             return (
               <SidebarMenuItem key={item.href}>

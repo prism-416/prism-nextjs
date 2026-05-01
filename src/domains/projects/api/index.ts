@@ -26,7 +26,7 @@ export async function getProjectsByWorkspaceId(workspaceId: string) {
 
 export async function getProjectsByWorkspaceSlug(workspaceSlug: string) {
   const response = await commonAxios<null, ApiResponse<ProjectSummary[]>>({
-    url: `/projects/workspaces/${encodeURIComponent(workspaceSlug)}`,
+    url: `/workspaces/${encodeURIComponent(workspaceSlug)}/projects`,
     method: "GET",
     version: null,
   });
@@ -69,16 +69,6 @@ export async function getProject(projectId: string) {
 export async function getProjectBySlug(projectSlug: string) {
   const response = await commonAxios<null, ApiResponse<Project>>({
     url: `/projects/slugs/${encodeURIComponent(projectSlug)}`,
-    method: "GET",
-    version: null,
-  });
-
-  return response?.data;
-}
-
-export async function getProjectByWorkspaceSlug(workspaceSlug: string, projectSlug: string) {
-  const response = await commonAxios<null, ApiResponse<Project>>({
-    url: `/projects/workspaces/${encodeURIComponent(workspaceSlug)}/${encodeURIComponent(projectSlug)}`,
     method: "GET",
     version: null,
   });

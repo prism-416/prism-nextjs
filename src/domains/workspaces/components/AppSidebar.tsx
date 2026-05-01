@@ -12,10 +12,16 @@ import {
   SidebarTrigger,
 } from "@/atomics/organisms/Sidebar";
 import { WorkspaceNavGroup } from "@/domains/workspaces/components/navigation/WorkspaceNavGroup";
-import { WORKSPACE_PRIMARY_NAV, WORKSPACE_SECONDARY_NAV } from "@/domains/workspaces/constants/navigation";
+import { getWorkspacePrimaryNav, getWorkspaceSecondaryNav } from "@/domains/workspaces/constants/navigation";
 
-export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  workspaceSlug?: string;
+};
+
+export function AppSidebar({ workspaceSlug, ...props }: AppSidebarProps) {
   const pathname = usePathname() ?? "/";
+  const primaryNav = React.useMemo(() => getWorkspacePrimaryNav(workspaceSlug), [workspaceSlug]);
+  const secondaryNav = React.useMemo(() => getWorkspaceSecondaryNav(workspaceSlug), [workspaceSlug]);
 
   return (
     <Sidebar
@@ -25,12 +31,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <WorkspaceNavGroup
           label="Workspace"
-          items={WORKSPACE_PRIMARY_NAV}
+          items={primaryNav}
           pathname={pathname}
         />
         <WorkspaceNavGroup
           label="General"
-          items={WORKSPACE_SECONDARY_NAV}
+          items={secondaryNav}
           pathname={pathname}
         />
       </SidebarContent>

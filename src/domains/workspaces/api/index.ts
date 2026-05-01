@@ -36,6 +36,12 @@ export async function getWorkspaceById(workspaceId: string) {
   return response?.data;
 }
 
+export async function getWorkspaceBySlug(workspaceSlug: string) {
+  const workspaces = await getWorkspaces();
+
+  return workspaces.find(workspace => workspace.slug === workspaceSlug);
+}
+
 export async function createWorkspace(body: CreateWorkspacePayload) {
   const response = await commonAxios<CreateWorkspacePayload, ApiResponse<Workspace>>({
     url: "/workspaces",

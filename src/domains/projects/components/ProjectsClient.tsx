@@ -99,6 +99,7 @@ export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClien
               <ProjectCard
                 key={project.projectId}
                 project={project}
+                workspaceSlug={slug}
               />
             ))}
           </div>
