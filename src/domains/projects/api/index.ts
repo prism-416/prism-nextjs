@@ -66,6 +66,16 @@ export async function getProject(projectId: string) {
   return response?.data;
 }
 
+export async function getProjectBySlug(projectSlug: string) {
+  const response = await commonAxios<null, ApiResponse<Project>>({
+    url: `/projects/slugs/${encodeURIComponent(projectSlug)}`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data;
+}
+
 export async function getProjectByWorkspaceSlug(workspaceSlug: string, projectSlug: string) {
   const response = await commonAxios<null, ApiResponse<Project>>({
     url: `/projects/workspaces/${encodeURIComponent(workspaceSlug)}/${encodeURIComponent(projectSlug)}`,
