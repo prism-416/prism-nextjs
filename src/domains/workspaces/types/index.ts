@@ -68,7 +68,7 @@ export interface CreateWorkspacePayload {
 /** `PATCH /workspaces/{workspaceId}` body */
 export interface UpdateWorkspacePayload {
   name?: string;
-  description?: string | null;
+  description?: string;
 }
 
 /** `POST /workspaces/{workspaceId}/invitations` body */
