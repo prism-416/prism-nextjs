@@ -21,7 +21,7 @@ type WorkspaceCardProps = {
 };
 
 export function WorkspaceCard({ workspace, onEdit, onDelete }: WorkspaceCardProps) {
-  const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}/projects`;
+  const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
 
   return (
     <article

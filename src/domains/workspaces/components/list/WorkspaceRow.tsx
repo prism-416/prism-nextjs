@@ -17,7 +17,7 @@ type WorkspaceRowProps = {
 };
 
 export function WorkspaceRow({ workspace, onEdit, onDelete }: WorkspaceRowProps) {
-  const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}/projects`;
+  const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
 
   return (
     <article

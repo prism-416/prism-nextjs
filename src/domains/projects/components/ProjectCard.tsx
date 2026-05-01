@@ -8,11 +8,10 @@ import { cn } from "@/shared/utils/cn";
 
 type ProjectCardProps = {
   project: ProjectSummary;
-  workspaceSlug: string;
 };
 
-export function ProjectCard({ project, workspaceSlug }: ProjectCardProps) {
-  const projectHref = `/workspaces/${encodeURIComponent(workspaceSlug)}/projects/${encodeURIComponent(project.slug)}`;
+export function ProjectCard({ project }: ProjectCardProps) {
+  const projectHref = `/projects/${encodeURIComponent(project.slug)}`;
 
   return (
     <Link

@@ -34,7 +34,7 @@ export function WorkspaceShell({
     workspace && workspaceSlug && !workspace.href
       ? {
           ...workspace,
-          href: `/workspaces/${encodeURIComponent(workspaceSlug)}/projects`,
+          href: `/workspaces/${encodeURIComponent(workspaceSlug)}`,
         }
       : workspace;
 

@@ -1,4 +1,10 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { notFound } from "next/navigation";
+
+import { ProjectsContent } from "@/domains/projects/components/ProjectsContent";
+import { ProjectsSkeleton } from "@/domains/projects/components/ProjectsSkeleton";
+import { getWorkspaceBySlug } from "@/domains/workspaces/api";
+import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
 
 type WorkspacePageProps = {
   params: Promise<{
@@ -8,6 +14,23 @@ type WorkspacePageProps = {
 
 export default async function WorkspacePage({ params }: WorkspacePageProps) {
   const { slug } = await params;
+  const workspace = await getWorkspaceBySlug(slug);
 
-  redirect(`/workspaces/${encodeURIComponent(slug)}/projects`);
+  if (!workspace) {
+    notFound();
+  }
+
+  return (
+    <WorkspaceShell
+      workspace={{ name: workspace.name }}
+      workspaceSlug={slug}
+    >
+      <Suspense fallback={<ProjectsSkeleton />}>
+        <ProjectsContent
+          slug={slug}
+          workspaceId={workspace.workspaceId}
+        />
+      </Suspense>
+    </WorkspaceShell>
+  );
 }

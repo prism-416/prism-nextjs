@@ -14,7 +14,7 @@ type ProjectHeroProps = {
 };
 
 export function ProjectHero({ project, workspaceSlug }: ProjectHeroProps) {
-  const backHref = workspaceSlug ? `/workspaces/${encodeURIComponent(workspaceSlug)}/projects` : "/workspaces";
+  const backHref = workspaceSlug ? `/workspaces/${encodeURIComponent(workspaceSlug)}` : "/workspaces";
 
   return (
     <div

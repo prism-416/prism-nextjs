@@ -14,8 +14,9 @@ type WorkspaceScopedNavItem = Omit<WorkspaceNavItem, "href"> & {
 const WORKSPACE_PRIMARY_NAV: WorkspaceScopedNavItem[] = [
   {
     label: "Projects",
-    href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/projects`,
+    href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}`,
     icon: FolderKanban,
+    exact: true,
   },
   { label: "Members", href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/members`, icon: Users },
 ];
