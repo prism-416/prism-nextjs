@@ -10,6 +10,7 @@ import { Button } from "@/atomics/atoms/Button";
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { signInWithGithub } from "@/domains/auth/api";
 import { clearGithubOAuthState, readGithubOAuthState } from "@/domains/auth/utils/github-oauth-session";
+import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
 
 export function GitHubCallbackHandler() {
   const searchParams = useSearchParams();
@@ -59,7 +60,7 @@ export function GitHubCallbackHandler() {
         return;
       }
 
-      window.location.assign("/");
+      window.location.assign(AUTHENTICATED_ENTRY_PATH);
     } catch {
       setError("GitHub sign-in failed. Please try again.");
     }

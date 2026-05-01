@@ -6,7 +6,7 @@ import Link from "next/link";
 import Container from "@/atomics/atoms/Container";
 import { Typography } from "@/atomics/atoms/Typography";
 import LandingFooter from "@/domains/home/components/LandingFooter";
-import LandingHeader from "@/domains/home/components/LandingHeader";
+import LandingHeaderContent from "@/domains/home/components/LandingHeaderContent";
 
 interface Props {
   error: Error & { digest?: string };
@@ -20,7 +20,7 @@ export default function GlobalError({ error, reset }: Props) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <LandingHeader />
+      <LandingHeaderContent />
       <Container className="flex min-h-[calc(100vh-8rem)] items-center justify-center py-16">
         <div className="w-full max-w-xl rounded-4xl border border-border bg-surface-strong p-10 text-center shadow-sm shadow-prism-teal-500/10">
           <Typography

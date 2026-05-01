@@ -9,6 +9,7 @@ import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
+import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
 import type { GoogleAccountsIdApi, GoogleCredentialResponse } from "@/domains/auth/types";
 
 const GOOGLE_IDENTITY_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
@@ -108,7 +109,7 @@ export function GoogleSignInButton() {
         return;
       }
 
-      window.location.assign("/");
+      window.location.assign(AUTHENTICATED_ENTRY_PATH);
     } catch {
       setErrorMessage("Google sign-in failed.");
     } finally {

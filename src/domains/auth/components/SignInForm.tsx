@@ -10,6 +10,7 @@ import { Checkbox } from "@/atomics/atoms/Checkbox";
 import { Typography } from "@/atomics/atoms/Typography";
 import { signInWithEmail } from "@/domains/auth/api";
 import { Field, FieldGroup, FieldLabel, FieldSet } from "@/atomics/molecules/Field";
+import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
 import { AuthFormSeparator } from "./AuthFormSeparator";
 import { AuthPasswordField } from "./AuthPasswordField";
 import { AuthSocialButtons } from "./AuthSocialButtons";
@@ -55,7 +56,7 @@ export function SignInForm() {
         return;
       }
 
-      router.replace("/");
+      router.replace(AUTHENTICATED_ENTRY_PATH);
     } catch {
       setErrorMessage("Sign in failed.");
     } finally {

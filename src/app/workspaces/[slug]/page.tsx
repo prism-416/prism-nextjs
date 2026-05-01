@@ -6,20 +6,20 @@ import { Suspense } from "react";
 
 type WorkspacePageProps = {
   params: Promise<{
-    workspaceSlug: string;
+    slug: string;
   }>;
 };
 
 export default async function WorkspacePage({ params }: WorkspacePageProps) {
-  const { workspaceSlug } = await params;
+  const { slug } = await params;
   const workspaces = await getWorkspaces();
-  const workspace = workspaces.find(item => item.slug === workspaceSlug);
+  const workspace = workspaces.find(item => item.slug === slug);
 
   return (
-    <WorkspaceShell workspace={{ name: workspace?.name ?? workspaceSlug }}>
+    <WorkspaceShell workspace={{ name: workspace?.name ?? "" }}>
       <Suspense fallback={<ProjectsSkeleton />}>
         <ProjectsContent
-          slug={workspaceSlug}
+          slug={slug}
           workspaceId={workspace?.workspaceId}
         />
       </Suspense>

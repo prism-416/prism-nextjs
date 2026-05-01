@@ -4,11 +4,12 @@ import { API_HOST, JSON_CONTENT_TYPE } from "@/shared/constants/api";
 import { applyAuthCookies, clearAuthCookies } from "@/shared/utils/auth-cookie";
 import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 import type { AuthTokens } from "@/shared/types/auth";
+import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
 
 /** Routes anyone can visit (authenticated or not). */
 const PUBLIC_ROUTES = ["/", "/sign-in", "/sign-up", "/verify", "/workspaces/invitations/accept"];
 
-/** Routes that authenticated users are bounced away from (back to "/"). */
+/** Routes that authenticated users are bounced away from. */
 const GUEST_ONLY_ROUTES = ["/sign-in", "/sign-up"];
 
 type RefreshSessionResult =
@@ -150,7 +151,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isAuthenticated && isGuestOnlyRoute) {
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(new URL(AUTHENTICATED_ENTRY_PATH, request.url));
     return refreshedTokens ? applyAuthCookies(response, refreshedTokens) : response;
   }
 
