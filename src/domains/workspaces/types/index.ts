@@ -73,7 +73,8 @@ export interface UpdateWorkspacePayload {
 
 /** `POST /workspaces/{workspaceId}/invitations` body */
 export interface CreateInvitationPayload {
-  receiverId: string;
+  receiverId?: string;
+  email?: string;
   role: InvitationRole;
 }
 
@@ -87,7 +88,8 @@ export interface WorkspaceInvitation {
   invitationId: string;
   workspaceId: string;
   senderId: string;
-  receiverId: string;
+  receiverId: string | null;
+  receiverEmail: string;
   role: InvitationRole;
   expiresAt: string;
   token: string;
@@ -112,4 +114,5 @@ export interface WorkspaceInvitationPreview {
   role: InvitationRole;
   expiresAt: string;
   status: WorkspaceInvitationStatus;
+  requiresSignup: boolean;
 }

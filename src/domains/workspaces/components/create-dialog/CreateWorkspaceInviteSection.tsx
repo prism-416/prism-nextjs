@@ -26,7 +26,6 @@ type CreateWorkspaceInviteSectionProps = {
   shouldShowCandidateResults?: boolean;
   selectedRoleDescription?: string | null;
   selectedInvites: InviteMember[];
-  hasExternalInvites?: boolean;
   onMemberQueryChange: (value: string) => void;
   onInviteRoleChange: (role: InvitationRole) => void;
   onAddInvite: () => void;
@@ -47,7 +46,6 @@ export function CreateWorkspaceInviteSection({
   shouldShowCandidateResults = false,
   selectedRoleDescription = null,
   selectedInvites,
-  hasExternalInvites = false,
   onMemberQueryChange,
   onInviteRoleChange,
   onAddInvite,
@@ -116,18 +114,6 @@ export function CreateWorkspaceInviteSection({
               onRemove={onRemoveInvite}
             />
           ))}
-        </div>
-      )}
-
-      {hasExternalInvites && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-          <Typography
-            variant="caption"
-            tone="inherit"
-            className="text-amber-800"
-          >
-            External email delivery is not available yet. Those invites will stay unsent for now.
-          </Typography>
         </div>
       )}
     </div>

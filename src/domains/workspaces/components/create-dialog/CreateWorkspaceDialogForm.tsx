@@ -47,7 +47,6 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
   const {
     inviteFieldError,
     inviteRole,
-    hasExternalInvites,
     isResolvingMember,
     roleOptions,
     selectedInvites,
@@ -85,38 +84,33 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
         description: trimmedDescription || undefined,
       });
 
-      const existingInvites = selectedInvites.filter(isExistingInvite);
-      const externalInvites = selectedInvites.filter(invite => !isExistingInvite(invite));
-      let failedExistingInviteCount = 0;
+      const failedInvites: string[] = [];
 
-      if (existingInvites.length > 0) {
+      if (selectedInvites.length > 0) {
         setIsCreatingInvitations(true);
 
         const results = await Promise.allSettled(
-          existingInvites.map(invite =>
-            createInvitation(workspace.workspaceId, {
-              receiverId: invite.userId,
-              role: invite.role,
-            }),
-          ),
+          selectedInvites.map(invite => {
+            const payload = isExistingInvite(invite)
+              ? { receiverId: invite.userId, role: invite.role }
+              : { email: invite.email, role: invite.role };
+
+            return createInvitation(workspace.workspaceId, payload);
+          }),
         );
 
-        failedExistingInviteCount = results.filter(result => result.status === "rejected").length;
+        results.forEach((result, index) => {
+          if (result.status === "rejected") {
+            failedInvites.push(selectedInvites[index]?.email ?? "Unknown invite");
+          }
+        });
         setIsCreatingInvitations(false);
       }
 
       const postCreateMessages: string[] = [];
 
-      if (failedExistingInviteCount > 0) {
-        postCreateMessages.push(
-          `${failedExistingInviteCount} ${pluralize(failedExistingInviteCount, "existing invite")} failed to send.`,
-        );
-      }
-
-      if (externalInvites.length > 0) {
-        postCreateMessages.push(
-          `${externalInvites.length} ${pluralize(externalInvites.length, "external invite")} were not sent because email-based invitations are not available yet.`,
-        );
+      if (failedInvites.length > 0) {
+        postCreateMessages.push(`${failedInvites.length} ${pluralize(failedInvites.length, "invite")} failed to send.`);
       }
 
       if (postCreateMessages.length > 0) {
@@ -166,7 +160,6 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
           isSearchingCandidates={isSearchingCandidates}
           selectedRoleDescription={selectedRoleDescription}
           selectedInvites={selectedInvites}
-          hasExternalInvites={hasExternalInvites}
           onMemberQueryChange={handleMemberQueryChange}
           onInviteRoleChange={setInviteRole}
           onAddInvite={() => handleSelectionAddInvite(trimmedMemberQuery)}

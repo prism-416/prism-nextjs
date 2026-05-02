@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceInvitationShell } from "@/domains/workspaces/components/invitation/WorkspaceInvitationShell";
@@ -10,6 +12,7 @@ import { formatInvitationRole } from "@/domains/workspaces/utils/invitation";
 type WorkspaceInvitationReadySectionProps = {
   workspaceName: string;
   role: InvitationRole;
+  signupLink?: string;
   onAccept: () => void;
   onDecline: () => void;
 };
@@ -17,6 +20,7 @@ type WorkspaceInvitationReadySectionProps = {
 export function WorkspaceInvitationReadySection({
   workspaceName,
   role,
+  signupLink,
   onAccept,
   onDecline,
 }: WorkspaceInvitationReadySectionProps) {
@@ -36,7 +40,13 @@ export function WorkspaceInvitationReadySection({
         This invitation grants you the {formatInvitationRole(role)} role.
       </Typography>
       <div className="mt-2 flex gap-2">
-        <Button onClick={onAccept}>Accept</Button>
+        {signupLink ? (
+          <Button asChild>
+            <Link href={signupLink}>Create account</Link>
+          </Button>
+        ) : (
+          <Button onClick={onAccept}>Accept</Button>
+        )}
         <Button
           variant="outline"
           onClick={onDecline}
