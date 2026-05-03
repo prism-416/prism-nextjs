@@ -8,6 +8,8 @@ import type {
   DeclineInvitationPayload,
   GetWorkspaceInvitationPayload,
   SearchWorkspaceMemberCandidatesPayload,
+  TransferWorkspaceOwnerPayload,
+  UpdateWorkspaceMemberRolePayload,
   UpdateWorkspacePayload,
   Workspace,
   WorkspaceInvitation,
@@ -80,6 +82,40 @@ export async function getWorkspaceMembers(workspaceId: string) {
   });
 
   return response?.data ?? [];
+}
+
+export async function removeWorkspaceMember(workspaceId: string, userId: string) {
+  await commonAxios<null, ApiResponse<null>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
+export async function updateWorkspaceMemberRole(
+  workspaceId: string,
+  userId: string,
+  body: UpdateWorkspaceMemberRolePayload,
+) {
+  const response = await commonAxios<UpdateWorkspaceMemberRolePayload, ApiResponse<WorkspaceMember>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}/role`,
+    method: "PUT",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function transferWorkspaceOwner(workspaceId: string, body: TransferWorkspaceOwnerPayload) {
+  const response = await commonAxios<TransferWorkspaceOwnerPayload, ApiResponse<Workspace>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/owner`,
+    method: "PUT",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
 }
 
 export async function searchWorkspaceMemberCandidates(query: SearchWorkspaceMemberCandidatesPayload) {

@@ -13,13 +13,17 @@ import {
 } from "@/atomics/molecules/Dialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { CreateWorkspaceDetailsSection } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDetailsSection";
+import { WorkspaceMembersEditor } from "@/domains/workspaces/components/WorkspaceMembersEditor";
 import { useUpdateWorkspace } from "@/domains/workspaces/hooks/useUpdateWorkspace";
+import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
 import type { Workspace } from "@/domains/workspaces/types";
+import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 
 type WorkspaceEditDialogProps = {
   workspace: Workspace;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onWorkspaceLeft?: (workspace: Workspace) => void;
 };
 
 type WorkspaceMutationError = {
@@ -40,14 +44,22 @@ function getWorkspaceMutationErrorMessage(error: unknown, fallback: string) {
   return typeof message === "string" && message.trim().length > 0 ? message : fallback;
 }
 
-export function WorkspaceEditDialog({ workspace, open, onOpenChange }: WorkspaceEditDialogProps) {
+export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspaceLeft }: WorkspaceEditDialogProps) {
   const [name, setName] = useState(() => workspace.name);
   const [description, setDescription] = useState(() => workspace.description ?? "");
   const [fieldError, setFieldError] = useState<string | null>(null);
+  const { data: currentUser } = useCurrentUser();
+  const { data: members } = useWorkspaceMembers(workspace.workspaceId);
   const { mutateAsync: mutateUpdateWorkspace, isPending, error } = useUpdateWorkspace();
+  const currentMember = members?.find(member => member.userId === currentUser?.userId);
+  const canEditWorkspace = currentUser?.userId === workspace.ownerId || currentMember?.role === "admin";
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!canEditWorkspace) {
+      return;
+    }
 
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
@@ -83,10 +95,14 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange }: Workspace
         }
       }}
     >
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit workspace</DialogTitle>
-          <DialogDescription>Update the workspace details shown to your team.</DialogDescription>
+          <DialogTitle>Workspace details</DialogTitle>
+          <DialogDescription>
+            {canEditWorkspace
+              ? "Update the workspace details shown to your team."
+              : "Review this workspace's details and members."}
+          </DialogDescription>
         </DialogHeader>
 
         <form
@@ -100,6 +116,8 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange }: Workspace
             fieldError={fieldError}
             nameMax={NAME_MAX}
             descriptionMax={DESCRIPTION_MAX}
+            disabled={isPending}
+            readOnly={!canEditWorkspace}
             onNameChange={value => {
               setName(value);
               if (fieldError) {
@@ -121,24 +139,31 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange }: Workspace
             </div>
           )}
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-              disabled={isPending}
-              className="h-10 rounded-lg"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="h-10 rounded-lg px-5"
-            >
-              {isPending ? "Saving..." : "Save changes"}
-            </Button>
-          </DialogFooter>
+          <WorkspaceMembersEditor
+            workspace={workspace}
+            onWorkspaceLeft={() => onWorkspaceLeft?.(workspace)}
+          />
+
+          {canEditWorkspace ? (
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => onOpenChange(false)}
+                disabled={isPending}
+                className="h-10 rounded-lg"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="h-10 rounded-lg px-5"
+              >
+                {isPending ? "Saving..." : "Save changes"}
+              </Button>
+            </DialogFooter>
+          ) : null}
         </form>
       </DialogContent>
     </Dialog>

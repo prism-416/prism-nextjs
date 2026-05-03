@@ -12,6 +12,8 @@ type CreateWorkspaceDetailsSectionProps = {
   fieldError?: string | null;
   nameMax: number;
   descriptionMax: number;
+  disabled?: boolean;
+  readOnly?: boolean;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
 };
@@ -22,6 +24,8 @@ export function CreateWorkspaceDetailsSection({
   fieldError = null,
   nameMax,
   descriptionMax,
+  disabled = false,
+  readOnly = false,
   onNameChange,
   onDescriptionChange,
 }: CreateWorkspaceDetailsSectionProps) {
@@ -52,9 +56,12 @@ export function CreateWorkspaceDetailsSection({
           maxLength={nameMax}
           placeholder="e.g. Atlas Studio"
           value={name}
+          disabled={disabled}
+          readOnly={readOnly}
           onChange={event => onNameChange(event.target.value)}
           className={cn(
             "h-11 rounded-xl border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring",
+            readOnly && "cursor-default focus-visible:ring-0",
             fieldError && "border-red-300 focus-visible:ring-red-300/60",
           )}
           aria-invalid={Boolean(fieldError)}
@@ -79,7 +86,7 @@ export function CreateWorkspaceDetailsSection({
             className="text-prism-body"
           >
             Description
-            <span className="ml-1 text-prism-muted/80">(optional)</span>
+            {!readOnly ? <span className="ml-1 text-prism-muted/80">(optional)</span> : null}
           </Label>
           <Typography
             variant="caption"
@@ -93,10 +100,15 @@ export function CreateWorkspaceDetailsSection({
           name="description"
           rows={3}
           maxLength={descriptionMax}
-          placeholder="What is this workspace for?"
+          placeholder={readOnly ? undefined : "What is this workspace for?"}
           value={description}
+          disabled={disabled}
+          readOnly={readOnly}
           onChange={event => onDescriptionChange(event.target.value)}
-          className="rounded-xl border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
+          className={cn(
+            "rounded-xl border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring",
+            readOnly && "cursor-default focus-visible:ring-0",
+          )}
         />
       </div>
     </>

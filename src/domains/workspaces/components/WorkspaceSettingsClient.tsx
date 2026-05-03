@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Info } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
@@ -13,6 +14,7 @@ type WorkspaceSettingsClientProps = {
 };
 
 export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientProps) {
+  const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   return (
@@ -27,8 +29,8 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
             onClick={() => setIsEditOpen(true)}
             className="h-10 gap-1.5 rounded-lg px-4"
           >
-            <Pencil className="size-4" />
-            Edit workspace
+            <Info className="size-4" />
+            Workspace details
           </Button>
         </div>
 
@@ -68,6 +70,7 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
         workspace={workspace}
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
+        onWorkspaceLeft={() => router.push("/workspaces")}
       />
     </>
   );

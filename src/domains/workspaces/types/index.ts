@@ -71,6 +71,16 @@ export interface UpdateWorkspacePayload {
   description?: string;
 }
 
+/** `PUT /workspaces/{workspaceId}/members/{userId}/role` body */
+export interface UpdateWorkspaceMemberRolePayload {
+  role: InvitationRole;
+}
+
+/** `PUT /workspaces/{workspaceId}/owner` body */
+export interface TransferWorkspaceOwnerPayload {
+  ownerId: string;
+}
+
 /** `POST /workspaces/{workspaceId}/invitations` body */
 export interface CreateInvitationPayload {
   receiverId?: string;

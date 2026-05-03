@@ -5,6 +5,7 @@ import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceActionsMenu } from "@/domains/workspaces/components/list/WorkspaceActionsMenu";
 import { WorkspaceAvatar } from "@/domains/workspaces/components/list/WorkspaceAvatar";
+import { WorkspaceDetailsButton } from "@/domains/workspaces/components/list/WorkspaceDetailsButton";
 import { WorkspaceMetaItem } from "@/domains/workspaces/components/list/WorkspaceMetaItem";
 import type { Workspace } from "@/domains/workspaces/types";
 import { formatWorkspaceCount, formatWorkspaceRelativeDate } from "@/domains/workspaces/utils/display";
@@ -12,11 +13,12 @@ import { cn } from "@/shared/utils/cn";
 
 type WorkspaceRowProps = {
   workspace: Workspace;
-  onEdit: (workspace: Workspace) => void;
+  canManageWorkspace?: boolean;
+  onOpenDetails: (workspace: Workspace) => void;
   onDelete: (workspace: Workspace) => void;
 };
 
-export function WorkspaceRow({ workspace, onEdit, onDelete }: WorkspaceRowProps) {
+export function WorkspaceRow({ workspace, canManageWorkspace = false, onOpenDetails, onDelete }: WorkspaceRowProps) {
   const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
 
   return (
@@ -73,11 +75,18 @@ export function WorkspaceRow({ workspace, onEdit, onDelete }: WorkspaceRowProps)
           <ArrowUpRight className="size-4" />
         </Link>
       </Button>
-      <WorkspaceActionsMenu
-        workspaceName={workspace.name}
-        onEdit={() => onEdit(workspace)}
-        onDelete={() => onDelete(workspace)}
-      />
+      {canManageWorkspace ? (
+        <WorkspaceActionsMenu
+          workspaceName={workspace.name}
+          onEdit={() => onOpenDetails(workspace)}
+          onDelete={() => onDelete(workspace)}
+        />
+      ) : (
+        <WorkspaceDetailsButton
+          workspaceName={workspace.name}
+          onOpen={() => onOpenDetails(workspace)}
+        />
+      )}
     </article>
   );
 }
