@@ -48,7 +48,7 @@ function excludeCurrentUser(
   };
 }
 
-export function useWorkspaceMemberCandidateSearch() {
+export function useWorkspaceMemberCandidateSearch(workspaceId?: string) {
   const { data: currentUser, isPending: isCurrentUserPending } = useCurrentUser();
   const [memberQuery, setMemberQuery] = useState("");
   const [candidateSearchResult, setCandidateSearchResult] = useState<WorkspaceMemberCandidateSearchResult | null>(null);
@@ -64,13 +64,20 @@ export function useWorkspaceMemberCandidateSearch() {
   const searchCandidates = useCallback(
     async (keyword: string) => {
       const trimmedKeyword = keyword.trim();
-      const result = await searchWorkspaceMemberCandidates({
-        keyword: trimmedKeyword,
-      });
+      const result = await searchWorkspaceMemberCandidates(
+        workspaceId
+          ? {
+              keyword: trimmedKeyword,
+              workspaceId,
+            }
+          : {
+              keyword: trimmedKeyword,
+            },
+      );
 
       return excludeCurrentUser(result ?? createEmptySearchResult(), currentUser);
     },
-    [currentUser],
+    [currentUser, workspaceId],
   );
 
   useEffect(() => {

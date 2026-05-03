@@ -5,6 +5,7 @@ import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceActionsMenu } from "@/domains/workspaces/components/list/WorkspaceActionsMenu";
 import { WorkspaceAvatar } from "@/domains/workspaces/components/list/WorkspaceAvatar";
+import { WorkspaceDetailsButton } from "@/domains/workspaces/components/list/WorkspaceDetailsButton";
 import { WorkspaceMetaItem } from "@/domains/workspaces/components/list/WorkspaceMetaItem";
 import type { Workspace } from "@/domains/workspaces/types";
 import {
@@ -16,11 +17,12 @@ import { cn } from "@/shared/utils/cn";
 
 type WorkspaceCardProps = {
   workspace: Workspace;
-  onEdit: (workspace: Workspace) => void;
+  canManageWorkspace?: boolean;
+  onOpenDetails: (workspace: Workspace) => void;
   onDelete: (workspace: Workspace) => void;
 };
 
-export function WorkspaceCard({ workspace, onEdit, onDelete }: WorkspaceCardProps) {
+export function WorkspaceCard({ workspace, canManageWorkspace = false, onOpenDetails, onDelete }: WorkspaceCardProps) {
   const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
 
   return (
@@ -57,11 +59,18 @@ export function WorkspaceCard({ workspace, onEdit, onDelete }: WorkspaceCardProp
             </Typography>
           </div>
         </div>
-        <WorkspaceActionsMenu
-          workspaceName={workspace.name}
-          onEdit={() => onEdit(workspace)}
-          onDelete={() => onDelete(workspace)}
-        />
+        {canManageWorkspace ? (
+          <WorkspaceActionsMenu
+            workspaceName={workspace.name}
+            onEdit={() => onOpenDetails(workspace)}
+            onDelete={() => onDelete(workspace)}
+          />
+        ) : (
+          <WorkspaceDetailsButton
+            workspaceName={workspace.name}
+            onOpen={() => onOpenDetails(workspace)}
+          />
+        )}
       </div>
 
       <div className="mt-3 flex items-center gap-4">
