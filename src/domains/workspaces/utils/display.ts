@@ -26,8 +26,9 @@ export function getWorkspaceInitials(name: string) {
   return (segments[0][0] + segments[1][0]).toUpperCase();
 }
 
-export function formatWorkspaceCount(value: number | undefined, singular: string, plural: string) {
-  const safe = value ?? 0;
+export function formatWorkspaceCount(value: number | string | null | undefined, singular: string, plural: string) {
+  const parsed = Number(value ?? 0);
+  const safe = Number.isFinite(parsed) ? parsed : 0;
 
   return `${safe.toLocaleString()} ${safe === 1 ? singular : plural}`;
 }

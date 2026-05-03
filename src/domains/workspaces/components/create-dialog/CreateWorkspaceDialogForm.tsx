@@ -4,7 +4,6 @@ import { type FormEvent, useState } from "react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { DialogFooter } from "@/atomics/molecules/Dialog";
-import { Typography } from "@/atomics/atoms/Typography";
 import { createInvitation } from "@/domains/workspaces/api";
 import { CreateWorkspaceDetailsSection } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDetailsSection";
 import { CreateWorkspaceDialogHero } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDialogHero";
@@ -13,6 +12,7 @@ import { useCreateWorkspace } from "@/domains/workspaces/hooks/useCreateWorkspac
 import { useInviteMemberSelection } from "@/domains/workspaces/hooks/useInviteMemberSelection";
 import { useWorkspaceMemberCandidateSearch } from "@/domains/workspaces/hooks/useWorkspaceMemberCandidateSearch";
 import type { Workspace } from "@/domains/workspaces/types";
+import { getWorkspaceMutationErrorMessage } from "@/domains/workspaces/utils/error";
 import { isExistingInvite } from "@/domains/workspaces/utils/invite-member";
 
 type CreateWorkspaceDialogFormProps = {
@@ -61,7 +61,7 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
     onMemberQueryChange: handleSearchMemberQueryChange,
     searchCandidates,
   });
-  const { mutateAsync, isPending, error } = useCreateWorkspace();
+  const { mutateAsync, isPending } = useCreateWorkspace();
 
   const trimmedName = name.trim();
   const trimmedDescription = description.trim();
@@ -119,8 +119,9 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
 
       onCreated?.(workspace);
       onOpenChange(false);
-    } catch {
+    } catch (error) {
       setIsCreatingInvitations(false);
+      setFieldError(getWorkspaceMutationErrorMessage(error, "Something went wrong. Please try again."));
     }
   };
 
@@ -167,21 +168,6 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
           onRemoveInvite={handleRemoveInvite}
           shouldShowCandidateResults={shouldShowCandidateResults && !inviteFieldError}
         />
-
-        {error && (
-          <div
-            role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 px-3 py-2"
-          >
-            <Typography
-              variant="caption"
-              tone="inherit"
-              className="text-red-700"
-            >
-              {error.message || "Something went wrong. Please try again."}
-            </Typography>
-          </div>
-        )}
 
         <DialogFooter>
           <Button
