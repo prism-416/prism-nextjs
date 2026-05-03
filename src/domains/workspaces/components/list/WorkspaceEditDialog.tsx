@@ -11,12 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/atomics/molecules/Dialog";
-import { Typography } from "@/atomics/atoms/Typography";
 import { CreateWorkspaceDetailsSection } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDetailsSection";
 import { WorkspaceMembersEditor } from "@/domains/workspaces/components/WorkspaceMembersEditor";
 import { useUpdateWorkspace } from "@/domains/workspaces/hooks/useUpdateWorkspace";
 import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
 import type { Workspace } from "@/domains/workspaces/types";
+import { getWorkspaceMutationErrorMessage } from "@/domains/workspaces/utils/error";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 
 type WorkspaceEditDialogProps = {
@@ -26,23 +26,8 @@ type WorkspaceEditDialogProps = {
   onWorkspaceLeft?: (workspace: Workspace) => void;
 };
 
-type WorkspaceMutationError = {
-  message?: unknown;
-  data?: { message?: unknown } | null;
-  response?: {
-    data?: { message?: unknown } | null;
-  };
-};
-
 const NAME_MAX = 20;
 const DESCRIPTION_MAX = 1000;
-
-function getWorkspaceMutationErrorMessage(error: unknown, fallback: string) {
-  const candidate = error as WorkspaceMutationError | null;
-  const message = candidate?.response?.data?.message ?? candidate?.data?.message ?? candidate?.message;
-
-  return typeof message === "string" && message.trim().length > 0 ? message : fallback;
-}
 
 export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspaceLeft }: WorkspaceEditDialogProps) {
   const [name, setName] = useState(() => workspace.name);
@@ -50,7 +35,7 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspace
   const [fieldError, setFieldError] = useState<string | null>(null);
   const { data: currentUser } = useCurrentUser();
   const { data: members } = useWorkspaceMembers(workspace.workspaceId);
-  const { mutateAsync: mutateUpdateWorkspace, isPending, error } = useUpdateWorkspace();
+  const { mutateAsync: mutateUpdateWorkspace, isPending } = useUpdateWorkspace();
   const currentMember = members?.find(member => member.userId === currentUser?.userId);
   const canEditWorkspace = currentUser?.userId === workspace.ownerId || currentMember?.role === "admin";
 
@@ -81,8 +66,8 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspace
       });
 
       onOpenChange(false);
-    } catch {
-      // Mutation error is surfaced through `error`.
+    } catch (error) {
+      setFieldError(getWorkspaceMutationErrorMessage(error, "Failed to update workspace."));
     }
   };
 
@@ -126,18 +111,6 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspace
             }}
             onDescriptionChange={setDescription}
           />
-
-          {error != null && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2">
-              <Typography
-                variant="caption"
-                tone="inherit"
-                className="text-red-700"
-              >
-                {getWorkspaceMutationErrorMessage(error, "Failed to update workspace.")}
-              </Typography>
-            </div>
-          )}
 
           <WorkspaceMembersEditor
             workspace={workspace}
