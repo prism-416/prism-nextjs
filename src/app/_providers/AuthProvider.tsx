@@ -5,7 +5,6 @@ import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { normalizeAuthTokens } from "@/shared/utils/auth-session";
 import { getCookie } from "@/shared/utils/cookie";
 import { removeAuthToken, setAuthToken } from "@/shared/utils/axios-util";
-import { logout } from "@/domains/auth/api";
 import type { ServerInitDataType } from "@/shared/utils/server-util";
 import { AuthSessionPayload } from "@/shared/types/auth";
 
@@ -108,12 +107,28 @@ export default function AuthProvider({ children }: Props) {
         return hydrateSession(result);
       },
       async clearSession() {
+        let shouldFallbackToSessionDelete = false;
+
         try {
-          await logout();
+          const response = await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+            cache: "no-store",
+          });
+
+          shouldFallbackToSessionDelete = !response.ok;
         } catch {
-          // Backend logout is best-effort
+          shouldFallbackToSessionDelete = true;
         }
-        await fetch("/api/auth/session", { method: "DELETE", credentials: "include" });
+
+        if (shouldFallbackToSessionDelete) {
+          try {
+            await fetch("/api/auth/session", { method: "DELETE", credentials: "include" });
+          } catch {
+            // Client auth state is still cleared below.
+          }
+        }
+
         removeAuthToken();
         setIsAuthenticated(false);
       },
