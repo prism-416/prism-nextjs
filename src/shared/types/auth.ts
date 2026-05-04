@@ -24,6 +24,7 @@ export interface CurrentUser {
   email: string;
   fullName: string;
   username: string;
+  isOAuthUser: boolean;
 }
 
 export interface AuthMeResponse {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "@/shared/utils/cn";
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
+import { AppHeaderUserMenu } from "@/domains/workspaces/components/AppHeaderUserMenu";
 import { WorkspacePath } from "@/domains/workspaces/components/WorkspacePath";
 import type { WorkspacePathSegment } from "@/domains/workspaces/types/path";
 
@@ -59,12 +60,7 @@ export function AppHeader({ pathSegments, actions, className }: AppHeaderProps) 
         >
           <Bell />
         </Button>
-        <div
-          aria-label="User menu"
-          className="grid size-9 place-items-center rounded-full bg-prism-navy text-sm font-semibold text-primary-foreground"
-        >
-          U
-        </div>
+        <AppHeaderUserMenu />
       </div>
     </header>
   );
