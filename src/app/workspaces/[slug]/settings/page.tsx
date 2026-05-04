@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { getWorkspaceBySlug } from "@/domains/workspaces/api";
+import { getProjects } from "@/domains/projects/api";
+import { getWorkspaces } from "@/domains/workspaces/api";
 import { WorkspaceSettingsClient } from "@/domains/workspaces/components/WorkspaceSettingsClient";
 import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
 
@@ -12,7 +13,8 @@ type WorkspaceSettingsPageProps = {
 
 export default async function WorkspaceSettingsPage({ params }: WorkspaceSettingsPageProps) {
   const { slug } = await params;
-  const workspace = await getWorkspaceBySlug(slug);
+  const [workspaces, projects] = await Promise.all([getWorkspaces(), getProjects(slug).catch(() => [])]);
+  const workspace = workspaces.find(item => item.slug === slug);
 
   if (!workspace) {
     notFound();
@@ -22,6 +24,19 @@ export default async function WorkspaceSettingsPage({ params }: WorkspaceSetting
     <WorkspaceShell
       workspace={{ name: workspace.name }}
       workspaceSlug={slug}
+      workspaceOptions={workspaces.map(item => ({
+        id: item.workspaceId,
+        name: item.name,
+        href: `/workspaces/${encodeURIComponent(item.slug)}`,
+        isCurrent: item.slug === slug,
+      }))}
+      project={{ name: "Projects" }}
+      projectOptions={projects.map(project => ({
+        id: project.projectId,
+        name: project.name,
+        href: `/projects/${encodeURIComponent(project.slug)}`,
+      }))}
+      section={{ name: "Settings" }}
     >
       <WorkspaceSettingsClient workspace={workspace} />
     </WorkspaceShell>
