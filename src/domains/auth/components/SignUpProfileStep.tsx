@@ -1,8 +1,9 @@
 "use client";
 
 import { FieldDescription, FieldGroup } from "@/atomics/molecules/Field";
-import { AuthTextField } from "./AuthTextField";
 import { FormHintChecklist } from "@/domains/auth/components/FormHintChecklist";
+import { getUsernameCheckLabel } from "@/domains/auth/utils/sign-up";
+import { AuthTextField } from "./AuthTextField";
 
 type SignUpProfileStepProps = {
   name: string;
@@ -12,14 +13,6 @@ type SignUpProfileStepProps = {
   onNameChange: (value: string) => void;
   onUsernameChange: (value: string) => void;
 };
-
-function getUsernameCheckLabel(username: string, isChecking: boolean, isAvailable: boolean | null) {
-  if (!username.trim()) return "Choose a username";
-  if (isChecking) return "Checking availability…";
-  if (isAvailable === true) return "Username is available";
-  if (isAvailable === false) return "Username is already taken";
-  return "Choose a username";
-}
 
 export function SignUpProfileStep({
   name,
