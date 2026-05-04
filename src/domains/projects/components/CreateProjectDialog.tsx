@@ -24,7 +24,7 @@ export function CreateProjectDialog({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="max-w-3xl overflow-hidden p-0">
+      <DialogContent className="max-w-4xl overflow-hidden p-0">
         <CreateProjectDialogForm
           key={open ? "open" : "closed"}
           workspaceId={workspaceId}

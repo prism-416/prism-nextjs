@@ -1,4 +1,4 @@
-import { FolderKanban, LayoutDashboard, Settings, Users, type LucideIcon } from "lucide-react";
+import { BriefcaseBusiness, FolderKanban, LayoutDashboard, Settings, Users, type LucideIcon } from "lucide-react";
 
 export type WorkspaceNavItem = {
   label: string;
@@ -19,6 +19,11 @@ const WORKSPACE_PRIMARY_NAV: WorkspaceScopedNavItem[] = [
     exact: true,
   },
   { label: "Members", href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/members`, icon: Users },
+  {
+    label: "Project jobs",
+    href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/jobs`,
+    icon: BriefcaseBusiness,
+  },
 ];
 
 const WORKSPACE_SECONDARY_NAV: WorkspaceScopedNavItem[] = [
