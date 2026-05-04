@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { CircleCheck, UserPlus } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
+import { ConfirmDialog } from "@/atomics/organisms/ConfirmDialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceInviteMembersDialog } from "@/domains/workspaces/components/WorkspaceInviteMembersDialog";
 import { WorkspaceMemberActionsMenu } from "@/domains/workspaces/components/WorkspaceMemberActionsMenu";
@@ -12,6 +13,11 @@ import { useTransferWorkspaceOwner } from "@/domains/workspaces/hooks/useTransfe
 import { useUpdateWorkspaceMemberRole } from "@/domains/workspaces/hooks/useUpdateWorkspaceMemberRole";
 import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
 import type { InvitationRole, Workspace, WorkspaceMember } from "@/domains/workspaces/types";
+import {
+  getWorkspaceMemberDisplayName,
+  getWorkspaceMemberInitial,
+  getWorkspaceMemberSortRank,
+} from "@/domains/workspaces/utils/member";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { cn } from "@/shared/utils/cn";
 
@@ -20,11 +26,17 @@ type WorkspaceMembersEditorProps = {
   onWorkspaceLeft?: () => void;
 };
 
+type PendingMemberAction = {
+  type: "remove" | "transfer-owner";
+  member: WorkspaceMember;
+};
+
 const EMPTY_MEMBERS: WorkspaceMember[] = [];
 
 export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: WorkspaceMembersEditorProps) {
   const [ownerId, setOwnerId] = useState(workspace.ownerId);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingMemberAction | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const { data: currentUser } = useCurrentUser();
   const { data, isPending, isError, refetch } = useWorkspaceMembers(workspace.workspaceId);
@@ -37,7 +49,10 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
   const canManageMembers = isWorkspaceOwner || currentMember?.role === "admin";
   const isMutating = removeMember.isPending || updateRole.isPending || transferOwner.isPending;
   const sortedMembers = useMemo(
-    () => [...members].sort((first, second) => getMemberSortRank(first, ownerId) - getMemberSortRank(second, ownerId)),
+    () =>
+      [...members].sort(
+        (first, second) => getWorkspaceMemberSortRank(first, ownerId) - getWorkspaceMemberSortRank(second, ownerId),
+      ),
     [members, ownerId],
   );
 
@@ -52,15 +67,7 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
   }
 
   async function handleRemove(member: WorkspaceMember) {
-    const displayName = getMemberDisplayName(member);
     const isSelf = member.userId === currentUser?.userId;
-    const confirmed = window.confirm(
-      isSelf ? `Leave ${workspace.name}?` : `Remove ${displayName} from this workspace?`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
 
     setActionMessage(null);
 
@@ -79,13 +86,6 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
   }
 
   async function handleTransferOwner(member: WorkspaceMember) {
-    const displayName = getMemberDisplayName(member);
-    const confirmed = window.confirm(`Transfer workspace ownership to ${displayName}?`);
-
-    if (!confirmed) {
-      return;
-    }
-
     setActionMessage(null);
     const previousOwnerId = ownerId;
     const nextOwnerId = member.userId;
@@ -103,6 +103,52 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
       setActionMessage("Workspace owner could not be transferred.");
     }
   }
+
+  function getPendingActionCopy() {
+    if (!pendingAction) {
+      return {
+        title: "Confirm action",
+        description: "Confirm this workspace member action.",
+        confirmLabel: "Confirm",
+        tone: "default" as const,
+      };
+    }
+
+    const displayName = getWorkspaceMemberDisplayName(pendingAction.member);
+    const isSelf = pendingAction.member.userId === currentUser?.userId;
+
+    if (pendingAction.type === "transfer-owner") {
+      return {
+        title: "Transfer ownership",
+        description: `Transfer workspace ownership to ${displayName}?`,
+        confirmLabel: "Transfer owner",
+        tone: "default" as const,
+      };
+    }
+
+    return {
+      title: isSelf ? "Leave workspace" : "Remove member",
+      description: isSelf ? `Leave ${workspace.name}?` : `Remove ${displayName} from this workspace?`,
+      confirmLabel: isSelf ? "Leave workspace" : "Remove member",
+      tone: "danger" as const,
+    };
+  }
+
+  async function handleConfirmPendingAction() {
+    if (!pendingAction) {
+      return;
+    }
+
+    if (pendingAction.type === "transfer-owner") {
+      await handleTransferOwner(pendingAction.member);
+    } else {
+      await handleRemove(pendingAction.member);
+    }
+
+    setPendingAction(null);
+  }
+
+  const pendingActionCopy = getPendingActionCopy();
 
   return (
     <section className="space-y-2.5 pt-1">
@@ -186,7 +232,7 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
                 className="flex items-center gap-2 border-b border-border/60 px-2.5 py-2 last:border-b-0"
               >
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-prism-navy text-[11px] font-semibold text-primary-foreground">
-                  {getMemberInitial(member)}
+                  {getWorkspaceMemberInitial(member)}
                 </span>
                 <div className="min-w-0 flex-1">
                   <Typography
@@ -196,7 +242,7 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
                     weight="medium"
                     className="truncate"
                   >
-                    {getMemberDisplayName(member)}
+                    {getWorkspaceMemberDisplayName(member)}
                   </Typography>
                   <Typography
                     variant="caption"
@@ -232,11 +278,11 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
                       void handleRoleChange(member, role);
                     }}
                     onRemove={() => {
-                      void handleRemove(member);
+                      setPendingAction({ type: "remove", member });
                     }}
                     onTransferOwner={() => {
                       if (isWorkspaceOwner) {
-                        void handleTransferOwner(member);
+                        setPendingAction({ type: "transfer-owner", member });
                       }
                     }}
                     canTransferOwner={isWorkspaceOwner}
@@ -254,33 +300,23 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
         open={isInviteDialogOpen}
         onOpenChange={setIsInviteDialogOpen}
       />
+
+      <ConfirmDialog
+        open={pendingAction != null}
+        title={pendingActionCopy.title}
+        description={pendingActionCopy.description}
+        confirmLabel={pendingActionCopy.confirmLabel}
+        isPending={isMutating}
+        tone={pendingActionCopy.tone}
+        onOpenChange={open => {
+          if (!open) {
+            setPendingAction(null);
+          }
+        }}
+        onConfirm={() => {
+          void handleConfirmPendingAction();
+        }}
+      />
     </section>
   );
-}
-
-function getMemberInitial(member: WorkspaceMember) {
-  const displayName = getMemberDisplayName(member);
-
-  return displayName.trim().charAt(0).toUpperCase() || "U";
-}
-
-function getMemberDisplayName(member: WorkspaceMember) {
-  return member.fullName || member.username;
-}
-
-function getMemberSortRank(member: WorkspaceMember, ownerId: string) {
-  if (member.userId === ownerId) {
-    return 0;
-  }
-
-  switch (member.role) {
-    case "admin":
-      return 1;
-    case "member":
-      return 2;
-    case "viewer":
-      return 3;
-    default:
-      return 4;
-  }
 }

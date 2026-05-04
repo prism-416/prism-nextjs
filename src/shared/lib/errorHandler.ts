@@ -5,11 +5,11 @@ export interface ApiError extends AxiosError {
   data?: ErrorResponseType<unknown>;
 }
 
-export function handleApiError(error: ApiError, $alert: (message: string) => void) {
+export function handleApiError(error: ApiError, notify: (message: string) => void) {
   console.log("HandleApiError", error);
 
   if (error.status === 500 || (error.status === 400 && !error.data?.code)) {
-    $alert("We couldn't process your request.");
+    notify("We couldn't process your request.");
   }
 }
 

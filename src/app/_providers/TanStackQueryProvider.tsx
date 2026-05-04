@@ -35,10 +35,7 @@ export default function TanStackQueryProvider({ children }: Props) {
           },
           mutations: {
             retry: 3, // 변이 작업도 최대 3번 재시도
-            onError: (error: unknown) =>
-              handleApiError(error as ApiError, () => {
-                console.log("error");
-              }),
+            onError: (error: unknown) => handleApiError(error as ApiError, message => console.log(message)),
           },
         },
       }),

@@ -8,6 +8,7 @@ import { Input } from "@/atomics/atoms/Input";
 import { Label } from "@/atomics/atoms/Label";
 import { Typography } from "@/atomics/atoms/Typography";
 import type { CreateProjectMemberSelection, ProjectAssignableMember, ProjectJob } from "@/domains/projects/types";
+import { getProjectMemberDisplayName } from "@/domains/projects/utils/member";
 import { cn } from "@/shared/utils/cn";
 
 type CreateProjectMembersSectionProps = {
@@ -25,10 +26,6 @@ type CreateProjectMembersSectionProps = {
   onRemoveMember: (userId: string) => void;
   onToggleMemberJob: (userId: string, jobId: string, checked: boolean) => void;
 };
-
-function getMemberDisplayName(member: Pick<ProjectAssignableMember, "fullName" | "username">) {
-  return member.fullName || member.username;
-}
 
 export function CreateProjectMembersSection({
   memberQuery,
@@ -104,7 +101,9 @@ export function CreateProjectMembersSection({
                     className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-prism-navy/5 disabled:opacity-50"
                   >
                     <div className="min-w-0">
-                      <div className="truncate text-sm font-medium text-prism-body">{getMemberDisplayName(member)}</div>
+                      <div className="truncate text-sm font-medium text-prism-body">
+                        {getProjectMemberDisplayName(member)}
+                      </div>
                       <div className="truncate text-xs text-prism-muted">@{member.username}</div>
                     </div>
                     <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-prism-navy/6 px-2 py-1 text-xs font-medium text-prism-body">
@@ -128,7 +127,9 @@ export function CreateProjectMembersSection({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-medium text-prism-body">{getMemberDisplayName(member)}</div>
+                  <div className="truncate text-sm font-medium text-prism-body">
+                    {getProjectMemberDisplayName(member)}
+                  </div>
                   <div className="truncate text-xs text-prism-muted">@{member.username}</div>
                 </div>
                 <Button
@@ -138,7 +139,7 @@ export function CreateProjectMembersSection({
                   onClick={() => onRemoveMember(member.userId)}
                   disabled={isSubmitting}
                   className="size-8 rounded-full text-prism-muted hover:text-prism-body"
-                  aria-label={`Remove ${getMemberDisplayName(member)}`}
+                  aria-label={`Remove ${getProjectMemberDisplayName(member)}`}
                 >
                   <X className="size-4" />
                 </Button>

@@ -1,16 +1,17 @@
 import { getWorkspaceMembers } from "@/domains/workspaces/api";
 import { WorkspaceMembersClient } from "@/domains/workspaces/components/WorkspaceMembersClient";
+import type { Workspace } from "@/domains/workspaces/types";
 
 type WorkspaceMembersContentProps = {
-  workspaceId: string;
+  workspace: Workspace;
 };
 
-export async function WorkspaceMembersContent({ workspaceId }: WorkspaceMembersContentProps) {
-  const initialData = await getWorkspaceMembers(workspaceId);
+export async function WorkspaceMembersContent({ workspace }: WorkspaceMembersContentProps) {
+  const initialData = await getWorkspaceMembers(workspace.workspaceId);
 
   return (
     <WorkspaceMembersClient
-      workspaceId={workspaceId}
+      workspace={workspace}
       initialData={initialData}
     />
   );

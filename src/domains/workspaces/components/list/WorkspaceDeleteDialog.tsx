@@ -12,35 +12,13 @@ import {
 import { Typography } from "@/atomics/atoms/Typography";
 import { useDeleteWorkspace } from "@/domains/workspaces/hooks/useDeleteWorkspace";
 import type { Workspace } from "@/domains/workspaces/types";
+import { getDeleteWorkspaceErrorMessage } from "@/domains/workspaces/utils/error";
 
 type WorkspaceDeleteDialogProps = {
   workspace: Workspace | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-type WorkspaceDeleteError = {
-  message?: unknown;
-  status?: unknown;
-  data?: { message?: unknown } | null;
-  response?: {
-    status?: unknown;
-    data?: { message?: unknown } | null;
-  };
-};
-
-function getDeleteWorkspaceErrorMessage(error: unknown) {
-  const candidate = error as WorkspaceDeleteError | null;
-  const status = candidate?.response?.status ?? candidate?.status;
-
-  if (status === 403) {
-    return "Only the workspace owner can delete this workspace.";
-  }
-
-  const message = candidate?.response?.data?.message ?? candidate?.data?.message ?? candidate?.message;
-
-  return typeof message === "string" && message.trim().length > 0 ? message : "Failed to delete workspace.";
-}
 
 export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: WorkspaceDeleteDialogProps) {
   const { mutateAsync: mutateDeleteWorkspace, isPending, error } = useDeleteWorkspace();

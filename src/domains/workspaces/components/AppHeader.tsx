@@ -9,13 +9,12 @@ import { WorkspacePath } from "@/domains/workspaces/components/WorkspacePath";
 import type { WorkspacePathSegment } from "@/domains/workspaces/types/path";
 
 type AppHeaderProps = {
-  workspace?: WorkspacePathSegment;
-  project?: WorkspacePathSegment;
+  pathSegments?: WorkspacePathSegment[];
   actions?: React.ReactNode;
   className?: string;
 };
 
-export function AppHeader({ workspace, project, actions, className }: AppHeaderProps) {
+export function AppHeader({ pathSegments, actions, className }: AppHeaderProps) {
   return (
     <header
       className={cn(
@@ -33,10 +32,9 @@ export function AppHeader({ workspace, project, actions, className }: AppHeaderP
         </div>
       </Link>
 
-      {workspace ? (
+      {pathSegments && pathSegments.length > 0 ? (
         <WorkspacePath
-          workspace={workspace}
-          project={project}
+          segments={pathSegments}
           className="min-w-0 flex-1"
         />
       ) : (

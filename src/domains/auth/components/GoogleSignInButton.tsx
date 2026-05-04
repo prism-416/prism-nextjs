@@ -9,73 +9,9 @@ import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
 import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
+import type { GoogleCredentialResponse } from "@/domains/auth/types";
+import { getGoogleAccountsIdApi, loadGoogleIdentityScript } from "@/domains/auth/utils/google-identity";
 import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
-import type { GoogleAccountsIdApi, GoogleCredentialResponse } from "@/domains/auth/types";
-
-const GOOGLE_IDENTITY_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
-
-let googleIdentityScriptPromise: Promise<void> | null = null;
-
-type GoogleWindow = Window &
-  typeof globalThis & {
-    google?: {
-      accounts?: {
-        id?: GoogleAccountsIdApi;
-      };
-    };
-  };
-
-function getGoogleAccountsIdApi() {
-  if (typeof window === "undefined") {
-    return undefined;
-  }
-
-  return (window as GoogleWindow).google?.accounts?.id;
-}
-
-function loadGoogleIdentityScript() {
-  if (typeof window === "undefined") {
-    return Promise.reject(new Error("Google Identity Services is only available in the browser."));
-  }
-
-  if (getGoogleAccountsIdApi()) {
-    return Promise.resolve();
-  }
-
-  if (googleIdentityScriptPromise) {
-    return googleIdentityScriptPromise;
-  }
-
-  googleIdentityScriptPromise = new Promise<void>((resolve, reject) => {
-    const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${GOOGLE_IDENTITY_SCRIPT_SRC}"]`);
-
-    if (existingScript) {
-      if (existingScript.dataset.loaded === "true") {
-        resolve();
-        return;
-      }
-
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener("error", () => reject(new Error("Failed to load Google Identity Services.")), {
-        once: true,
-      });
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = GOOGLE_IDENTITY_SCRIPT_SRC;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      script.dataset.loaded = "true";
-      resolve();
-    };
-    script.onerror = () => reject(new Error("Failed to load Google Identity Services."));
-    document.head.appendChild(script);
-  });
-
-  return googleIdentityScriptPromise;
-}
 
 export function GoogleSignInButton() {
   const { setSession } = useAuth();
