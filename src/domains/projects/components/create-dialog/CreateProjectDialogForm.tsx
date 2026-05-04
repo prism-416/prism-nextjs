@@ -204,7 +204,7 @@ export function CreateProjectDialogForm({
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="max-h-[calc(100vh-12rem)] space-y-5 overflow-y-auto px-6 pb-6 pt-5"
+          className="max-h-[calc(100vh-12rem)] space-y-6 overflow-y-auto px-6 pb-6 pt-5"
           noValidate
         >
           <CreateProjectDetailsSection
