@@ -32,6 +32,8 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
   const [description, setDescription] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [isCreatingInvitations, setIsCreatingInvitations] = useState(false);
+  const [createdWorkspace, setCreatedWorkspace] = useState<Workspace | null>(null);
+  const [postCreateMessage, setPostCreateMessage] = useState<string | null>(null);
 
   const {
     candidateSearchError,
@@ -77,6 +79,8 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
     }
 
     setFieldError(null);
+    setPostCreateMessage(null);
+    setCreatedWorkspace(null);
 
     try {
       const workspace = await mutateAsync({
@@ -114,7 +118,10 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
       }
 
       if (postCreateMessages.length > 0) {
-        window.alert(postCreateMessages.join("\n"));
+        setCreatedWorkspace(workspace);
+        setPostCreateMessage(postCreateMessages.join(" "));
+        onCreated?.(workspace);
+        return;
       }
 
       onCreated?.(workspace);
@@ -129,65 +136,83 @@ export function CreateWorkspaceDialogForm({ onOpenChange, onCreated }: CreateWor
     <>
       <CreateWorkspaceDialogHero />
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5 px-6 pb-6 pt-5"
-        noValidate
-      >
-        <CreateWorkspaceDetailsSection
-          name={name}
-          description={description}
-          fieldError={fieldError}
-          nameMax={NAME_MAX}
-          descriptionMax={DESCRIPTION_MAX}
-          onNameChange={value => {
-            setName(value);
-            if (fieldError) {
-              setFieldError(null);
-            }
-          }}
-          onDescriptionChange={setDescription}
-        />
+      {createdWorkspace && postCreateMessage ? (
+        <div className="space-y-5 px-6 pb-6 pt-5">
+          <div className="rounded-xl border border-prism-danger-soft bg-prism-danger-soft/20 px-4 py-3">
+            <p className="text-sm font-medium text-prism-heading">{createdWorkspace.name} was created</p>
+            <p className="mt-1 text-sm text-prism-muted">{postCreateMessage}</p>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              className="h-10 rounded-lg px-5"
+              onClick={() => onOpenChange(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5 px-6 pb-6 pt-5"
+          noValidate
+        >
+          <CreateWorkspaceDetailsSection
+            name={name}
+            description={description}
+            fieldError={fieldError}
+            nameMax={NAME_MAX}
+            descriptionMax={DESCRIPTION_MAX}
+            onNameChange={value => {
+              setName(value);
+              if (fieldError) {
+                setFieldError(null);
+              }
+            }}
+            onDescriptionChange={setDescription}
+          />
 
-        <CreateWorkspaceInviteSection
-          memberQuery={memberQuery}
-          inviteRole={inviteRole}
-          roleOptions={roleOptions}
-          inviteFieldError={inviteFieldError}
-          isSubmitting={isSubmitting}
-          isResolvingMember={isResolvingMember}
-          candidateSearchResult={candidateSearchResult}
-          candidateSearchError={candidateSearchError}
-          isSearchingCandidates={isSearchingCandidates}
-          selectedRoleDescription={selectedRoleDescription}
-          selectedInvites={selectedInvites}
-          onMemberQueryChange={handleMemberQueryChange}
-          onInviteRoleChange={setInviteRole}
-          onAddInvite={() => handleSelectionAddInvite(trimmedMemberQuery)}
-          onAddCandidate={handleAddCandidate}
-          onRemoveInvite={handleRemoveInvite}
-          shouldShowCandidateResults={shouldShowCandidateResults && !inviteFieldError}
-        />
+          <CreateWorkspaceInviteSection
+            memberQuery={memberQuery}
+            inviteRole={inviteRole}
+            roleOptions={roleOptions}
+            inviteFieldError={inviteFieldError}
+            isSubmitting={isSubmitting}
+            isResolvingMember={isResolvingMember}
+            candidateSearchResult={candidateSearchResult}
+            candidateSearchError={candidateSearchError}
+            isSearchingCandidates={isSearchingCandidates}
+            selectedRoleDescription={selectedRoleDescription}
+            selectedInvites={selectedInvites}
+            onMemberQueryChange={handleMemberQueryChange}
+            onInviteRoleChange={setInviteRole}
+            onAddInvite={() => handleSelectionAddInvite(trimmedMemberQuery)}
+            onAddCandidate={handleAddCandidate}
+            onRemoveInvite={handleRemoveInvite}
+            shouldShowCandidateResults={shouldShowCandidateResults && !inviteFieldError}
+          />
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-            className="h-10 rounded-lg"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={!isNameValid || isSubmitting}
-            className="h-10 rounded-lg px-5"
-          >
-            {isPending ? "Creating..." : isCreatingInvitations ? "Finishing..." : "Create workspace"}
-          </Button>
-        </DialogFooter>
-      </form>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+              className="h-10 rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!isNameValid || isSubmitting}
+              className="h-10 rounded-lg px-5"
+            >
+              {isPending ? "Creating..." : isCreatingInvitations ? "Finishing..." : "Create workspace"}
+            </Button>
+          </DialogFooter>
+        </form>
+      )}
     </>
   );
 }
