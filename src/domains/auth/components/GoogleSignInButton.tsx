@@ -8,7 +8,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
-import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
+import { AUTH_SOCIAL_GOOGLE_OAUTH_BUTTON_CLASSNAME, AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import type { GoogleCredentialResponse } from "@/domains/auth/types";
 import { getGoogleAccountsIdApi, loadGoogleIdentityScript } from "@/domains/auth/utils/google-identity";
 import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
@@ -111,11 +111,11 @@ export function GoogleSignInButton() {
 
   return (
     <div className="space-y-2">
-      <div className="relative">
+      <div className="group relative">
         <Button
           type="button"
           variant="outline"
-          className="h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-prism-surface-field text-primary hover:bg-prism-sand"
+          className={AUTH_SOCIAL_GOOGLE_OAUTH_BUTTON_CLASSNAME}
           disabled={isSubmitting || !clientId}
         >
           <FaGoogle className="size-4" />

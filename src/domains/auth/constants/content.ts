@@ -27,6 +27,16 @@ export const AUTH_SOCIAL_LABELS = {
   google: "Continue with Google",
 } as const;
 
+/** Outline social OAuth buttons (GitHub: pointer on button; Google: + group-* for overlay hit target). */
+export const AUTH_SOCIAL_OAUTH_BUTTON_CLASSNAME =
+  "h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-prism-surface-field text-primary " +
+  "hover:bg-prism-sand hover:text-accent-foreground active:bg-prism-sand active:text-accent-foreground";
+
+export const AUTH_SOCIAL_GOOGLE_OAUTH_BUTTON_CLASSNAME =
+  `${AUTH_SOCIAL_OAUTH_BUTTON_CLASSNAME} ` +
+  "group-hover:bg-prism-sand group-hover:text-accent-foreground " +
+  "group-active:bg-prism-sand group-active:text-accent-foreground";
+
 export const AUTH_HIGHLIGHTS: readonly AuthHighlight[] = [
   {
     title: "Shared visibility",

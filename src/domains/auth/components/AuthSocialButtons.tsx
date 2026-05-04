@@ -6,7 +6,7 @@ import { FaGithub } from "react-icons/fa";
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { FieldLegend, FieldSet } from "@/atomics/molecules/Field";
-import { AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
+import { AUTH_SOCIAL_LABELS, AUTH_SOCIAL_OAUTH_BUTTON_CLASSNAME } from "@/domains/auth/constants/content";
 import { GoogleSignInButton } from "@/domains/auth/components/GoogleSignInButton";
 import { getGithubAuthorizationUrl } from "@/domains/auth/api";
 import { persistGithubOAuthState } from "@/domains/auth/utils/github-oauth-session";
@@ -55,7 +55,7 @@ export function AuthSocialButtons({ legend }: AuthSocialButtonsProps) {
       <Button
         type="button"
         variant="outline"
-        className="h-11 w-full justify-start gap-3 rounded-xl border-prism-sand bg-prism-surface-field text-primary hover:bg-prism-sand"
+        className={AUTH_SOCIAL_OAUTH_BUTTON_CLASSNAME}
         disabled={isRedirecting}
         onClick={handleGitHubClick}
       >
