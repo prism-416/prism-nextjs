@@ -18,6 +18,7 @@ import type {
   ProjectAssignableMember,
   ProjectJob,
 } from "@/domains/projects/types";
+import { getProjectMemberSearchText } from "@/domains/projects/utils/member";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 
 type CreateProjectDialogFormProps = {
@@ -33,10 +34,6 @@ const MEMBER_RESULT_LIMIT = 12;
 const EMPTY_JOBS: ProjectJob[] = [];
 const EMPTY_MEMBERS: ProjectAssignableMember[] = [];
 
-function getMemberSearchText(member: ProjectAssignableMember) {
-  return `${member.fullName} ${member.username}`.toLowerCase();
-}
-
 export function CreateProjectDialogForm({
   workspaceId,
   workspaceSlug,
@@ -50,6 +47,8 @@ export function CreateProjectDialogForm({
   const [memberError, setMemberError] = useState<string | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<CreateProjectMemberSelection[]>([]);
   const [isAssigningMembers, setIsAssigningMembers] = useState(false);
+  const [createdProject, setCreatedProject] = useState<Project | null>(null);
+  const [postCreateMessage, setPostCreateMessage] = useState<string | null>(null);
 
   const { data: jobsData, isPending: isJobsPending } = useWorkspaceJobs(workspaceId);
   const { data: membersData, isPending: isMembersPending } = useProjectAssignableMembers(workspaceId);
@@ -70,7 +69,7 @@ export function CreateProjectDialogForm({
     return members
       .filter(member => !selectedMemberIds.has(member.userId))
       .filter(member => member.userId !== currentUser?.userId)
-      .filter(member => (normalizedQuery ? getMemberSearchText(member).includes(normalizedQuery) : true))
+      .filter(member => (normalizedQuery ? getProjectMemberSearchText(member).includes(normalizedQuery) : true))
       .slice(0, MEMBER_RESULT_LIMIT);
   }, [currentUser?.userId, members, selectedMemberIds, trimmedMemberQuery]);
 
@@ -131,6 +130,8 @@ export function CreateProjectDialogForm({
 
     setFieldError(null);
     setMemberError(null);
+    setPostCreateMessage(null);
+    setCreatedProject(null);
 
     try {
       const project = await mutateAsync({
@@ -150,7 +151,12 @@ export function CreateProjectDialogForm({
             })),
           });
         } catch {
-          window.alert("Project was created, but members could not be assigned. Please update project members later.");
+          setCreatedProject(project);
+          setPostCreateMessage(
+            "Project was created, but members could not be assigned. Please update project members later.",
+          );
+          onCreated?.(project);
+          return;
         } finally {
           setIsAssigningMembers(false);
         }
@@ -167,81 +173,111 @@ export function CreateProjectDialogForm({
     <>
       <CreateProjectDialogHero />
 
-      <form
-        onSubmit={handleSubmit}
-        className="max-h-[calc(100vh-12rem)] space-y-5 overflow-y-auto px-6 pb-6 pt-5"
-        noValidate
-      >
-        <CreateProjectDetailsSection
-          name={name}
-          description={description}
-          fieldError={fieldError}
-          nameMax={NAME_MAX}
-          descriptionMax={DESCRIPTION_MAX}
-          onNameChange={value => {
-            setName(value);
-            if (fieldError) {
-              setFieldError(null);
-            }
-          }}
-          onDescriptionChange={setDescription}
-        />
-
-        <CreateProjectMembersSection
-          memberQuery={memberQuery}
-          availableMembers={availableMembers}
-          selectedMembers={selectedMembers}
-          jobs={jobs}
-          errorMessage={memberError}
-          isLoadingMembers={isMembersPending || isCurrentUserPending}
-          isLoadingJobs={isJobsPending}
-          isSubmitting={isSubmitting}
-          showMemberResults
-          onMemberQueryChange={value => {
-            setMemberQuery(value);
-            if (memberError) {
-              setMemberError(null);
-            }
-          }}
-          onAddMember={handleAddMember}
-          onRemoveMember={handleRemoveMember}
-          onToggleMemberJob={handleToggleMemberJob}
-        />
-
-        {error && (
-          <div
-            role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 px-3 py-2"
-          >
+      {createdProject && postCreateMessage ? (
+        <div className="space-y-5 px-6 pb-6 pt-5">
+          <div className="rounded-xl border border-prism-danger-soft bg-prism-danger-soft/20 px-4 py-3">
+            <Typography
+              variant="bodySm"
+              tone="primary"
+              weight="medium"
+            >
+              {createdProject.name} was created
+            </Typography>
             <Typography
               variant="caption"
-              tone="inherit"
-              className="text-red-700"
+              tone="muted"
+              className="mt-1 block"
             >
-              {error.message || "Something went wrong. Please try again."}
+              {postCreateMessage}
             </Typography>
           </div>
-        )}
+          <DialogFooter>
+            <Button
+              type="button"
+              className="h-10 rounded-lg px-5"
+              onClick={() => onOpenChange(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[calc(100vh-12rem)] space-y-5 overflow-y-auto px-6 pb-6 pt-5"
+          noValidate
+        >
+          <CreateProjectDetailsSection
+            name={name}
+            description={description}
+            fieldError={fieldError}
+            nameMax={NAME_MAX}
+            descriptionMax={DESCRIPTION_MAX}
+            onNameChange={value => {
+              setName(value);
+              if (fieldError) {
+                setFieldError(null);
+              }
+            }}
+            onDescriptionChange={setDescription}
+          />
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-            className="h-10 rounded-lg"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={!isNameValid || isSubmitting}
-            className="h-10 rounded-lg px-5"
-          >
-            {isCreatingProject ? "Creating..." : isAssigningMembers ? "Assigning members..." : "Create project"}
-          </Button>
-        </DialogFooter>
-      </form>
+          <CreateProjectMembersSection
+            memberQuery={memberQuery}
+            availableMembers={availableMembers}
+            selectedMembers={selectedMembers}
+            jobs={jobs}
+            errorMessage={memberError}
+            isLoadingMembers={isMembersPending || isCurrentUserPending}
+            isLoadingJobs={isJobsPending}
+            isSubmitting={isSubmitting}
+            showMemberResults
+            onMemberQueryChange={value => {
+              setMemberQuery(value);
+              if (memberError) {
+                setMemberError(null);
+              }
+            }}
+            onAddMember={handleAddMember}
+            onRemoveMember={handleRemoveMember}
+            onToggleMemberJob={handleToggleMemberJob}
+          />
+
+          {error && (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-200 bg-red-50 px-3 py-2"
+            >
+              <Typography
+                variant="caption"
+                tone="inherit"
+                className="text-red-700"
+              >
+                {error.message || "Something went wrong. Please try again."}
+              </Typography>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+              className="h-10 rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!isNameValid || isSubmitting}
+              className="h-10 rounded-lg px-5"
+            >
+              {isCreatingProject ? "Creating..." : isAssigningMembers ? "Assigning members..." : "Create project"}
+            </Button>
+          </DialogFooter>
+        </form>
+      )}
     </>
   );
 }
