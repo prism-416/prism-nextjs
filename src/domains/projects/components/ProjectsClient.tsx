@@ -15,9 +15,10 @@ type ProjectsClientProps = {
   slug: string;
   workspaceId?: string;
   initialData?: ProjectSummary[];
+  canCreateProject: boolean;
 };
 
-export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClientProps) {
+export function ProjectsClient({ slug, workspaceId, initialData, canCreateProject }: ProjectsClientProps) {
   const {
     data,
     isPending: isProjectsPending,
@@ -27,14 +28,14 @@ export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClien
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const projects = data ?? [];
-  const canCreateProject = Boolean(slug);
+  const hasCreatePermission = canCreateProject && Boolean(slug);
 
   const handleRetry = () => {
     void refetchProjects();
   };
 
   const handleCreate = () => {
-    if (!canCreateProject) {
+    if (!hasCreatePermission) {
       return;
     }
 
@@ -51,16 +52,21 @@ export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClien
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-prism-heading">Projects</h1>
-            <p className="mt-1 text-sm text-prism-muted">Create and organize projects in this workspace.</p>
+            <p className="mt-1 text-sm text-prism-muted">
+              {hasCreatePermission
+                ? "Create and organize projects in this workspace."
+                : "Browse projects in this workspace."}
+            </p>
           </div>
-          <Button
-            onClick={handleCreate}
-            disabled={!canCreateProject}
-            className="h-10 gap-1.5 rounded-lg px-4"
-          >
-            <Plus className="size-4" />
-            Create project
-          </Button>
+          {hasCreatePermission && (
+            <Button
+              onClick={handleCreate}
+              className="h-10 gap-1.5 rounded-lg px-4"
+            >
+              <Plus className="size-4" />
+              Create project
+            </Button>
+          )}
         </div>
 
         {isProjectsError && (
@@ -80,16 +86,19 @@ export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClien
           <div className="rounded-xl border border-dashed border-border-strong/60 bg-surface px-6 py-10 text-center">
             <h2 className="text-base font-semibold text-prism-heading">No projects yet</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-prism-muted">
-              Create a project to start organizing work in this workspace.
+              {hasCreatePermission
+                ? "Create a project to start organizing work in this workspace."
+                : "No projects are available in this workspace yet."}
             </p>
-            <Button
-              onClick={handleCreate}
-              disabled={!canCreateProject}
-              className="mt-5 h-10 gap-1.5 rounded-lg px-5"
-            >
-              <Plus className="size-4" />
-              Create project
-            </Button>
+            {hasCreatePermission && (
+              <Button
+                onClick={handleCreate}
+                className="mt-5 h-10 gap-1.5 rounded-lg px-5"
+              >
+                <Plus className="size-4" />
+                Create project
+              </Button>
+            )}
           </div>
         )}
 
@@ -105,12 +114,14 @@ export function ProjectsClient({ slug, workspaceId, initialData }: ProjectsClien
         )}
       </section>
 
-      <CreateProjectDialog
-        open={isCreateOpen}
-        workspaceId={workspaceId}
-        workspaceSlug={slug}
-        onOpenChange={setIsCreateOpen}
-      />
+      {hasCreatePermission && (
+        <CreateProjectDialog
+          open={isCreateOpen}
+          workspaceId={workspaceId}
+          workspaceSlug={slug}
+          onOpenChange={setIsCreateOpen}
+        />
+      )}
     </>
   );
 }
