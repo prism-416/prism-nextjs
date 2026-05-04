@@ -16,6 +16,7 @@ export const QUERY_KEYS = {
     list: () => ["workspace", "list"] as const,
     detail: (id: string) => ["workspace", "detail", id] as const,
     members: (id: string) => ["workspace", "members", id] as const,
+    projectJobs: (id: string) => ["workspace", "project-jobs", id] as const,
     invitation: (token: string) => ["workspace", "invitation", token] as const,
   },
   project: {
@@ -28,6 +29,5 @@ export const QUERY_KEYS = {
     detailBySlug: (projectSlug: string) => [...QUERY_KEYS.project.all, "detail", "slug", projectSlug] as const,
     members: (id: string) => [...QUERY_KEYS.project.detail(id), "members"] as const,
     assignableMembers: (workspaceId: string) => [...QUERY_KEYS.project.all, "assignable-members", workspaceId] as const,
-    workspaceJobs: (workspaceId: string) => [...QUERY_KEYS.project.all, "workspace-jobs", workspaceId] as const,
   },
 } as const;

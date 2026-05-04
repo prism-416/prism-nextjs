@@ -21,6 +21,15 @@ export interface WorkspaceMember {
   joinedAt: string | null;
 }
 
+/** `GET /workspaces/{workspaceId}/jobs` response item */
+export interface WorkspaceProjectJob {
+  jobId: string;
+  workspaceId: string;
+  name: string;
+  description: string;
+  createdAt: string;
+}
+
 export type InvitationRole = "admin" | "member" | "viewer";
 
 export type WorkspaceMemberCandidateKind = "existing" | "external";
@@ -69,6 +78,29 @@ export interface CreateWorkspacePayload {
 export interface UpdateWorkspacePayload {
   name?: string;
   description?: string;
+}
+
+/** `POST /workspaces/{workspaceId}/jobs` body item */
+export interface CreateWorkspaceProjectJobPayload {
+  name: string;
+  description: string;
+}
+
+/** `POST /workspaces/{workspaceId}/jobs` body */
+export interface CreateWorkspaceProjectJobsPayload {
+  jobs: CreateWorkspaceProjectJobPayload[];
+}
+
+/** `PATCH /workspaces/{workspaceId}/jobs` body item */
+export interface UpdateWorkspaceProjectJobPayload {
+  jobId: string;
+  name: string;
+  description: string;
+}
+
+/** `PATCH /workspaces/{workspaceId}/jobs` body */
+export interface UpdateWorkspaceProjectJobsPayload {
+  jobs: UpdateWorkspaceProjectJobPayload[];
 }
 
 /** `PUT /workspaces/{workspaceId}/members/{userId}/role` body */
