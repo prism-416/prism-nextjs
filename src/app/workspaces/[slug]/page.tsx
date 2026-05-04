@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { getProjects } from "@/domains/projects/api";
 import { ProjectsContent } from "@/domains/projects/components/ProjectsContent";
 import { ProjectsSkeleton } from "@/domains/projects/components/ProjectsSkeleton";
-import { getWorkspaces } from "@/domains/workspaces/api";
+import { getWorkspaceMembers, getWorkspaces } from "@/domains/workspaces/api";
 import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
+import { getCurrentUser } from "@/shared/api/auth";
 
 type WorkspacePageProps = {
   params: Promise<{
@@ -21,6 +22,13 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
   if (!workspace) {
     notFound();
   }
+
+  const [currentUser, members] = await Promise.all([
+    getCurrentUser().catch(() => undefined),
+    getWorkspaceMembers(workspace.workspaceId).catch(() => []),
+  ]);
+  const currentMember = members.find(member => member.userId === currentUser?.userId);
+  const canCreateProject = currentUser?.userId === workspace.ownerId || currentMember?.role === "admin";
 
   return (
     <WorkspaceShell
@@ -43,6 +51,7 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
         <ProjectsContent
           slug={slug}
           workspaceId={workspace.workspaceId}
+          canCreateProject={canCreateProject}
         />
       </Suspense>
     </WorkspaceShell>

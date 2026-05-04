@@ -1,16 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CircleCheck, Loader2, Trash2, UserPlus } from "lucide-react";
+import { CircleCheck, UserPlus } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { ConfirmDialog } from "@/atomics/organisms/ConfirmDialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceInviteMembersDialog } from "@/domains/workspaces/components/WorkspaceInviteMembersDialog";
+import { WorkspaceMemberActionsMenu } from "@/domains/workspaces/components/WorkspaceMemberActionsMenu";
 import { WorkspaceMembersSkeleton } from "@/domains/workspaces/components/WorkspaceMembersSkeleton";
 import { useRemoveWorkspaceMember } from "@/domains/workspaces/hooks/useRemoveWorkspaceMember";
+import { useUpdateWorkspaceMemberRole } from "@/domains/workspaces/hooks/useUpdateWorkspaceMemberRole";
 import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
-import type { Workspace, WorkspaceMember } from "@/domains/workspaces/types";
+import type { InvitationRole, Workspace, WorkspaceMember } from "@/domains/workspaces/types";
 import {
   getWorkspaceMemberDisplayName,
   getWorkspaceMemberInitial,
@@ -33,9 +35,11 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
   const { data: currentUser } = useCurrentUser();
   const { data, isPending, isError, refetch } = useWorkspaceMembers(workspace.workspaceId, initialData);
   const removeMember = useRemoveWorkspaceMember();
+  const updateRole = useUpdateWorkspaceMemberRole();
   const members = data ?? EMPTY_MEMBERS;
   const currentMember = members.find(member => member.userId === currentUser?.userId);
   const canManageMembers = currentUser?.userId === workspace.ownerId || currentMember?.role === "admin";
+  const isMutating = removeMember.isPending || updateRole.isPending;
   const sortedMembers = useMemo(
     () =>
       [...members].sort(
@@ -61,6 +65,16 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
     } catch {
       setActionMessage("Member could not be removed.");
       setPendingRemoveMember(null);
+    }
+  }
+
+  async function handleRoleChange(member: WorkspaceMember, role: InvitationRole) {
+    setActionMessage(null);
+
+    try {
+      await updateRole.mutateAsync({ workspaceId: workspace.workspaceId, userId: member.userId, role });
+    } catch {
+      setActionMessage("Member role could not be updated.");
     }
   }
 
@@ -135,7 +149,7 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
           {sortedMembers.map(member => {
             const isOwner = member.userId === workspace.ownerId;
             const isSelf = member.userId === currentUser?.userId;
-            const canRemoveMember = canManageMembers && !isOwner && !isSelf;
+            const canShowActions = canManageMembers && !isOwner && !isSelf;
 
             return (
               <div
@@ -177,22 +191,16 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
                 >
                   {isOwner ? "owner" : member.role}
                 </span>
-                {canRemoveMember ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-9 shrink-0 text-prism-danger hover:bg-prism-danger-soft/30 hover:text-prism-danger"
-                    aria-label={`Remove ${getWorkspaceMemberDisplayName(member)}`}
-                    disabled={removeMember.isPending}
-                    onClick={() => setPendingRemoveMember(member)}
-                  >
-                    {removeMember.isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="size-4" />
-                    )}
-                  </Button>
+                {canShowActions ? (
+                  <WorkspaceMemberActionsMenu
+                    member={member}
+                    disabled={isMutating}
+                    onRoleChange={role => {
+                      void handleRoleChange(member, role);
+                    }}
+                    onRemove={() => setPendingRemoveMember(member)}
+                    onTransferOwner={() => undefined}
+                  />
                 ) : null}
               </div>
             );

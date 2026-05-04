@@ -4,9 +4,10 @@ import { ProjectsClient } from "./ProjectsClient";
 type ProjectsContentProps = {
   slug: string;
   workspaceId?: string;
+  canCreateProject: boolean;
 };
 
-export async function ProjectsContent({ slug, workspaceId }: ProjectsContentProps) {
+export async function ProjectsContent({ slug, workspaceId, canCreateProject }: ProjectsContentProps) {
   const initialData = await getProjects(slug);
 
   return (
@@ -14,6 +15,7 @@ export async function ProjectsContent({ slug, workspaceId }: ProjectsContentProp
       slug={slug}
       workspaceId={workspaceId}
       initialData={initialData}
+      canCreateProject={canCreateProject}
     />
   );
 }
