@@ -30,8 +30,6 @@ Before starting the project, create a `.env.example`file based on `.env.local`.
 
 - `NEXT_PUBLIC_API_HOST`: Backend API host
 - `NEXT_PUBLIC_SITE_URL`: Frontend base URL
-- `AUTH_REFRESH_PATH`: Refresh token endpoint
-- `AUTH_LOGOUT_PATH`: Logout endpoint
 - `PASSWORD_VERIFY_SECRET`: Secret key for server-side validation
 
 ## Auth Flow

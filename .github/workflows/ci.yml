@@ -42,6 +42,4 @@ jobs:
           NEXT_PUBLIC_ENV: production
           NEXT_PUBLIC_API_HOST: https://api.example.com
           NEXT_PUBLIC_SITE_URL: https://example.com
-          AUTH_REFRESH_PATH: /api/auth/refresh
-          AUTH_LOGOUT_PATH: /api/auth/logout
           PASSWORD_VERIFY_SECRET: ci-placeholder-secret
