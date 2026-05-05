@@ -13,7 +13,10 @@ type ProjectMembersPanelProps = {
 
 export function ProjectMembersPanel({ members, isPending, isError, onRetry }: ProjectMembersPanelProps) {
   return (
-    <aside className="rounded-2xl border border-border/80 bg-surface p-5">
+    <aside
+      id="members"
+      className="scroll-mt-24 rounded-2xl border border-border/80 bg-surface p-5"
+    >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Users className="size-4 text-prism-muted" />

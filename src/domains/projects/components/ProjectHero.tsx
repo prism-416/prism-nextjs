@@ -18,8 +18,9 @@ export function ProjectHero({ project, workspaceSlug }: ProjectHeroProps) {
 
   return (
     <div
+      id="overview"
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/80 bg-surface p-6",
+        "relative scroll-mt-24 overflow-hidden rounded-2xl border border-border/80 bg-surface p-6",
         "shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.05)]",
       )}
     >
