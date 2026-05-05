@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { getProjectBySlug, getProjects } from "@/domains/projects/api";
 import { ProjectContent } from "@/domains/projects/components/ProjectContent";
+import { ProjectSidebar } from "@/domains/projects/components/ProjectSidebar";
 import { ProjectSkeleton } from "@/domains/projects/components/ProjectSkeleton";
 import { getWorkspaceById, getWorkspaces } from "@/domains/workspaces/api";
 import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
@@ -37,6 +38,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         href: `/projects/${encodeURIComponent(item.slug)}`,
         isCurrent: item.slug === slug,
       }))}
+      sidebar={
+        <ProjectSidebar
+          projectName={project?.name}
+          projectSlug={slug}
+          workspaceSlug={workspace?.slug}
+        />
+      }
     >
       <Suspense fallback={<ProjectSkeleton />}>
         <ProjectContent

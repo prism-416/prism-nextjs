@@ -15,6 +15,7 @@ export type WorkspaceShellProps = {
   projectOptions?: WorkspacePathOption[];
   section?: WorkspacePathSegment;
   pathSegments?: WorkspacePathSegment[];
+  sidebar?: React.ReactNode;
   actions?: React.ReactNode;
   defaultSidebarOpen?: boolean;
   headerHeight?: string;
@@ -31,6 +32,7 @@ export function WorkspaceShell({
   projectOptions,
   section,
   pathSegments,
+  sidebar,
   actions,
   defaultSidebarOpen,
   headerHeight,
@@ -46,6 +48,7 @@ export function WorkspaceShell({
     section,
     pathSegments,
   });
+  const resolvedSidebar = sidebar === undefined ? <AppSidebar workspaceSlug={workspaceSlug} /> : sidebar;
 
   return (
     <MainLayout
@@ -55,7 +58,7 @@ export function WorkspaceShell({
           actions={actions}
         />
       }
-      sidebar={<AppSidebar workspaceSlug={workspaceSlug} />}
+      sidebar={resolvedSidebar}
       defaultSidebarOpen={defaultSidebarOpen}
       headerHeight={headerHeight}
       className={className}
