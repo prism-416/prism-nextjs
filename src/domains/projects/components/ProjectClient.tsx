@@ -1,5 +1,8 @@
 "use client";
 
+import { CalendarRange, Files, ListTodo, type LucideIcon } from "lucide-react";
+
+import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectErrorState } from "@/domains/projects/components/ProjectErrorState";
 import { ProjectHero } from "@/domains/projects/components/ProjectHero";
 import { ProjectMembersPanel } from "@/domains/projects/components/ProjectMembersPanel";
@@ -15,6 +18,39 @@ type ProjectClientProps = {
   initialData?: Project;
   initialMembers?: ProjectMemberListItem[];
 };
+
+type ProjectSectionPanelProps = {
+  id: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+function ProjectSectionPanel({ id, title, description, icon: Icon }: ProjectSectionPanelProps) {
+  return (
+    <section
+      id={id}
+      className="scroll-mt-24 rounded-2xl border border-border/80 bg-surface p-5"
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="size-4 text-prism-muted" />
+        <Typography
+          variant="title"
+          tone="primary"
+        >
+          {title}
+        </Typography>
+      </div>
+      <Typography
+        variant="bodySm"
+        tone="muted"
+        className="mt-4 italic"
+      >
+        {description}
+      </Typography>
+    </section>
+  );
+}
 
 export function ProjectClient({ slug, workspaceSlug, initialData, initialMembers }: ProjectClientProps) {
   const {
@@ -60,6 +96,27 @@ export function ProjectClient({ slug, workspaceSlug, initialData, initialMembers
           onRetry={() => {
             void refetchMembers();
           }}
+        />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <ProjectSectionPanel
+          id="sprints"
+          title="Sprints"
+          description="No sprints yet."
+          icon={CalendarRange}
+        />
+        <ProjectSectionPanel
+          id="documents"
+          title="Documents"
+          description="No documents yet."
+          icon={Files}
+        />
+        <ProjectSectionPanel
+          id="my-tasks"
+          title="My tasks"
+          description="No tasks assigned."
+          icon={ListTodo}
         />
       </div>
     </section>
