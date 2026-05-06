@@ -3,14 +3,16 @@ import { ProjectSprintsClient } from "@/domains/projects/components/ProjectSprin
 
 type ProjectSprintsContentProps = {
   projectId: string;
+  projectSlug: string;
 };
 
-export async function ProjectSprintsContent({ projectId }: ProjectSprintsContentProps) {
+export async function ProjectSprintsContent({ projectId, projectSlug }: ProjectSprintsContentProps) {
   const initialData = await getProjectSprints(projectId).catch(() => undefined);
 
   return (
     <ProjectSprintsClient
       projectId={projectId}
+      projectSlug={projectSlug}
       initialData={initialData}
     />
   );

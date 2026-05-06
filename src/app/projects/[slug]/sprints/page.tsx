@@ -19,9 +19,12 @@ export default async function ProjectSprintsPage({ params }: ProjectSprintsPageP
       slug={slug}
       section={{ name: "Sprints" }}
     >
-      {({ projectId }) => (
+      {({ projectId, projectSlug }) => (
         <Suspense fallback={<ProjectSprintsSkeleton />}>
-          <ProjectSprintsContent projectId={projectId} />
+          <ProjectSprintsContent
+            projectId={projectId}
+            projectSlug={projectSlug}
+          />
         </Suspense>
       )}
     </ProjectPageShell>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CalendarRange, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
@@ -16,6 +17,7 @@ import { cn } from "@/shared/utils/cn";
 
 type ProjectSprintsPanelProps = {
   projectId: string;
+  projectSlug: string;
   sprints: ProjectSprint[];
   isError: boolean;
   onRetry: () => void;
@@ -55,9 +57,14 @@ function SprintSummaryCard({ status, count }: { status: ProjectSprintStatus; cou
   );
 }
 
-function SprintRow({ sprint }: { sprint: ProjectSprint }) {
+function SprintRow({ projectSlug, sprint }: { projectSlug: string; sprint: ProjectSprint }) {
+  const sprintHref = `/projects/${encodeURIComponent(projectSlug)}/sprints/${encodeURIComponent(sprint.sprintId)}`;
+
   return (
-    <article className="p-4">
+    <Link
+      href={sprintHref}
+      className="block p-4 transition-colors hover:bg-prism-navy/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <Typography
@@ -93,11 +100,19 @@ function SprintRow({ sprint }: { sprint: ProjectSprint }) {
           <dd className="text-prism-body">{formatProjectRelativeDateTime(sprint.createdAt)}</dd>
         </div>
       </dl>
-    </article>
+    </Link>
   );
 }
 
-function SprintStatusColumn({ status, sprints }: { status: ProjectSprintStatus; sprints: ProjectSprint[] }) {
+function SprintStatusColumn({
+  projectSlug,
+  status,
+  sprints,
+}: {
+  projectSlug: string;
+  status: ProjectSprintStatus;
+  sprints: ProjectSprint[];
+}) {
   return (
     <section className="overflow-hidden rounded-2xl border border-border/80 bg-surface">
       <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-surface-strong px-4 py-3">
@@ -129,6 +144,7 @@ function SprintStatusColumn({ status, sprints }: { status: ProjectSprintStatus; 
           {sprints.map(sprint => (
             <SprintRow
               key={sprint.sprintId}
+              projectSlug={projectSlug}
               sprint={sprint}
             />
           ))}
@@ -138,7 +154,7 @@ function SprintStatusColumn({ status, sprints }: { status: ProjectSprintStatus; 
   );
 }
 
-export function ProjectSprintsPanel({ projectId, sprints, isError, onRetry }: ProjectSprintsPanelProps) {
+export function ProjectSprintsPanel({ projectId, projectSlug, sprints, isError, onRetry }: ProjectSprintsPanelProps) {
   const sprintsByStatus = getSprintsByStatus(sprints);
 
   return (
@@ -221,6 +237,7 @@ export function ProjectSprintsPanel({ projectId, sprints, isError, onRetry }: Pr
             {PROJECT_SPRINT_STATUSES.map(status => (
               <SprintStatusColumn
                 key={status}
+                projectSlug={projectSlug}
                 status={status}
                 sprints={sprintsByStatus[status]}
               />
