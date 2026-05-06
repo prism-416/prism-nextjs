@@ -23,19 +23,12 @@ export function ProjectSkeleton() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-4">
         <div className="rounded-2xl border border-border/80 bg-surface p-5">
           <Skeleton className="h-5 w-36 bg-prism-navy/5" />
-          <Skeleton className="mt-5 h-4 w-full bg-prism-navy/5" />
-          <Skeleton className="mt-3 h-4 w-11/12 bg-prism-navy/5" />
-          <Skeleton className="mt-3 h-4 w-9/12 bg-prism-navy/5" />
-        </div>
-        <div className="rounded-2xl border border-border/80 bg-surface p-5">
-          <Skeleton className="h-5 w-28 bg-prism-navy/5" />
-          <div className="mt-5 space-y-3">
-            <Skeleton className="h-12 rounded-xl bg-prism-navy/5" />
-            <Skeleton className="h-12 rounded-xl bg-prism-navy/5" />
-            <Skeleton className="h-12 rounded-xl bg-prism-navy/5" />
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <Skeleton className="h-24 rounded-xl bg-prism-navy/5" />
+            <Skeleton className="h-24 rounded-xl bg-prism-navy/5" />
           </div>
         </div>
       </div>

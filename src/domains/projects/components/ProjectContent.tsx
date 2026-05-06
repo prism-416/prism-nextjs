@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getProjectBySlug, getProjectMembers } from "@/domains/projects/api";
+import { getProjectBySlug } from "@/domains/projects/api";
 import { ProjectClient } from "@/domains/projects/components/ProjectClient";
 
 type ProjectContentProps = {
@@ -15,14 +15,11 @@ export async function ProjectContent({ slug, workspaceSlug }: ProjectContentProp
     notFound();
   }
 
-  const initialMembers = await getProjectMembers(initialData.projectId).catch(() => undefined);
-
   return (
     <ProjectClient
       slug={slug}
       workspaceSlug={workspaceSlug}
       initialData={initialData}
-      initialMembers={initialMembers}
     />
   );
 }
