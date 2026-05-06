@@ -9,9 +9,18 @@ import type {
   ProjectMember,
   ProjectMemberListItem,
   ProjectSummary,
+  ProjectSprint,
+  ProjectWorkItem,
+  ProjectWorkItemSearchParams,
+  ProjectWorkItemSearchResult,
+  CreateProjectSprintPayload,
+  CreateProjectWorkItemPayload,
   UpdateProjectPayload,
+  UpdateProjectSprintPayload,
+  UpdateProjectWorkItemPayload,
   UpsertProjectMembersPayload,
 } from "../types";
+import { getDefinedProjectWorkItemSearchParams, getEmptyProjectWorkItemSearchResult } from "../utils/work-item";
 
 export async function getProjectsByWorkspaceId(workspaceId: string) {
   const response = await commonAxios<{ workspaceId: string }, ApiResponse<ProjectSummary[]>>({
@@ -133,4 +142,132 @@ export async function removeProjectMember(projectId: string, memberId: string) {
     method: "DELETE",
     version: null,
   });
+}
+
+export async function getProjectWorkItems(projectId: string, params?: ProjectWorkItemSearchParams) {
+  const searchParams = getDefinedProjectWorkItemSearchParams(params);
+  const response = await commonAxios<ProjectWorkItemSearchParams | null, ApiResponse<ProjectWorkItemSearchResult>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items`,
+    method: "GET",
+    data: searchParams ?? null,
+    version: null,
+  });
+
+  return response?.data ?? getEmptyProjectWorkItemSearchResult(searchParams);
+}
+
+export async function createProjectWorkItem(projectId: string, body: CreateProjectWorkItemPayload) {
+  const response = await commonAxios<CreateProjectWorkItemPayload, ApiResponse<ProjectWorkItem>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items`,
+    method: "POST",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function getProjectWorkItem(projectId: string, itemId: string) {
+  const response = await commonAxios<null, ApiResponse<ProjectWorkItem>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function updateProjectWorkItem(projectId: string, itemId: string, body: UpdateProjectWorkItemPayload) {
+  const response = await commonAxios<UpdateProjectWorkItemPayload, ApiResponse<ProjectWorkItem>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}`,
+    method: "PATCH",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function deleteProjectWorkItem(projectId: string, itemId: string) {
+  await commonAxios<null, unknown>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
+export async function getProjectWorkItemChildren(projectId: string, itemId: string) {
+  const response = await commonAxios<null, ApiResponse<ProjectWorkItem[]>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}/children`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? [];
+}
+
+export async function getProjectSprints(projectId: string) {
+  const response = await commonAxios<null, ApiResponse<ProjectSprint[]>>({
+    url: `/projects/${encodeURIComponent(projectId)}/sprints`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? [];
+}
+
+export async function createProjectSprint(projectId: string, body: CreateProjectSprintPayload) {
+  const response = await commonAxios<CreateProjectSprintPayload, ApiResponse<ProjectSprint>>({
+    url: `/projects/${encodeURIComponent(projectId)}/sprints`,
+    method: "POST",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function getProjectSprint(projectId: string, sprintId: string) {
+  const response = await commonAxios<null, ApiResponse<ProjectSprint>>({
+    url: `/projects/${encodeURIComponent(projectId)}/sprints/${encodeURIComponent(sprintId)}`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function updateProjectSprint(projectId: string, sprintId: string, body: UpdateProjectSprintPayload) {
+  const response = await commonAxios<UpdateProjectSprintPayload, ApiResponse<ProjectSprint>>({
+    url: `/projects/${encodeURIComponent(projectId)}/sprints/${encodeURIComponent(sprintId)}`,
+    method: "PATCH",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function deleteProjectSprint(projectId: string, sprintId: string) {
+  await commonAxios<null, unknown>({
+    url: `/projects/${encodeURIComponent(projectId)}/sprints/${encodeURIComponent(sprintId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
+export async function getProjectSprintWorkItems(
+  projectId: string,
+  sprintId: string,
+  params?: ProjectWorkItemSearchParams,
+) {
+  const searchParams = getDefinedProjectWorkItemSearchParams(params);
+  const response = await commonAxios<ProjectWorkItemSearchParams | null, ApiResponse<ProjectWorkItemSearchResult>>({
+    url: `/projects/${encodeURIComponent(projectId)}/sprints/${encodeURIComponent(sprintId)}/work-items`,
+    method: "GET",
+    data: searchParams ?? null,
+    version: null,
+  });
+
+  return response?.data ?? getEmptyProjectWorkItemSearchResult(searchParams);
 }
