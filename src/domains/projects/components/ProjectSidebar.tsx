@@ -197,7 +197,7 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
                 href={projectHref}
                 aria-label={`${projectLabel} overview`}
               >
-                <span className="grid size-8 shrink-0 place-items-center rounded-md bg-sidebar-accent text-sidebar-accent-foreground">
+                <span className="grid size-8 shrink-0 place-items-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
                   <FolderKanban className="size-4" />
                 </span>
                 <span className="flex min-w-0 flex-col">
