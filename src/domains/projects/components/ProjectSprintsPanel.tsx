@@ -2,6 +2,7 @@ import { CalendarRange, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
+import { CreateProjectSprintForm } from "@/domains/projects/components/CreateProjectSprintForm";
 import { ProjectSprintStatusBadge } from "@/domains/projects/components/ProjectSprintStatusBadge";
 import type { ProjectSprint, ProjectSprintStatus } from "@/domains/projects/types";
 import {
@@ -14,6 +15,7 @@ import {
 import { cn } from "@/shared/utils/cn";
 
 type ProjectSprintsPanelProps = {
+  projectId: string;
   sprints: ProjectSprint[];
   isError: boolean;
   onRetry: () => void;
@@ -136,7 +138,7 @@ function SprintStatusColumn({ status, sprints }: { status: ProjectSprintStatus; 
   );
 }
 
-export function ProjectSprintsPanel({ sprints, isError, onRetry }: ProjectSprintsPanelProps) {
+export function ProjectSprintsPanel({ projectId, sprints, isError, onRetry }: ProjectSprintsPanelProps) {
   const sprintsByStatus = getSprintsByStatus(sprints);
 
   return (
@@ -161,10 +163,14 @@ export function ProjectSprintsPanel({ sprints, isError, onRetry }: ProjectSprint
             Track planned project iterations and their current state.
           </Typography>
         </div>
-        <span className="inline-flex h-7 w-fit items-center rounded-full border border-border bg-surface px-3 text-xs font-medium text-prism-muted">
-          {sprints.length} total
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex h-7 w-fit items-center rounded-full border border-border bg-surface px-3 text-xs font-medium text-prism-muted">
+            {sprints.length} total
+          </span>
+        </div>
       </div>
+
+      {!isError && <CreateProjectSprintForm projectId={projectId} />}
 
       {isError && (
         <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
