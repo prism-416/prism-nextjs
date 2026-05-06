@@ -71,3 +71,93 @@ export interface UpsertProjectMemberPayload {
 export interface UpsertProjectMembersPayload {
   members: UpsertProjectMemberPayload[];
 }
+
+export type ProjectWorkItemType = "epic" | "story" | "task";
+
+export type ProjectWorkItemPriority = "low" | "medium" | "high" | "urgent";
+
+export type ProjectWorkItemStatus = "todo" | "in_progress" | "in_review" | "done";
+
+export interface ProjectWorkItem {
+  itemId: string;
+  projectId: string;
+  parentId: string | null;
+  title: string;
+  description: string;
+  type: ProjectWorkItemType;
+  priority: ProjectWorkItemPriority;
+  status: ProjectWorkItemStatus;
+  statusChangedAt: string;
+  createdAt: string;
+  assigneeUsernames: string[];
+  labelNames: string[];
+}
+
+export interface ProjectWorkItemSearchParams {
+  query?: string;
+  parentId?: string;
+  type?: ProjectWorkItemType;
+  priority?: ProjectWorkItemPriority;
+  status?: ProjectWorkItemStatus;
+  assigneeUsername?: string;
+  labelName?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ProjectWorkItemSearchResult {
+  items: ProjectWorkItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface CreateProjectWorkItemPayload {
+  parentId?: string;
+  title: string;
+  description: string;
+  type: ProjectWorkItemType;
+  priority?: ProjectWorkItemPriority;
+  assigneeUsernames?: string[];
+  labelNames?: string[];
+}
+
+export interface UpdateProjectWorkItemPayload {
+  parentId?: string | null;
+  title?: string;
+  description?: string;
+  type?: ProjectWorkItemType;
+  priority?: ProjectWorkItemPriority;
+  status?: ProjectWorkItemStatus;
+  assigneeUsernames?: string[];
+  labelNames?: string[];
+}
+
+export type ProjectSprintStatus = "backlog" | "in_progress" | "done";
+
+export interface ProjectSprint {
+  sprintId: string;
+  projectId: string;
+  name: string;
+  description: string | null;
+  startsAt: string;
+  endsAt: string;
+  status: ProjectSprintStatus;
+  createdAt: string;
+}
+
+export interface CreateProjectSprintPayload {
+  name: string;
+  description?: string;
+  startsAt: string;
+  endsAt: string;
+  status?: ProjectSprintStatus;
+}
+
+export interface UpdateProjectSprintPayload {
+  name?: string;
+  description?: string;
+  startsAt?: string;
+  endsAt?: string;
+  status?: ProjectSprintStatus;
+}
