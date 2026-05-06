@@ -16,6 +16,7 @@ type ProjectMembersClientProps = {
   initialMembers?: ProjectMemberListItem[];
   initialJobs?: ProjectJob[];
   initialAssignableMembers?: ProjectAssignableMember[];
+  canManageMembers: boolean;
 };
 
 const EMPTY_ASSIGNABLE_MEMBERS: ProjectAssignableMember[] = [];
@@ -28,6 +29,7 @@ export function ProjectMembersClient({
   initialMembers,
   initialJobs,
   initialAssignableMembers,
+  canManageMembers,
 }: ProjectMembersClientProps) {
   const {
     data: project,
@@ -46,13 +48,16 @@ export function ProjectMembersClient({
     isPending: isJobsPending,
     isError: isJobsError,
     refetch: refetchJobs,
-  } = useWorkspaceJobs(project?.workspaceId, initialJobs);
+  } = useWorkspaceJobs(canManageMembers ? project?.workspaceId : undefined, canManageMembers ? initialJobs : undefined);
   const {
     data: assignableMembers = EMPTY_ASSIGNABLE_MEMBERS,
     isPending: isAssignableMembersPending,
     isError: isAssignableMembersError,
     refetch: refetchAssignableMembers,
-  } = useProjectAssignableMembers(project?.workspaceId, initialAssignableMembers);
+  } = useProjectAssignableMembers(
+    canManageMembers ? project?.workspaceId : undefined,
+    canManageMembers ? initialAssignableMembers : undefined,
+  );
 
   if (isProjectPending && !project) {
     return <ProjectMembersSkeleton />;
@@ -82,6 +87,7 @@ export function ProjectMembersClient({
         isAssignableMembersError={isAssignableMembersError}
         isJobsPending={isJobsPending}
         isJobsError={isJobsError}
+        canManageMembers={canManageMembers}
         onRetry={() => {
           void refetchMembers();
         }}

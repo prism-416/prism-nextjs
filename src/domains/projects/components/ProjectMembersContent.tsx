@@ -11,9 +11,10 @@ import { ProjectMembersClient } from "@/domains/projects/components/ProjectMembe
 type ProjectMembersContentProps = {
   slug: string;
   workspaceSlug?: string;
+  canManageMembers: boolean;
 };
 
-export async function ProjectMembersContent({ slug, workspaceSlug }: ProjectMembersContentProps) {
+export async function ProjectMembersContent({ slug, workspaceSlug, canManageMembers }: ProjectMembersContentProps) {
   const initialData = await getProjectBySlug(slug);
 
   if (!initialData) {
@@ -22,8 +23,8 @@ export async function ProjectMembersContent({ slug, workspaceSlug }: ProjectMemb
 
   const [initialMembers, initialJobs, initialAssignableMembers] = await Promise.all([
     getProjectMembers(initialData.projectId).catch(() => undefined),
-    getWorkspaceJobs(initialData.workspaceId).catch(() => undefined),
-    getProjectAssignableMembers(initialData.workspaceId).catch(() => undefined),
+    canManageMembers ? getWorkspaceJobs(initialData.workspaceId).catch(() => undefined) : undefined,
+    canManageMembers ? getProjectAssignableMembers(initialData.workspaceId).catch(() => undefined) : undefined,
   ]);
 
   return (
@@ -34,6 +35,7 @@ export async function ProjectMembersContent({ slug, workspaceSlug }: ProjectMemb
       initialMembers={initialMembers}
       initialJobs={initialJobs}
       initialAssignableMembers={initialAssignableMembers}
+      canManageMembers={canManageMembers}
     />
   );
 }

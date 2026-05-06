@@ -25,6 +25,7 @@ type ProjectMembersPanelProps = {
   isAssignableMembersError: boolean;
   isJobsPending: boolean;
   isJobsError: boolean;
+  canManageMembers: boolean;
   onRetry: () => void;
   onRetryAssignableMembers: () => void;
   onRetryJobs: () => void;
@@ -111,6 +112,7 @@ export function ProjectMembersPanel({
   isAssignableMembersError,
   isJobsPending,
   isJobsError,
+  canManageMembers,
   onRetry,
   onRetryAssignableMembers,
   onRetryJobs,
@@ -131,15 +133,19 @@ export function ProjectMembersPanel({
   );
   const draftMemberIds = React.useMemo(() => new Set(draftMembers.map(member => member.userId)), [draftMembers]);
   const availableMembers = React.useMemo(() => {
+    if (!canManageMembers) {
+      return [];
+    }
+
     const normalizedQuery = memberQuery.trim().toLowerCase();
 
     return assignableMembers
       .filter(member => !draftMemberIds.has(member.userId))
       .filter(member => (normalizedQuery ? getProjectMemberSearchText(member).includes(normalizedQuery) : true))
       .slice(0, MEMBER_RESULT_LIMIT);
-  }, [assignableMembers, draftMemberIds, memberQuery]);
+  }, [assignableMembers, canManageMembers, draftMemberIds, memberQuery]);
   const isMutating = saveAssignments.isPending || removeAssignment.isPending;
-  const canAssignJobs = !isJobsPending && !isJobsError && jobs.length > 0;
+  const canAssignJobs = canManageMembers && !isJobsPending && !isJobsError && jobs.length > 0;
   const addMemberUnavailableMessage = isJobsPending
     ? "Loading project jobs before members can be added..."
     : isJobsError
@@ -153,6 +159,10 @@ export function ProjectMembersPanel({
   }, [persistedMembers]);
 
   function handleAddMember(member: ProjectAssignableMember) {
+    if (!canManageMembers) {
+      return;
+    }
+
     setDraftMembers(previous => [
       ...previous,
       {
@@ -168,12 +178,20 @@ export function ProjectMembersPanel({
   }
 
   function handleRemoveLocalMember(userId: string) {
+    if (!canManageMembers) {
+      return;
+    }
+
     setDraftMembers(previous => previous.filter(member => member.userId !== userId));
     setPanelError(null);
     setPanelMessage(null);
   }
 
   function handleToggleMemberJob(userId: string, jobId: string, checked: boolean) {
+    if (!canManageMembers) {
+      return;
+    }
+
     setDraftMembers(previous =>
       previous.map(member => {
         if (member.userId !== userId) {
@@ -192,6 +210,10 @@ export function ProjectMembersPanel({
   }
 
   async function handleSaveMember(member: EditableProjectMember) {
+    if (!canManageMembers) {
+      return;
+    }
+
     if (member.jobIds.length === 0) {
       setPanelError("Select at least one project job before saving this member.");
       return;
@@ -233,6 +255,10 @@ export function ProjectMembersPanel({
   }
 
   async function handleRemoveMember(member: EditableProjectMember) {
+    if (!canManageMembers) {
+      return;
+    }
+
     if (!member.memberId) {
       handleRemoveLocalMember(member.userId);
       return;
@@ -278,7 +304,9 @@ export function ProjectMembersPanel({
               tone="muted"
               className="mt-1 max-w-2xl"
             >
-              Workspace members and their project job assignments.
+              {canManageMembers
+                ? "Assign workspace members and choose their project jobs."
+                : "Review workspace members assigned to this project and their jobs."}
             </Typography>
           </div>
         </div>
@@ -320,84 +348,92 @@ export function ProjectMembersPanel({
         </div>
       )}
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.2fr)]">
-        <div className="rounded-xl border border-border/70 bg-surface-strong p-4">
-          <Typography
-            variant="bodySm"
-            tone="primary"
-            weight="semibold"
-          >
-            Add member
-          </Typography>
-          <Typography
-            variant="caption"
-            tone="muted"
-            className="mt-1"
-          >
-            Available workspace members.
-          </Typography>
+      {!canManageMembers ? (
+        <p className="mt-5 rounded-xl border border-border/80 bg-surface-strong px-4 py-3 text-sm text-prism-muted">
+          Workspace owners and admins can assign project members and edit job assignments.
+        </p>
+      ) : null}
 
-          <div className="relative mt-4">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-prism-muted" />
-            <Input
-              value={memberQuery}
-              disabled={isAssignableMembersPending || isMutating || !canAssignJobs}
-              onChange={event => setMemberQuery(event.target.value)}
-              placeholder="Search by name or username"
-              className="h-10 rounded-lg border-border bg-surface-field pl-9"
-            />
-          </div>
+      <div className={cn("mt-5 grid gap-4", canManageMembers && "lg:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.2fr)]")}>
+        {canManageMembers ? (
+          <div className="rounded-xl border border-border/70 bg-surface-strong p-4">
+            <Typography
+              variant="bodySm"
+              tone="primary"
+              weight="semibold"
+            >
+              Add member
+            </Typography>
+            <Typography
+              variant="caption"
+              tone="muted"
+              className="mt-1"
+            >
+              Available workspace members.
+            </Typography>
 
-          <div className="mt-3 overflow-hidden rounded-xl border border-border bg-surface">
-            {addMemberUnavailableMessage ? (
-              <div className="px-3 py-3 text-sm text-prism-muted">{addMemberUnavailableMessage}</div>
-            ) : isAssignableMembersPending ? (
-              <div className="px-3 py-3 text-sm text-prism-muted">Loading workspace members...</div>
-            ) : availableMembers.length === 0 ? (
-              <div className="px-3 py-3 text-sm text-prism-muted">
-                {memberQuery.trim() ? "No matching workspace members." : "All workspace members are already listed."}
-              </div>
-            ) : (
-              <div className="max-h-72 overflow-y-auto py-1">
-                {availableMembers.map(member => (
-                  <button
-                    key={member.userId}
-                    type="button"
-                    disabled={isMutating || !canAssignJobs}
-                    onClick={() => handleAddMember(member)}
-                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-prism-navy/5 disabled:opacity-50"
-                  >
-                    <MemberAvatar member={member} />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-prism-body">
-                        {getProjectMemberDisplayName(member)}
-                      </span>
-                      <span className="block truncate text-xs text-prism-muted">@{member.username}</span>
-                    </span>
-                    <span className="ml-auto grid size-7 shrink-0 place-items-center rounded-full border border-border bg-surface-strong text-prism-muted">
-                      <Plus className="size-3.5" />
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {!isJobsPending && !isJobsError && jobs.length === 0 ? (
-            <div className="mt-3 rounded-xl border border-border bg-surface px-3 py-3 text-sm text-prism-muted">
-              <p>No project jobs are available in this workspace yet.</p>
-              {workspaceJobsHref ? (
-                <Button
-                  asChild
-                  variant="outline"
-                  className="mt-3 h-8 rounded-lg bg-surface px-3"
-                >
-                  <Link href={workspaceJobsHref}>Manage jobs</Link>
-                </Button>
-              ) : null}
+            <div className="relative mt-4">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-prism-muted" />
+              <Input
+                value={memberQuery}
+                disabled={isAssignableMembersPending || isMutating || !canAssignJobs}
+                onChange={event => setMemberQuery(event.target.value)}
+                placeholder="Search by name or username"
+                className="h-10 rounded-lg border-border bg-surface-field pl-9"
+              />
             </div>
-          ) : null}
-        </div>
+
+            <div className="mt-3 overflow-hidden rounded-xl border border-border bg-surface">
+              {addMemberUnavailableMessage ? (
+                <div className="px-3 py-3 text-sm text-prism-muted">{addMemberUnavailableMessage}</div>
+              ) : isAssignableMembersPending ? (
+                <div className="px-3 py-3 text-sm text-prism-muted">Loading workspace members...</div>
+              ) : availableMembers.length === 0 ? (
+                <div className="px-3 py-3 text-sm text-prism-muted">
+                  {memberQuery.trim() ? "No matching workspace members." : "All workspace members are already listed."}
+                </div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto py-1">
+                  {availableMembers.map(member => (
+                    <button
+                      key={member.userId}
+                      type="button"
+                      disabled={isMutating || !canAssignJobs}
+                      onClick={() => handleAddMember(member)}
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-prism-navy/5 disabled:opacity-50"
+                    >
+                      <MemberAvatar member={member} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-prism-body">
+                          {getProjectMemberDisplayName(member)}
+                        </span>
+                        <span className="block truncate text-xs text-prism-muted">@{member.username}</span>
+                      </span>
+                      <span className="ml-auto grid size-7 shrink-0 place-items-center rounded-full border border-border bg-surface-strong text-prism-muted">
+                        <Plus className="size-3.5" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {!isJobsPending && !isJobsError && jobs.length === 0 ? (
+              <div className="mt-3 rounded-xl border border-border bg-surface px-3 py-3 text-sm text-prism-muted">
+                <p>No project jobs are available in this workspace yet.</p>
+                {workspaceJobsHref ? (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="mt-3 h-8 rounded-lg bg-surface px-3"
+                  >
+                    <Link href={workspaceJobsHref}>Manage jobs</Link>
+                  </Button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="min-h-80 rounded-xl border border-border/70 bg-surface">
           {isPending ? (
@@ -431,7 +467,9 @@ export function ProjectMembersPanel({
                   !member.isPersisted || !haveSameValues(member.jobIds, persistedMember?.jobIds ?? member.jobIds);
                 const isSaving = savingUserId === member.userId;
                 const isRemoving = Boolean(member.memberId && removingMemberId === member.memberId);
-                const disabled = isMutating || isPending || isJobsPending || isJobsError || jobs.length === 0;
+                const assignedJobCount = member.jobIds.length || member.assignedJobNames.length;
+                const disabled =
+                  !canManageMembers || isMutating || isPending || isJobsPending || isJobsError || jobs.length === 0;
 
                 return (
                   <div
@@ -454,14 +492,14 @@ export function ProjectMembersPanel({
                             <span
                               className={cn(
                                 "shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium",
-                                member.jobIds.length > 0
+                                assignedJobCount > 0
                                   ? "border-prism-teal-500/25 bg-prism-teal-500/10 text-prism-navy"
                                   : "border-prism-danger-soft bg-prism-danger-soft/20 text-prism-danger",
                               )}
                             >
-                              {getSelectedJobText(member.jobIds.length || member.assignedJobNames.length)}
+                              {getSelectedJobText(assignedJobCount)}
                             </span>
-                            {!member.isPersisted ? (
+                            {canManageMembers && !member.isPersisted ? (
                               <span className="shrink-0 rounded-full border border-prism-glow-sky/35 bg-prism-glow-sky/10 px-2 py-0.5 text-xs font-medium text-prism-navy">
                                 New
                               </span>
@@ -477,34 +515,36 @@ export function ProjectMembersPanel({
                         </div>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={!isDirty || disabled || isSaving}
-                          onClick={() => {
-                            void handleSaveMember(member);
-                          }}
-                          className="h-8 rounded-lg bg-surface px-3"
-                        >
-                          {isSaving ? <RefreshCw className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
-                          Save
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          disabled={isMutating}
-                          onClick={() => {
-                            void handleRemoveMember(member);
-                          }}
-                          className="size-8 rounded-lg text-prism-muted hover:text-prism-danger"
-                          aria-label={`Remove ${getProjectMemberDisplayName(member)}`}
-                        >
-                          {isRemoving ? <RefreshCw className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                        </Button>
-                      </div>
+                      {canManageMembers ? (
+                        <div className="flex shrink-0 items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={!isDirty || disabled || isSaving}
+                            onClick={() => {
+                              void handleSaveMember(member);
+                            }}
+                            className="h-8 rounded-lg bg-surface px-3"
+                          >
+                            {isSaving ? <RefreshCw className="size-3.5 animate-spin" /> : <Save className="size-3.5" />}
+                            Save
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            disabled={isMutating}
+                            onClick={() => {
+                              void handleRemoveMember(member);
+                            }}
+                            className="size-8 rounded-lg text-prism-muted hover:text-prism-danger"
+                            aria-label={`Remove ${getProjectMemberDisplayName(member)}`}
+                          >
+                            {isRemoving ? <RefreshCw className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                          </Button>
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="mt-4">
@@ -513,6 +553,7 @@ export function ProjectMembersPanel({
                         jobs={jobs}
                         disabled={disabled}
                         isJobsPending={isJobsPending}
+                        readOnly={!canManageMembers}
                         onToggleJob={handleToggleMemberJob}
                       />
                     </div>
@@ -565,10 +606,50 @@ type JobSelectorProps = {
   jobs: ProjectJob[];
   disabled: boolean;
   isJobsPending: boolean;
+  readOnly: boolean;
   onToggleJob: (userId: string, jobId: string, checked: boolean) => void;
 };
 
-function JobSelector({ member, jobs, disabled, isJobsPending, onToggleJob }: JobSelectorProps) {
+function JobSelector({ member, jobs, disabled, isJobsPending, readOnly, onToggleJob }: JobSelectorProps) {
+  if (readOnly) {
+    const selectedJobs = jobs.filter(job => member.jobIds.includes(job.jobId));
+    const selectedJobNames = new Set(selectedJobs.map(job => job.name));
+    const assignedJobNames = member.assignedJobNames.filter(jobName => !selectedJobNames.has(jobName));
+
+    if (selectedJobs.length === 0 && assignedJobNames.length === 0) {
+      return (
+        <Typography
+          variant="caption"
+          tone="muted"
+        >
+          No project jobs assigned.
+        </Typography>
+      );
+    }
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {selectedJobs.map(job => (
+          <span
+            key={job.jobId}
+            className="rounded-full border border-border bg-surface-strong px-2.5 py-1 text-xs font-medium text-prism-body"
+            title={job.description}
+          >
+            {job.name}
+          </span>
+        ))}
+        {assignedJobNames.map(jobName => (
+          <span
+            key={jobName}
+            className="rounded-full border border-border bg-surface-strong px-2.5 py-1 text-xs font-medium text-prism-body"
+          >
+            {jobName}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
   if (isJobsPending) {
     return (
       <Typography

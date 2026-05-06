@@ -18,12 +18,14 @@ export default async function ProjectMembersPage({ params }: ProjectMembersPageP
     <ProjectPageShell
       slug={slug}
       section={{ name: "Members" }}
+      withMemberManagementPermission
     >
-      {({ workspaceSlug }) => (
+      {({ workspaceSlug, canManageProjectMembers }) => (
         <Suspense fallback={<ProjectMembersSkeleton />}>
           <ProjectMembersContent
             slug={slug}
             workspaceSlug={workspaceSlug}
+            canManageMembers={canManageProjectMembers}
           />
         </Suspense>
       )}
