@@ -11,6 +11,9 @@ import { getCurrentUser } from "@/shared/api/auth";
 type ProjectPageShellContext = {
   canManageProjectMembers: boolean;
   currentUserId?: string;
+  projectId: string;
+  projectSlug: string;
+  workspaceId: string;
   workspaceSlug?: string;
 };
 
@@ -58,6 +61,9 @@ export async function ProjectPageShell({
       ? children({
           canManageProjectMembers,
           currentUserId,
+          projectId: project.projectId,
+          projectSlug: project.slug,
+          workspaceId: project.workspaceId,
           workspaceSlug,
         })
       : children;
