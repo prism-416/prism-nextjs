@@ -1,11 +1,10 @@
-import { ListTodo, RefreshCw, RotateCcw, Search } from "lucide-react";
+import { ListTodo, LoaderCircle, RefreshCw, RotateCcw, Search } from "lucide-react";
 import type * as React from "react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
-import { ProjectWorkItemStatusBadge } from "@/domains/projects/components/ProjectWorkItemStatusBadge";
 import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 import {
   formatProjectRelativeDateTime,
@@ -28,9 +27,13 @@ type ProjectMyTasksPanelProps = {
   status: ProjectMyTasksStatusFilter;
   priority: ProjectMyTasksPriorityFilter;
   isError: boolean;
+  isUpdatingStatus: boolean;
+  updatingTaskId: string | null;
+  statusUpdateError: string | null;
   onQueryChange: (value: string) => void;
   onStatusChange: (value: ProjectMyTasksStatusFilter) => void;
   onPriorityChange: (value: ProjectMyTasksPriorityFilter) => void;
+  onStatusUpdate: (task: ProjectWorkItem, value: ProjectWorkItemStatus) => void;
   onResetFilters: () => void;
   onRetry: () => void;
 };
@@ -70,7 +73,14 @@ function FilterButton({
   );
 }
 
-function TaskRow({ task }: { task: ProjectWorkItem }) {
+type TaskRowProps = {
+  task: ProjectWorkItem;
+  isUpdating: boolean;
+  isStatusUpdateDisabled: boolean;
+  onStatusUpdate: (task: ProjectWorkItem, value: ProjectWorkItemStatus) => void;
+};
+
+function TaskRow({ task, isUpdating, isStatusUpdateDisabled, onStatusUpdate }: TaskRowProps) {
   const visibleLabels = task.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(task.labelNames.length - visibleLabels.length, 0);
 
@@ -122,7 +132,30 @@ function TaskRow({ task }: { task: ProjectWorkItem }) {
 
       <div>
         <span className="mb-1 block text-xs font-medium text-prism-muted md:hidden">Status</span>
-        <ProjectWorkItemStatusBadge status={task.status} />
+        <div className="flex items-center gap-2">
+          <select
+            value={task.status}
+            onChange={event => {
+              onStatusUpdate(task, event.target.value as ProjectWorkItemStatus);
+            }}
+            className={cn(
+              "h-9 w-full rounded-lg border border-border bg-surface-field px-2 text-xs font-medium text-prism-body",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
+            )}
+            aria-label={`Update ${task.title} status`}
+            disabled={isStatusUpdateDisabled}
+          >
+            {PROJECT_WORK_ITEM_STATUSES.map(item => (
+              <option
+                key={item}
+                value={item}
+              >
+                {getProjectWorkItemStatusLabel(item)}
+              </option>
+            ))}
+          </select>
+          {isUpdating && <LoaderCircle className="size-4 shrink-0 animate-spin text-prism-muted" />}
+        </div>
       </div>
       <div>
         <span className="mb-1 block text-xs font-medium text-prism-muted md:hidden">Priority</span>
@@ -144,9 +177,13 @@ export function ProjectMyTasksPanel({
   status,
   priority,
   isError,
+  isUpdatingStatus,
+  updatingTaskId,
+  statusUpdateError,
   onQueryChange,
   onStatusChange,
   onPriorityChange,
+  onStatusUpdate,
   onResetFilters,
   onRetry,
 }: ProjectMyTasksPanelProps) {
@@ -182,6 +219,12 @@ export function ProjectMyTasksPanel({
       {!assigneeUsername && (
         <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
           Current user could not be loaded.
+        </div>
+      )}
+
+      {statusUpdateError && (
+        <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
+          {statusUpdateError}
         </div>
       )}
 
@@ -292,6 +335,9 @@ export function ProjectMyTasksPanel({
             <TaskRow
               key={task.itemId}
               task={task}
+              isUpdating={updatingTaskId === task.itemId}
+              isStatusUpdateDisabled={isUpdatingStatus}
+              onStatusUpdate={onStatusUpdate}
             />
           ))}
         </div>
