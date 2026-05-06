@@ -50,39 +50,27 @@ type ProjectSidebarNavGroupProps = {
   label: string;
   items: ProjectSidebarNavItem[];
   pathname: string;
-  hash: string;
 };
 
 const URL_BASE = "https://prism.local";
 
-function getHrefParts(href: string) {
+function getHrefPathname(href: string) {
   const url = new URL(href, URL_BASE);
 
-  return {
-    hash: url.hash,
-    pathname: url.pathname,
-  };
+  return url.pathname;
 }
 
-function isActiveProjectHref(pathname: string, hash: string, item: ProjectSidebarNavItem) {
-  const itemUrl = getHrefParts(item.href);
-
-  if (itemUrl.hash) {
-    if (itemUrl.hash === "#overview") {
-      return pathname === itemUrl.pathname && (hash === "" || hash === itemUrl.hash);
-    }
-
-    return pathname === itemUrl.pathname && hash === itemUrl.hash;
-  }
+function isActiveProjectHref(pathname: string, item: ProjectSidebarNavItem) {
+  const itemPathname = getHrefPathname(item.href);
 
   if (item.exact) {
-    return pathname === itemUrl.pathname;
+    return pathname === itemPathname;
   }
 
-  return pathname === itemUrl.pathname || pathname.startsWith(`${itemUrl.pathname}/`);
+  return pathname === itemPathname || pathname.startsWith(`${itemPathname}/`);
 }
 
-function ProjectSidebarNavGroup({ label, items, pathname, hash }: ProjectSidebarNavGroupProps) {
+function ProjectSidebarNavGroup({ label, items, pathname }: ProjectSidebarNavGroupProps) {
   if (items.length === 0) {
     return null;
   }
@@ -94,7 +82,7 @@ function ProjectSidebarNavGroup({ label, items, pathname, hash }: ProjectSidebar
         <SidebarMenu>
           {items.map(item => {
             const Icon = item.icon;
-            const active = isActiveProjectHref(pathname, hash, item);
+            const active = isActiveProjectHref(pathname, item);
 
             return (
               <SidebarMenuItem key={item.href}>
@@ -125,18 +113,17 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
   const pathname = usePathname() ?? "/";
   const queryClient = useQueryClient();
   const { clearSession } = useAuth();
-  const [hash, setHash] = React.useState("");
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
   const projectHref = `/projects/${encodeURIComponent(projectSlug)}`;
   const workspaceHref = workspaceSlug ? `/workspaces/${encodeURIComponent(workspaceSlug)}` : "/workspaces";
   const projectLabel = projectName ?? "Project";
   const primaryNav = React.useMemo<ProjectSidebarNavItem[]>(
     () => [
-      { label: "Overview", href: `${projectHref}#overview`, icon: FolderKanban, exact: true },
-      { label: "Members", href: `${projectHref}#members`, icon: Users, exact: true },
-      { label: "Sprints", href: `${projectHref}#sprints`, icon: CalendarRange, exact: true },
-      { label: "Documents", href: `${projectHref}#documents`, icon: Files, exact: true },
-      { label: "My tasks", href: `${projectHref}#my-tasks`, icon: ListTodo, exact: true },
+      { label: "Overview", href: projectHref, icon: FolderKanban, exact: true },
+      { label: "Members", href: `${projectHref}/members`, icon: Users, exact: true },
+      { label: "Sprints", href: `${projectHref}/sprints`, icon: CalendarRange, exact: true },
+      { label: "Documents", href: `${projectHref}/documents`, icon: Files, exact: true },
+      { label: "My tasks", href: `${projectHref}/my-tasks`, icon: ListTodo, exact: true },
     ],
     [projectHref],
   );
@@ -147,21 +134,6 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
     ],
     [workspaceHref],
   );
-
-  React.useEffect(() => {
-    function syncHash() {
-      setHash(window.location.hash);
-    }
-
-    syncHash();
-    window.addEventListener("hashchange", syncHash);
-    window.addEventListener("popstate", syncHash);
-
-    return () => {
-      window.removeEventListener("hashchange", syncHash);
-      window.removeEventListener("popstate", syncHash);
-    };
-  }, [pathname]);
 
   async function handleLogout() {
     if (isLoggingOut) {
@@ -215,13 +187,11 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
           label="Project"
           items={primaryNav}
           pathname={pathname}
-          hash={hash}
         />
         <ProjectSidebarNavGroup
           label="Workspace"
           items={secondaryNav}
           pathname={pathname}
-          hash={hash}
         />
       </SidebarContent>
 

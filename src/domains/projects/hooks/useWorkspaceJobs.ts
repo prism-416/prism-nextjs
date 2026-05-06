@@ -6,11 +6,12 @@ import { QUERY_KEYS, useApiQuery } from "@/shared/query";
 
 const MISSING_WORKSPACE_ID = "__missing_workspace__";
 
-export function useWorkspaceJobs(workspaceId?: string) {
+export function useWorkspaceJobs(workspaceId?: string, initialData?: ProjectJob[]) {
   return useApiQuery<ProjectJob[]>({
     queryKey: QUERY_KEYS.workspace.projectJobs(workspaceId ?? MISSING_WORKSPACE_ID),
     queryFn: () => (workspaceId ? getWorkspaceJobs(workspaceId) : Promise.resolve([])),
     enabled: Boolean(workspaceId),
+    initialData: initialData ?? undefined,
     staleTime: 5 * 60 * 1000,
   });
 }
