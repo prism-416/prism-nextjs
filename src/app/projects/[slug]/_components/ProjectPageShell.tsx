@@ -10,6 +10,7 @@ import { getCurrentUser } from "@/shared/api/auth";
 
 type ProjectPageShellContext = {
   canManageProjectMembers: boolean;
+  currentUserId?: string;
   workspaceSlug?: string;
 };
 
@@ -39,6 +40,7 @@ export async function ProjectPageShell({
   const projects = workspace?.slug ? await getProjects(workspace.slug).catch(() => []) : [];
   const workspaceSlug = workspace?.slug;
   let canManageProjectMembers = false;
+  let currentUserId: string | undefined;
 
   if (withMemberManagementPermission && workspace) {
     const [currentUser, members] = await Promise.all([
@@ -47,6 +49,7 @@ export async function ProjectPageShell({
     ]);
     const currentMember = members.find(member => member.userId === currentUser?.userId);
 
+    currentUserId = currentUser?.userId;
     canManageProjectMembers = currentUser?.userId === workspace.ownerId || currentMember?.role === "admin";
   }
 
@@ -54,6 +57,7 @@ export async function ProjectPageShell({
     typeof children === "function"
       ? children({
           canManageProjectMembers,
+          currentUserId,
           workspaceSlug,
         })
       : children;

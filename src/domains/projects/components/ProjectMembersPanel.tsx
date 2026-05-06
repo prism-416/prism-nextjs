@@ -26,6 +26,7 @@ type ProjectMembersPanelProps = {
   isJobsPending: boolean;
   isJobsError: boolean;
   canManageMembers: boolean;
+  currentUserId?: string;
   onRetry: () => void;
   onRetryAssignableMembers: () => void;
   onRetryJobs: () => void;
@@ -113,6 +114,7 @@ export function ProjectMembersPanel({
   isJobsPending,
   isJobsError,
   canManageMembers,
+  currentUserId,
   onRetry,
   onRetryAssignableMembers,
   onRetryJobs,
@@ -178,6 +180,11 @@ export function ProjectMembersPanel({
   }
 
   function handleRemoveLocalMember(userId: string) {
+    if (userId === currentUserId) {
+      setPanelError("You cannot remove yourself from this project.");
+      return;
+    }
+
     if (!canManageMembers) {
       return;
     }
@@ -255,6 +262,11 @@ export function ProjectMembersPanel({
   }
 
   async function handleRemoveMember(member: EditableProjectMember) {
+    if (member.userId === currentUserId) {
+      setPanelError("You cannot remove yourself from this project.");
+      return;
+    }
+
     if (!canManageMembers) {
       return;
     }
@@ -468,6 +480,7 @@ export function ProjectMembersPanel({
                 const isSaving = savingUserId === member.userId;
                 const isRemoving = Boolean(member.memberId && removingMemberId === member.memberId);
                 const assignedJobCount = member.jobIds.length || member.assignedJobNames.length;
+                const isCurrentUserMember = member.userId === currentUserId;
                 const disabled =
                   !canManageMembers || isMutating || isPending || isJobsPending || isJobsError || jobs.length === 0;
 
@@ -504,6 +517,11 @@ export function ProjectMembersPanel({
                                 New
                               </span>
                             ) : null}
+                            {isCurrentUserMember ? (
+                              <span className="shrink-0 rounded-full border border-border bg-surface-strong px-2 py-0.5 text-xs font-medium text-prism-muted">
+                                You
+                              </span>
+                            ) : null}
                           </div>
                           <Typography
                             variant="caption"
@@ -534,12 +552,13 @@ export function ProjectMembersPanel({
                             type="button"
                             variant="ghost"
                             size="icon"
-                            disabled={isMutating}
+                            disabled={isMutating || isCurrentUserMember}
                             onClick={() => {
                               void handleRemoveMember(member);
                             }}
                             className="size-8 rounded-lg text-prism-muted hover:text-prism-danger"
                             aria-label={`Remove ${getProjectMemberDisplayName(member)}`}
+                            title={isCurrentUserMember ? "You cannot remove yourself from this project." : undefined}
                           >
                             {isRemoving ? <RefreshCw className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
                           </Button>

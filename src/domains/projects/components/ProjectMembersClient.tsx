@@ -17,6 +17,7 @@ type ProjectMembersClientProps = {
   initialJobs?: ProjectJob[];
   initialAssignableMembers?: ProjectAssignableMember[];
   canManageMembers: boolean;
+  currentUserId?: string;
 };
 
 const EMPTY_ASSIGNABLE_MEMBERS: ProjectAssignableMember[] = [];
@@ -30,6 +31,7 @@ export function ProjectMembersClient({
   initialJobs,
   initialAssignableMembers,
   canManageMembers,
+  currentUserId,
 }: ProjectMembersClientProps) {
   const {
     data: project,
@@ -88,6 +90,7 @@ export function ProjectMembersClient({
         isJobsPending={isJobsPending}
         isJobsError={isJobsError}
         canManageMembers={canManageMembers}
+        currentUserId={currentUserId}
         onRetry={() => {
           void refetchMembers();
         }}

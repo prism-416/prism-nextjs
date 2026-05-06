@@ -12,9 +12,15 @@ type ProjectMembersContentProps = {
   slug: string;
   workspaceSlug?: string;
   canManageMembers: boolean;
+  currentUserId?: string;
 };
 
-export async function ProjectMembersContent({ slug, workspaceSlug, canManageMembers }: ProjectMembersContentProps) {
+export async function ProjectMembersContent({
+  slug,
+  workspaceSlug,
+  canManageMembers,
+  currentUserId,
+}: ProjectMembersContentProps) {
   const initialData = await getProjectBySlug(slug);
 
   if (!initialData) {
@@ -36,6 +42,7 @@ export async function ProjectMembersContent({ slug, workspaceSlug, canManageMemb
       initialJobs={initialJobs}
       initialAssignableMembers={initialAssignableMembers}
       canManageMembers={canManageMembers}
+      currentUserId={currentUserId}
     />
   );
 }
