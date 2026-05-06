@@ -1,6 +1,7 @@
-import { ListTodo } from "lucide-react";
+import { Suspense } from "react";
 
-import { ProjectSectionPlaceholder } from "@/domains/projects/components/ProjectSectionPlaceholder";
+import { ProjectMyTasksContent } from "@/domains/projects/components/ProjectMyTasksContent";
+import { ProjectMyTasksSkeleton } from "@/domains/projects/components/ProjectMyTasksSkeleton";
 
 import { ProjectPageShell } from "../_components/ProjectPageShell";
 
@@ -18,11 +19,11 @@ export default async function ProjectMyTasksPage({ params }: ProjectMyTasksPageP
       slug={slug}
       section={{ name: "My tasks" }}
     >
-      <ProjectSectionPlaceholder
-        title="My tasks"
-        description="No tasks assigned."
-        icon={ListTodo}
-      />
+      {({ projectId }) => (
+        <Suspense fallback={<ProjectMyTasksSkeleton />}>
+          <ProjectMyTasksContent projectId={projectId} />
+        </Suspense>
+      )}
     </ProjectPageShell>
   );
 }
