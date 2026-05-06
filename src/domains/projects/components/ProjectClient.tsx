@@ -8,9 +8,11 @@ import { ProjectHero } from "@/domains/projects/components/ProjectHero";
 import { ProjectMembersPanel } from "@/domains/projects/components/ProjectMembersPanel";
 import { ProjectOverviewPanel } from "@/domains/projects/components/ProjectOverviewPanel";
 import { ProjectSkeleton } from "@/domains/projects/components/ProjectSkeleton";
+import { useProjectAssignableMembers } from "@/domains/projects/hooks/useProjectAssignableMembers";
 import { useProject } from "@/domains/projects/hooks/useProject";
 import { useProjectMembers } from "@/domains/projects/hooks/useProjectMembers";
-import type { Project, ProjectMemberListItem } from "@/domains/projects/types";
+import { useWorkspaceJobs } from "@/domains/projects/hooks/useWorkspaceJobs";
+import type { Project, ProjectAssignableMember, ProjectJob, ProjectMemberListItem } from "@/domains/projects/types";
 
 type ProjectClientProps = {
   slug: string;
@@ -18,6 +20,9 @@ type ProjectClientProps = {
   initialData?: Project;
   initialMembers?: ProjectMemberListItem[];
 };
+
+const EMPTY_ASSIGNABLE_MEMBERS: ProjectAssignableMember[] = [];
+const EMPTY_JOBS: ProjectJob[] = [];
 
 type ProjectSectionPanelProps = {
   id: string;
@@ -65,6 +70,18 @@ export function ProjectClient({ slug, workspaceSlug, initialData, initialMembers
     isError: isMembersError,
     refetch: refetchMembers,
   } = useProjectMembers(project?.projectId, initialMembers);
+  const {
+    data: jobs = EMPTY_JOBS,
+    isPending: isJobsPending,
+    isError: isJobsError,
+    refetch: refetchJobs,
+  } = useWorkspaceJobs(project?.workspaceId);
+  const {
+    data: assignableMembers = EMPTY_ASSIGNABLE_MEMBERS,
+    isPending: isAssignableMembersPending,
+    isError: isAssignableMembersError,
+    refetch: refetchAssignableMembers,
+  } = useProjectAssignableMembers(project?.workspaceId);
 
   if (isProjectPending && !project) {
     return <ProjectSkeleton />;
@@ -87,14 +104,28 @@ export function ProjectClient({ slug, workspaceSlug, initialData, initialMembers
         workspaceSlug={workspaceSlug}
       />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-4">
         <ProjectOverviewPanel project={project} />
         <ProjectMembersPanel
+          projectId={project.projectId}
+          workspaceSlug={workspaceSlug}
           members={members}
+          assignableMembers={assignableMembers}
+          jobs={jobs}
           isPending={isMembersPending}
           isError={isMembersError}
+          isAssignableMembersPending={isAssignableMembersPending}
+          isAssignableMembersError={isAssignableMembersError}
+          isJobsPending={isJobsPending}
+          isJobsError={isJobsError}
           onRetry={() => {
             void refetchMembers();
+          }}
+          onRetryAssignableMembers={() => {
+            void refetchAssignableMembers();
+          }}
+          onRetryJobs={() => {
+            void refetchJobs();
           }}
         />
       </div>
