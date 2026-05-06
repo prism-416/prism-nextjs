@@ -1,6 +1,7 @@
-import { CalendarRange } from "lucide-react";
+import { Suspense } from "react";
 
-import { ProjectSectionPlaceholder } from "@/domains/projects/components/ProjectSectionPlaceholder";
+import { ProjectSprintsContent } from "@/domains/projects/components/ProjectSprintsContent";
+import { ProjectSprintsSkeleton } from "@/domains/projects/components/ProjectSprintsSkeleton";
 
 import { ProjectPageShell } from "../_components/ProjectPageShell";
 
@@ -18,11 +19,11 @@ export default async function ProjectSprintsPage({ params }: ProjectSprintsPageP
       slug={slug}
       section={{ name: "Sprints" }}
     >
-      <ProjectSectionPlaceholder
-        title="Sprints"
-        description="No sprints yet."
-        icon={CalendarRange}
-      />
+      {({ projectId }) => (
+        <Suspense fallback={<ProjectSprintsSkeleton />}>
+          <ProjectSprintsContent projectId={projectId} />
+        </Suspense>
+      )}
     </ProjectPageShell>
   );
 }
