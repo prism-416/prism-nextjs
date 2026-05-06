@@ -9,7 +9,8 @@ import {
 } from "@/domains/projects/components/ProjectMyTasksPanel";
 import { ProjectMyTasksSkeleton } from "@/domains/projects/components/ProjectMyTasksSkeleton";
 import { useProjectMyTasks } from "@/domains/projects/hooks/useProjectMyTasks";
-import type { ProjectWorkItemSearchResult } from "@/domains/projects/types";
+import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
+import type { ProjectWorkItem, ProjectWorkItemSearchResult, ProjectWorkItemStatus } from "@/domains/projects/types";
 
 type ProjectMyTasksClientProps = {
   projectId: string;
@@ -21,6 +22,8 @@ export function ProjectMyTasksClient({ projectId, assigneeUsername, initialData 
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<ProjectMyTasksStatusFilter>("all");
   const [priority, setPriority] = React.useState<ProjectMyTasksPriorityFilter>("all");
+  const [updatingTaskId, setUpdatingTaskId] = React.useState<string | null>(null);
+  const [statusUpdateError, setStatusUpdateError] = React.useState<string | null>(null);
   const filters = React.useMemo(
     () => ({
       query: query.trim() || undefined,
@@ -36,7 +39,34 @@ export function ProjectMyTasksClient({ projectId, assigneeUsername, initialData 
     filters,
     hasActiveFilters ? undefined : initialData,
   );
+  const { mutateAsync: updateWorkItem, isPending: isUpdatingWorkItem } = useUpdateProjectWorkItem();
   const tasks = data?.items ?? [];
+
+  const handleStatusUpdate = React.useCallback(
+    async (task: ProjectWorkItem, nextStatus: ProjectWorkItemStatus) => {
+      if (task.status === nextStatus || updatingTaskId) {
+        return;
+      }
+
+      setStatusUpdateError(null);
+      setUpdatingTaskId(task.itemId);
+
+      try {
+        await updateWorkItem({
+          projectId,
+          itemId: task.itemId,
+          payload: {
+            status: nextStatus,
+          },
+        });
+      } catch (error) {
+        setStatusUpdateError(error instanceof Error ? error.message : "Task status could not be updated.");
+      } finally {
+        setUpdatingTaskId(null);
+      }
+    },
+    [projectId, updateWorkItem, updatingTaskId],
+  );
 
   if (isPending && !data && assigneeUsername) {
     return <ProjectMyTasksSkeleton />;
@@ -51,15 +81,21 @@ export function ProjectMyTasksClient({ projectId, assigneeUsername, initialData 
       status={status}
       priority={priority}
       isError={isError}
+      isUpdatingStatus={isUpdatingWorkItem}
+      updatingTaskId={updatingTaskId}
+      statusUpdateError={statusUpdateError}
       onQueryChange={setQuery}
       onStatusChange={setStatus}
       onPriorityChange={setPriority}
+      onStatusUpdate={handleStatusUpdate}
       onResetFilters={() => {
         setQuery("");
         setStatus("all");
         setPriority("all");
+        setStatusUpdateError(null);
       }}
       onRetry={() => {
+        setStatusUpdateError(null);
         void refetch();
       }}
     />

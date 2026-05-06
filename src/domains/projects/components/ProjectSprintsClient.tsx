@@ -19,6 +19,7 @@ export function ProjectSprintsClient({ projectId, initialData }: ProjectSprintsC
 
   return (
     <ProjectSprintsPanel
+      projectId={projectId}
       sprints={sprints}
       isError={isError}
       onRetry={() => {
