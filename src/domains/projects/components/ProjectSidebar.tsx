@@ -120,6 +120,7 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
   const primaryNav = React.useMemo<ProjectSidebarNavItem[]>(
     () => [
       { label: "Overview", href: projectHref, icon: FolderKanban, exact: true },
+      { label: "Work items", href: `${projectHref}/work-items`, icon: FolderKanban },
       { label: "Members", href: `${projectHref}/members`, icon: Users, exact: true },
       { label: "Sprints", href: `${projectHref}/sprints`, icon: CalendarRange, exact: true },
       { label: "Documents", href: `${projectHref}/documents`, icon: Files, exact: true },

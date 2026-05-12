@@ -27,6 +27,14 @@ function replaceWorkItemInSearchResult(previous: ProjectWorkItemSearchResult | u
   };
 }
 
+function replaceWorkItemInChildren(previous: ProjectWorkItem[] | undefined, workItem: ProjectWorkItem) {
+  if (!previous) {
+    return previous;
+  }
+
+  return previous.map(item => (item.itemId === workItem.itemId ? workItem : item));
+}
+
 function isProjectWorkItemListQuery(queryKey: readonly unknown[], projectId: string) {
   return (
     queryKey[0] === "project" &&
@@ -34,6 +42,17 @@ function isProjectWorkItemListQuery(queryKey: readonly unknown[], projectId: str
     queryKey[2] === projectId &&
     queryKey[3] === "work-items" &&
     (queryKey[4] === "list" || queryKey[4] === "my-tasks")
+  );
+}
+
+function isProjectWorkItemChildrenQuery(queryKey: readonly unknown[], projectId: string) {
+  return (
+    queryKey[0] === "project" &&
+    queryKey[1] === "detail" &&
+    queryKey[2] === projectId &&
+    queryKey[3] === "work-items" &&
+    queryKey[4] === "detail" &&
+    queryKey[6] === "children"
   );
 }
 
@@ -73,6 +92,12 @@ export function useUpdateProjectWorkItem() {
           predicate: query => isProjectSprintWorkItemsQuery(query.queryKey, projectId),
         },
         previous => replaceWorkItemInSearchResult(previous, workItem),
+      );
+      queryClient.setQueriesData<ProjectWorkItem[]>(
+        {
+          predicate: query => isProjectWorkItemChildrenQuery(query.queryKey, projectId),
+        },
+        previous => replaceWorkItemInChildren(previous, workItem),
       );
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(projectId) });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.sprints(projectId) });
