@@ -22,16 +22,16 @@ type TypographyVariant = keyof typeof typographyElementMap;
 const typographySizeVariants = cva("", {
   variants: {
     fontSize: {
-      xs: "text-xs",
-      sm: "text-sm",
-      base: "text-base",
-      lg: "text-lg",
-      xl: "text-xl",
-      "2xl": "text-2xl",
-      "3xl": "text-3xl",
-      "4xl": "text-4xl",
-      "5xl": "text-5xl",
-      "6xl": "text-6xl",
+      xs: "text-[0.75rem]",
+      sm: "text-[0.875rem]",
+      base: "text-[1rem]",
+      lg: "text-[1.125rem]",
+      xl: "text-[1.25rem]",
+      "2xl": "text-[1.5rem]",
+      "3xl": "text-[1.875rem]",
+      "4xl": "text-[2.25rem]",
+      "5xl": "text-[3rem]",
+      "6xl": "text-[3.75rem]",
     },
   },
 });
@@ -60,6 +60,8 @@ const typographyLineHeightVariants = cva("", {
       "6": "leading-6",
       "7": "leading-7",
       "8": "leading-8",
+      "9": "leading-9",
+      "10": "leading-10",
     },
   },
 });
@@ -67,16 +69,16 @@ const typographyLineHeightVariants = cva("", {
 const typographyVariants = cva("", {
   variants: {
     variant: {
-      display: "tracking-[-0.04em] md:text-6xl lg:text-[5rem] lg:leading-[0.96]",
-      h1: "tracking-tight md:text-5xl",
-      h2: "tracking-tight md:text-4xl",
-      h3: "tracking-tight md:text-3xl",
-      title: "tracking-tight md:text-xl",
-      bodyLg: "md:text-xl",
-      body: "",
-      bodySm: "",
-      caption: "",
-      overline: "uppercase tracking-[0.24em]",
+      display: "text-[3.5rem] leading-[0.94] tracking-[-0.055em] md:text-[4.75rem] lg:text-[5.5rem]",
+      h1: "text-[2.75rem] leading-[1.02] tracking-[-0.045em] md:text-[3.5rem] lg:text-[4rem]",
+      h2: "text-[2.25rem] leading-[1.05] tracking-[-0.035em] md:text-[2.75rem] lg:text-[3rem]",
+      h3: "text-[1.5rem] leading-[1.12] tracking-[-0.025em] md:text-[1.75rem]",
+      title: "text-xl leading-[1.2] tracking-[-0.02em] md:text-2xl",
+      bodyLg: "text-lg leading-8 md:text-xl md:leading-9",
+      body: "leading-7",
+      bodySm: "leading-6",
+      caption: "leading-5",
+      overline: "text-[0.6875rem] uppercase leading-4 tracking-[0.22em]",
       code: "rounded-md bg-black/5 px-1.5 py-0.5 font-mono text-[0.925em]",
     },
     tone: {
@@ -111,9 +113,7 @@ const typographyVariants = cva("", {
   },
 });
 
-export interface TypographyProps
-  extends React.HTMLAttributes<HTMLElement>,
-    VariantProps<typeof typographyVariants> {
+export interface TypographyProps extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof typographyVariants> {
   as?: React.ElementType;
   fontSize?: VariantProps<typeof typographySizeVariants>["fontSize"];
   weight?: VariantProps<typeof typographyWeightVariants>["weight"];
@@ -121,16 +121,16 @@ export interface TypographyProps
 }
 
 const typographyFontSizeDefaults: Record<TypographyVariant, NonNullable<TypographyProps["fontSize"]> | undefined> = {
-  display: "5xl",
-  h1: "4xl",
-  h2: "3xl",
-  h3: "2xl",
-  title: "lg",
-  bodyLg: "lg",
+  display: undefined,
+  h1: undefined,
+  h2: undefined,
+  h3: undefined,
+  title: undefined,
+  bodyLg: undefined,
   body: "base",
   bodySm: "sm",
-  caption: "sm",
-  overline: "xs",
+  caption: "xs",
+  overline: undefined,
   code: undefined,
 };
 
@@ -148,28 +148,23 @@ const typographyWeightDefaults: Record<TypographyVariant, NonNullable<Typography
   code: undefined,
 };
 
-const typographyLineHeightDefaults: Record<
-  TypographyVariant,
-  NonNullable<TypographyProps["lineHeight"]> | undefined
-> = {
-  display: undefined,
-  h1: undefined,
-  h2: undefined,
-  h3: undefined,
-  title: undefined,
-  bodyLg: "8",
-  body: "7",
-  bodySm: "6",
-  caption: "5",
-  overline: undefined,
-  code: undefined,
-};
+const typographyLineHeightDefaults: Record<TypographyVariant, NonNullable<TypographyProps["lineHeight"]> | undefined> =
+  {
+    display: undefined,
+    h1: undefined,
+    h2: undefined,
+    h3: undefined,
+    title: undefined,
+    bodyLg: undefined,
+    body: undefined,
+    bodySm: undefined,
+    caption: undefined,
+    overline: undefined,
+    code: undefined,
+  };
 
 const Typography = React.forwardRef<HTMLElement, TypographyProps>(
-  (
-    { as, className, variant = "body", tone, align, wrap, truncate, fontSize, weight, lineHeight, ...props },
-    ref,
-  ) => {
+  ({ as, className, variant = "body", tone, align, wrap, truncate, fontSize, weight, lineHeight, ...props }, ref) => {
     const resolvedVariant = (variant ?? "body") as TypographyVariant;
     const Component = as ?? typographyElementMap[resolvedVariant] ?? "p";
 
