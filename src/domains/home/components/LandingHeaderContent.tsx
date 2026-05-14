@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import Container from "@/atomics/atoms/Container";
 import { cn } from "@/shared/utils/cn";
@@ -14,13 +15,22 @@ export default function LandingHeaderContent({ isAuthenticated = false }: Landin
       <Container className="flex h-16 items-center justify-between gap-6">
         <Link
           href="/"
-          className="text-sm font-semibold tracking-tight text-primary"
+          aria-label={`${METADATA.siteName} home`}
+          className="inline-flex min-w-[120px] items-center gap-2.5 text-sm font-semibold tracking-tight text-primary"
         >
-          {METADATA.siteName}
+          <Image
+            src="/images/prizmatic-logo.png"
+            alt=""
+            width={40}
+            height={40}
+            priority
+            className="size-10 shrink-0 object-contain"
+          />
+          <span>{METADATA.siteName}</span>
         </Link>
         <nav
           aria-label="Primary"
-          className="hidden items-center gap-6 md:flex"
+          className="hidden items-center gap-4 lg:flex xl:gap-6"
         >
           {SITE_NAVIGATION.map(item => (
             <Link
