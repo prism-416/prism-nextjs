@@ -1,14 +1,15 @@
-import { Bot, CheckCheck, GitBranch, type LucideIcon } from "lucide-react";
+import { Activity, Bot, CheckCheck, GitBranch, type LucideIcon } from "lucide-react";
 
-export type LandingCapability = {
+export type LandingHeroFeature = {
   title: string;
   description: string;
   icon: LucideIcon;
 };
 
-export type LandingSignal = {
-  label: string;
-  value: string;
+export type LandingCapability = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
 };
 
 export type LandingStep = {
@@ -18,10 +19,10 @@ export type LandingStep = {
 };
 
 export const HERO_CONTENT = {
-  badge: "Agent-Authoritative Project Management",
-  title: "Start small. Ship with agents in charge.",
+  badge: "AI-powered project management",
+  title: "The Autonomous Project Management Platform",
   description:
-    "Prizmatic gives new project teams an operating system from day one. Agents create the plan, run the workflow, and keep momentum visible while your team makes the calls that matter.",
+    "Prizmatic brings AI agents, structured workflows, and deep integrations together in one place so teams can plan, coordinate, and ship with less manual project management.",
   primaryCta: {
     href: "/sign-up",
     label: "Get started",
@@ -32,30 +33,27 @@ export const HERO_CONTENT = {
   },
 } as const;
 
-export const HERO_BACKGROUND = {
-  colors: [
-    "#fff1a8",
-    "#ff9b73",
-    "#ff6bc6",
-    "#9d7bff",
-    "#63b2ff",
-    "#62d7c7",
-    "#0c4767",
-  ],
-  speed: 0.2,
-  scale: 0.84,
-  frequency: 1.18,
-  warpStrength: 1.24,
-  autoRotate: 6,
-  mouseInfluence: 0.07,
-  parallax: 0.24,
-  noise: 0.03,
-} as const;
-
-export const LANDING_SIGNALS: readonly LandingSignal[] = [
-  { label: "Team size", value: "Small & focused" },
-  { label: "Project start", value: "From day one" },
-  { label: "Operating model", value: "Agent-led" },
+export const HERO_FEATURES: readonly LandingHeroFeature[] = [
+  {
+    title: "AI Project Manager",
+    description: "Agents turn goals into plans, priorities, and next actions.",
+    icon: Bot,
+  },
+  {
+    title: "Smart Workflows",
+    description: "Structured execution paths keep every handoff moving.",
+    icon: CheckCheck,
+  },
+  {
+    title: "Deep Integrations",
+    description: "Connect work signals across the tools your team already uses.",
+    icon: GitBranch,
+  },
+  {
+    title: "Actionable Insights",
+    description: "Surface blockers, progress, and decisions before they drift.",
+    icon: Activity,
+  },
 ] as const;
 
 export const LANDING_CAPABILITIES_INTRO = {
@@ -102,12 +100,14 @@ export const LANDING_OPERATING_STEPS: readonly LandingStep[] = [
   {
     step: "02",
     title: "Let agents map the work",
-    description: "Agents generate structure, priorities, and execution order so the team does not start from a blank board.",
+    description:
+      "Agents generate structure, priorities, and execution order so the team does not start from a blank board.",
   },
   {
     step: "03",
     title: "Keep momentum visible",
-    description: "Progress, blockers, and next actions stay visible automatically while the project is still finding its rhythm.",
+    description:
+      "Progress, blockers, and next actions stay visible automatically while the project is still finding its rhythm.",
   },
   {
     step: "04",
