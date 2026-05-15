@@ -42,7 +42,7 @@ export default function LandingProductPreview() {
             {LANDING_PRODUCT_METRICS.map(metric => (
               <div
                 key={metric.label}
-                className="rounded-3xl border border-border bg-white/72 p-5 shadow-[0_14px_40px_rgba(12,71,103,0.06)]"
+                className="rounded-3xl border border-border bg-white/72 p-5 shadow-[0_14px_40px_rgba(12,71,103,0.06)] transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/45"
               >
                 <Typography
                   variant="bodySm"
@@ -64,9 +64,9 @@ export default function LandingProductPreview() {
         </div>
 
         <div className="relative">
-          <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_55%_45%,rgba(99,178,255,0.2),transparent_55%),radial-gradient(circle_at_22%_18%,rgba(255,107,198,0.12),transparent_32%)] blur-2xl" />
+          <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_55%_45%,rgba(99,178,255,0.16),transparent_55%),radial-gradient(circle_at_22%_18%,rgba(255,107,198,0.08),transparent_32%)] blur-2xl" />
           <div className="relative overflow-hidden rounded-[2rem] border border-border bg-surface-strong/92 p-3 shadow-2xl shadow-prism-navy/12 backdrop-blur">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(255,241,168,0.34),transparent_26%),radial-gradient(circle_at_85%_18%,rgba(157,123,255,0.16),transparent_28%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(255,241,168,0.26),transparent_26%),radial-gradient(circle_at_85%_18%,rgba(157,123,255,0.1),transparent_28%)]" />
             <div className="relative rounded-[1.5rem] border border-border/70 bg-white/88">
               <PreviewHeader />
               <div className="grid gap-3 border-t border-border/70 bg-prism-sand-soft/28 p-4 md:grid-cols-3">
@@ -165,7 +165,7 @@ function PreviewColumn({ column }: { column: LandingProductBoardColumn }) {
 
 function PreviewCard({ item }: { item: LandingProductBoardItem }) {
   return (
-    <article className="rounded-2xl border border-border/70 bg-white p-4 shadow-sm">
+    <article className="rounded-2xl border border-border/70 bg-white p-4 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/40 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <Typography
           variant="bodySm"

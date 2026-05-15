@@ -1,17 +1,52 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1200" height="630" fill="#F8FAFC"/>
-  <circle cx="976" cy="72" r="240" fill="#BBF7D0" fill-opacity="0.8"/>
-  <circle cx="1080" cy="-24" r="200" fill="#86EFAC" fill-opacity="0.55"/>
-  <rect x="72" y="72" width="1056" height="486" rx="36" fill="white"/>
-  <rect x="104" y="104" width="64" height="64" rx="16" fill="#171717"/>
-  <path d="M136 136C136 123.85 145.85 114 158 114H200V146H158C152.477 146 148 150.477 148 156V198H136V136Z" fill="#22C55E"/>
-  <text x="104" y="252" fill="#18181B" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">
-    Responsive Website Starter
+  <defs>
+    <linearGradient id="background" x1="154" y1="88" x2="1046" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FCF8EF"/>
+      <stop offset="0.58" stop-color="#F4ECD6"/>
+      <stop offset="1" stop-color="#D9E8E7"/>
+    </linearGradient>
+    <linearGradient id="prism" x1="444" y1="160" x2="760" y2="454" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF1A8"/>
+      <stop offset="0.32" stop-color="#FF6BC6"/>
+      <stop offset="0.68" stop-color="#63B2FF"/>
+      <stop offset="1" stop-color="#62D7C7"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="54" y="54" width="1092" height="522" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="36" flood-color="#0C4767" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1040" cy="96" r="260" fill="#63B2FF" fill-opacity="0.18"/>
+  <circle cx="964" cy="548" r="220" fill="#62D7C7" fill-opacity="0.16"/>
+  <circle cx="176" cy="516" r="180" fill="#FF6BC6" fill-opacity="0.1"/>
+  <g filter="url(#soft-shadow)">
+    <rect x="72" y="72" width="1056" height="486" rx="42" fill="white" fill-opacity="0.84"/>
+    <rect x="72.5" y="72.5" width="1055" height="485" rx="41.5" stroke="#6EA9A7" stroke-opacity="0.24"/>
+  </g>
+  <g opacity="0.9">
+    <rect x="874" y="112" width="158" height="158" rx="42" fill="#0C4767"/>
+    <rect x="910" y="148" width="86" height="86" rx="24" fill="url(#prism)" transform="rotate(45 953 191)"/>
+    <path d="M953 133L1009 191L953 249L897 191L953 133Z" stroke="white" stroke-opacity="0.46" stroke-width="3"/>
+    <path d="M953 145V237" stroke="white" stroke-opacity="0.58" stroke-width="3"/>
+    <path d="M907 191H999" stroke="white" stroke-opacity="0.38" stroke-width="3"/>
+  </g>
+  <text x="132" y="172" fill="#6EA9A7" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="4">
+    PRIZMATIC
   </text>
-  <text x="104" y="322" fill="#52525B" font-family="Arial, Helvetica, sans-serif" font-size="30">
-    Next.js 16 · Tailwind CSS · TanStack Query
+  <text x="132" y="272" fill="#0C4767" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">
+    Autonomous project
   </text>
-  <text x="104" y="372" fill="#71717A" font-family="Arial, Helvetica, sans-serif" font-size="28">
-    Production-oriented starter template for modern responsive websites
+  <text x="132" y="346" fill="#0C4767" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">
+    management for teams
+  </text>
+  <text x="132" y="418" fill="#61717C" font-family="Arial, Helvetica, sans-serif" font-size="30">
+    AI agents plan, coordinate, and surface delivery signals
+  </text>
+  <text x="132" y="462" fill="#61717C" font-family="Arial, Helvetica, sans-serif" font-size="30">
+    so small teams can start projects with less overhead.
+  </text>
+  <rect x="132" y="492" width="244" height="48" rx="24" fill="#0C4767"/>
+  <text x="164" y="524" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700">
+    Ship with agents
   </text>
 </svg>

@@ -8,6 +8,7 @@ export const METADATA = {
     "Autonomous project management that turns team goals into coordinated plans, tasks, and execution signals.",
   locale: "en_US",
   imageUrl: "/images/og-default.svg",
+  imageAlt: "Prizmatic autonomous project management platform social preview",
   imageType: "image/svg+xml",
   themeColor: "#0B1533",
   keywords: [
