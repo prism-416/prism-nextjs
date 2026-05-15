@@ -6,12 +6,14 @@ type LandingCapabilityCardProps = {
   title: string;
   description: string;
   icon: LucideIcon;
+  signal: string;
 };
 
-export default function LandingCapabilityCard({ title, description, icon: Icon }: LandingCapabilityCardProps) {
+export default function LandingCapabilityCard({ title, description, icon: Icon, signal }: LandingCapabilityCardProps) {
   return (
     <article className="group relative overflow-hidden rounded-[1.75rem] border border-border bg-(image:--gradient-capability-card) p-7 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-prism-teal-500/60 hover:shadow-xl hover:shadow-prism-teal-500/10">
-      <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-prism-teal-500/10 blur-2xl transition group-hover:bg-prism-teal-500/20" />
+      <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-prism-glow-sky/12 blur-2xl transition group-hover:bg-prism-glow-sky/22" />
+      <div className="absolute bottom-0 left-8 h-20 w-20 rounded-full bg-prism-glow-magenta/8 blur-2xl" />
       <div className="relative flex size-12 items-center justify-center rounded-2xl bg-prism-navy text-white shadow-lg shadow-prism-navy/15">
         <Icon
           className="size-5"
@@ -33,7 +35,7 @@ export default function LandingCapabilityCard({ title, description, icon: Icon }
       >
         {description}
       </Typography>
-      <div className="relative mt-8 inline-flex items-center gap-2">
+      <div className="relative mt-8 inline-flex items-center gap-2 rounded-full border border-border/70 bg-white/72 px-3 py-1.5">
         <Typography
           as="span"
           variant="bodySm"
@@ -41,7 +43,7 @@ export default function LandingCapabilityCard({ title, description, icon: Icon }
           weight="medium"
           className="text-prism-navy"
         >
-          Operational clarity by design
+          {signal}
         </Typography>
         <ArrowRight
           className="size-4 text-prism-navy transition group-hover:translate-x-1"

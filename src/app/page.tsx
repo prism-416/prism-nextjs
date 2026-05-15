@@ -1,10 +1,10 @@
-﻿import Container from "@/atomics/atoms/Container";
-import LandingFooter from "@/domains/home/components/LandingFooter";
+﻿import LandingFooter from "@/domains/home/components/LandingFooter";
 import LandingHeader from "@/domains/home/components/LandingHeader";
 import LandingCapabilitiesSection from "@/domains/home/components/LandingCapabilitiesSection";
 import LandingHeroSection from "@/domains/home/components/LandingHeroSection";
 import LandingLaunchSection from "@/domains/home/components/LandingLaunchSection";
-import LandingWorkflowSection from "@/domains/home/components/LandingWorkflowSection";
+import LandingProductPreview from "@/domains/home/components/LandingProductPreview";
+import LandingTrustBar from "@/domains/home/components/LandingTrustBar";
 
 export default function Home() {
   return (
@@ -12,17 +12,10 @@ export default function Home() {
       <LandingHeader />
       <main className="flex-1">
         <LandingHeroSection />
+        <LandingTrustBar />
         <LandingCapabilitiesSection />
-        <LandingWorkflowSection />
-        <section
-          id="launch"
-          aria-labelledby="launch-heading"
-          className="scroll-mt-20 bg-(image:--gradient-launch-surface) py-20 md:py-24"
-        >
-          <Container>
-            <LandingLaunchSection />
-          </Container>
-        </section>
+        <LandingProductPreview />
+        <LandingLaunchSection />
       </main>
       <LandingFooter />
     </div>
