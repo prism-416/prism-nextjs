@@ -56,6 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
         {
           url: METADATA.imageUrl,
           secureUrl: METADATA.imageUrl,
+          alt: METADATA.imageAlt,
           type: METADATA.imageType,
           width: 1200,
           height: 630,
@@ -95,7 +96,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="ko"
+      lang="en"
       suppressHydrationWarning
       className={`${pretendard.variable}`}
     >

@@ -10,15 +10,15 @@ export default function LandingHeroSection() {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="relative overflow-hidden border-b border-border bg-prism-cream"
+      className="relative overflow-hidden border-b border-border bg-(image:--gradient-hero-surface)"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-prism-teal-500/60 to-transparent" />
-      <div className="pointer-events-none absolute right-[-12rem] top-10 size-[34rem] rounded-full bg-prism-glow-sky/18 blur-3xl" />
-      <div className="pointer-events-none absolute right-20 top-24 size-72 rounded-full bg-prism-glow-violet/14 blur-3xl" />
+      <div className="pointer-events-none absolute right-[-12rem] top-10 size-[34rem] rounded-full bg-prism-glow-sky/14 blur-3xl" />
+      <div className="pointer-events-none absolute right-20 top-24 size-72 rounded-full bg-prism-glow-violet/10 blur-3xl" />
 
       <Container className="relative py-16 md:py-20 lg:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-6 xl:col-span-5">
+          <div className="lg:col-span-6">
             <div className="flex justify-center lg:justify-start">
               <div className="inline-flex items-center gap-2 rounded-full border border-prism-teal-500/30 bg-surface-strong/85 px-4 py-1.5 shadow-sm backdrop-blur">
                 <Sparkles
@@ -72,11 +72,11 @@ export default function LandingHeroSection() {
             </div>
           </div>
 
-          <div className="lg:col-span-6 xl:col-span-7">
+          <div className="lg:col-span-6">
             <div className="relative mx-auto max-w-xl lg:mr-0">
-              <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_56%_46%,rgba(99,178,255,0.26),transparent_58%)] blur-2xl" />
+              <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_56%_46%,rgba(99,178,255,0.2),transparent_58%)] blur-2xl" />
               <div className="relative overflow-hidden rounded-[2rem] border border-border bg-surface-strong/90 p-4 shadow-2xl shadow-prism-navy/10 backdrop-blur">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_18%,rgba(255,241,168,0.45),transparent_32%),radial-gradient(circle_at_82%_20%,rgba(157,123,255,0.2),transparent_28%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_18%,rgba(255,241,168,0.32),transparent_32%),radial-gradient(circle_at_82%_20%,rgba(157,123,255,0.14),transparent_28%)]" />
                 <div className="relative rounded-[1.5rem] border border-border/70 bg-white/85 p-5 sm:p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -146,7 +146,7 @@ function HeroFeatureCard({ feature }: { feature: LandingHeroFeature }) {
   const Icon = feature.icon;
 
   return (
-    <article className="rounded-2xl border border-border/70 bg-white/90 p-4 shadow-sm">
+    <article className="rounded-2xl border border-border/70 bg-white/90 p-4 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/45 hover:shadow-md">
       <div className="flex size-10 items-center justify-center rounded-xl bg-prism-navy text-white shadow-lg shadow-prism-navy/12">
         <Icon
           className="size-4"

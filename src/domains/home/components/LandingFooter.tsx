@@ -32,7 +32,7 @@ export default function LandingFooter() {
               href={item.href}
               target={item.href.startsWith("http") ? "_blank" : undefined}
               rel={item.href.startsWith("http") ? "noreferrer" : undefined}
-              className="text-sm text-muted transition-colors hover:text-primary"
+              className="text-sm text-muted transition-colors duration-150 hover:text-primary"
             >
               {item.label}
             </Link>
