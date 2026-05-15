@@ -39,8 +39,8 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: METADATA.keywords,
     robots,
     icons: {
-      icon: "/icon.svg",
-      shortcut: "/icon.svg",
+      icon: "/favicon.ico",
+      shortcut: "/favicon.ico",
       apple: "/icon.svg",
     },
     alternates: {
