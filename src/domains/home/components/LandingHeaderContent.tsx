@@ -4,6 +4,7 @@ import Container from "@/atomics/atoms/Container";
 import { cn } from "@/shared/utils/cn";
 import { METADATA } from "@/shared/constants/metadata";
 import { SITE_AUTH_ACTIONS, SITE_AUTHENTICATED_ACTION, SITE_NAVIGATION } from "@/shared/constants/site";
+import { Typography } from "@/atomics/atoms/Typography";
 
 type LandingHeaderContentProps = {
   isAuthenticated?: boolean;
@@ -24,12 +25,20 @@ export default function LandingHeaderContent({ isAuthenticated = false }: Landin
           <Image
             src="/images/prizmatic-logo.png"
             alt=""
-            width={40}
-            height={40}
+            width={20}
+            height={20}
             priority
-            className="size-10 shrink-0 object-contain"
+            className="size-5.5 shrink-0 object-contain"
           />
-          <span>{METADATA.siteName}</span>
+          <Typography
+            as="span"
+            variant="body"
+            fontSize="xl"
+            tone="primary"
+            weight="semibold"
+          >
+            {METADATA.siteName}
+          </Typography>
         </Link>
         <nav
           aria-label="Primary"
