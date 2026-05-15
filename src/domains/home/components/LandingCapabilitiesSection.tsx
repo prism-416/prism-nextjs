@@ -13,13 +13,14 @@ export default function LandingCapabilitiesSection() {
         <LandingSectionIntro {...LANDING_CAPABILITIES_INTRO} />
       </div>
 
-      <div className="mt-14 grid gap-6 lg:grid-cols-3">
-        {LANDING_CAPABILITIES.map(({ title, description, icon }) => (
+      <div className="mt-14 grid gap-5 md:grid-cols-2">
+        {LANDING_CAPABILITIES.map(({ title, description, icon, signal }) => (
           <LandingCapabilityCard
             key={title}
             title={title}
             description={description}
             icon={icon}
+            signal={signal}
           />
         ))}
       </div>

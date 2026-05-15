@@ -1,4 +1,13 @@
-import { Activity, Bot, CheckCheck, GitBranch, type LucideIcon } from "lucide-react";
+import {
+  Activity,
+  Bot,
+  CalendarDays,
+  CheckCheck,
+  GitBranch,
+  GitPullRequest,
+  Newspaper,
+  type LucideIcon,
+} from "lucide-react";
 
 export type LandingHeroFeature = {
   title: string;
@@ -10,12 +19,30 @@ export type LandingCapability = {
   title: string;
   description: string;
   icon: LucideIcon;
+  signal: string;
 };
 
 export type LandingStep = {
   step: string;
   title: string;
   description: string;
+};
+
+export type LandingProductMetric = {
+  label: string;
+  value: string;
+};
+
+export type LandingProductBoardItem = {
+  title: string;
+  meta: string;
+  agent: string;
+};
+
+export type LandingProductBoardColumn = {
+  title: string;
+  summary: string;
+  items: readonly LandingProductBoardItem[];
 };
 
 export const HERO_CONTENT = {
@@ -56,31 +83,105 @@ export const HERO_FEATURES: readonly LandingHeroFeature[] = [
   },
 ] as const;
 
+export const LANDING_TRUST_COMPANIES = ["Linear", "Vercel", "Figma", "Retool", "GitHub", "Notion", "Slack"] as const;
+
 export const LANDING_CAPABILITIES_INTRO = {
-  eyebrow: "Why Prizmatic",
-  title: "New teams need momentum, not ceremony.",
+  eyebrow: "Agent Capabilities",
+  title: "The work around the work, handled by agents.",
   description:
-    "Prizmatic gives small teams structure before process debt appears. Agents define the shape of the work early so the project can move before rituals and overhead slow it down.",
+    "Prizmatic turns scattered product signals into a calm operating layer for planning, reviews, updates, and daily execution.",
 } as const;
 
 export const LANDING_CAPABILITIES: readonly LandingCapability[] = [
   {
-    title: "Agents build the first operating system",
-    description:
-      "Start with a goal, not a perfect process. Agents turn the objective into milestones, priorities, and the first execution path automatically.",
+    title: "AI Backlog Assistant",
+    description: "Turn goals, customer notes, and open questions into prioritized work with crisp acceptance criteria.",
     icon: Bot,
+    signal: "Goal to backlog in minutes",
   },
   {
-    title: "Everything stays aligned from day one",
+    title: "Sprint Planning",
     description:
-      "Goals, tasks, and progress stay connected in one system so a small team does not fragment the moment work begins.",
-    icon: GitBranch,
+      "Balance scope, dependencies, and capacity into a sprint plan that stays readable as priorities shift.",
+    icon: CalendarDays,
+    signal: "Capacity-aware planning",
   },
   {
-    title: "Humans stay on product judgment",
+    title: "PR Review Bot",
+    description: "Summarize code changes, flag risky diffs, and connect pull requests back to the work they unblock.",
+    icon: GitPullRequest,
+    signal: "Context before review",
+  },
+  {
+    title: "Daily Summaries",
     description:
-      "Agents carry the management load while the team steps in for priorities, tradeoffs, and the decisions that actually require human context.",
-    icon: CheckCheck,
+      "Collect progress, blockers, and decisions into concise updates before another status meeting appears.",
+    icon: Newspaper,
+    signal: "Async team visibility",
+  },
+] as const;
+
+export const LANDING_PRODUCT_PREVIEW_INTRO = {
+  eyebrow: "Product Preview",
+  title: "A sprint board that already knows the plan.",
+  description:
+    "The landing preview mirrors how Prizmatic keeps goals, agent output, and delivery signals in one premium workspace without live data dependencies.",
+} as const;
+
+export const LANDING_PRODUCT_METRICS: readonly LandingProductMetric[] = [
+  { label: "Sprint health", value: "92%" },
+  { label: "Open blockers", value: "3" },
+  { label: "Agent actions", value: "18" },
+] as const;
+
+export const LANDING_PRODUCT_BOARD: readonly LandingProductBoardColumn[] = [
+  {
+    title: "Ready",
+    summary: "Backlog shaped by AI",
+    items: [
+      {
+        title: "Refine onboarding checklist",
+        meta: "Acceptance criteria drafted",
+        agent: "Backlog Assistant",
+      },
+      {
+        title: "Map analytics events",
+        meta: "Dependencies linked",
+        agent: "Sprint Planner",
+      },
+    ],
+  },
+  {
+    title: "In Progress",
+    summary: "Work moving this sprint",
+    items: [
+      {
+        title: "Ship workspace invite flow",
+        meta: "PR review context ready",
+        agent: "PR Review Bot",
+      },
+      {
+        title: "Resolve billing edge cases",
+        meta: "Blocker surfaced",
+        agent: "Daily Summary",
+      },
+    ],
+  },
+  {
+    title: "Done",
+    summary: "Signals closed out",
+    items: [
+      {
+        title: "Launch reference hero",
+        meta: "Release notes prepared",
+        agent: "Daily Summary",
+      },
+      {
+        title: "Triage navigation copy",
+        meta: "Decision logged",
+        agent: "Backlog Assistant",
+      },
+    ],
   },
 ] as const;
 
