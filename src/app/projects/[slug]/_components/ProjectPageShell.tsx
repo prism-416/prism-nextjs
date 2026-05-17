@@ -2,6 +2,7 @@ import type * as React from "react";
 import { notFound } from "next/navigation";
 
 import { getProjectBySlug, getProjects } from "@/domains/projects/api";
+import { ProjectRealtimeRoomBridge } from "@/domains/projects/components/ProjectRealtimeRoomBridge";
 import { ProjectSidebar } from "@/domains/projects/components/ProjectSidebar";
 import { getWorkspaceById, getWorkspaceMembers, getWorkspaces } from "@/domains/workspaces/api";
 import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
@@ -94,6 +95,7 @@ export async function ProjectPageShell({
         />
       }
     >
+      <ProjectRealtimeRoomBridge projectId={project.projectId} />
       {resolvedChildren}
     </WorkspaceShell>
   );
