@@ -81,7 +81,7 @@ export default function LandingHeaderContent({ isAuthenticated = false }: Landin
         </nav>
         <Link
           href={mobileAction.href}
-          className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-md shadow-prism-navy/10 transition duration-150 hover:bg-prism-navy-deep md:hidden"
+          className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-md shadow-prism-navy/10 transition duration-150 hover:bg-prism-navy-deep lg:hidden"
         >
           {mobileActionLabel}
         </Link>
