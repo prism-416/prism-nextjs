@@ -13,8 +13,8 @@ export default function LandingHeroSection() {
       aria-labelledby="hero-heading"
       className="relative overflow-hidden border-b border-border bg-[#f8f7fc]"
     >
-      <Container className="relative py-16 md:py-20 lg:py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
+      <Container className="relative py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-10">
           <div className="relative z-30 lg:col-span-6">
             <div className="flex justify-center lg:justify-start">
               <div className="inline-flex items-center gap-2 rounded-full border border-prism-teal-500/30 bg-surface-strong/85 px-4 py-1.5 shadow-sm backdrop-blur">
@@ -40,7 +40,7 @@ export default function LandingHeroSection() {
               tone="inherit"
               wrap="balance"
               align="center"
-              className="mt-6 text-prism-navy lg:text-left"
+              className="mt-5 text-[2.75rem] leading-[0.98] text-prism-navy sm:mt-6 sm:text-[3.5rem] md:text-[4.5rem] lg:text-left lg:text-[5rem] xl:text-[5.5rem]"
             >
               {HERO_CONTENT.title}
             </Typography>
@@ -55,7 +55,7 @@ export default function LandingHeroSection() {
               {HERO_CONTENT.description}
             </Typography>
 
-            <div className="mt-9 flex flex-wrap justify-center gap-3 lg:justify-start">
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap lg:justify-start">
               <LandingCtaLink
                 href={HERO_CONTENT.primaryCta.href}
                 label={HERO_CONTENT.primaryCta.label}
@@ -70,7 +70,7 @@ export default function LandingHeroSection() {
           </div>
 
           <div className="relative z-10 lg:col-span-6">
-            <div className="relative isolate mx-auto min-h-112 max-w-3xl lg:mr-0">
+            <div className="relative isolate mx-auto min-h-72 max-w-3xl sm:min-h-88 lg:mr-0 lg:min-h-112">
               <div className="pointer-events-none absolute inset-x-[-28%] -top-24 bottom-[-28%] z-0">
                 <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_52%_60%,rgba(128,192,255,0.24),transparent_54%)] blur-3xl" />
                 <Image
@@ -85,9 +85,9 @@ export default function LandingHeroSection() {
                 />
               </div>
 
-              <div className="relative z-10 min-h-112" />
+              <div className="relative z-10 min-h-72 sm:min-h-88 lg:min-h-112" />
 
-              <div className="relative z-20 grid gap-3 sm:grid-cols-2 lg:absolute lg:right-0 lg:top-1/2 lg:w-64 lg:-translate-y-1/2 lg:translate-x-36 lg:grid-cols-1 xl:translate-x-44">
+              <div className="relative z-20 grid gap-3 sm:grid-cols-2 lg:absolute lg:right-0 lg:top-1/2 lg:w-64 lg:-translate-y-1/2 lg:grid-cols-1 2xl:translate-x-20">
                 {HERO_FEATURES.map(feature => (
                   <HeroFeatureCard
                     key={feature.title}
@@ -107,7 +107,7 @@ function HeroFeatureCard({ feature }: { feature: LandingHeroFeature }) {
   const Icon = feature.icon;
 
   return (
-    <article className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-lg shadow-prism-navy/10 backdrop-blur-md transition duration-150 hover:-translate-y-0.5 hover:bg-white/90">
+    <article className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-lg shadow-prism-navy/10 backdrop-blur-md transition duration-150 hover:-translate-y-0.5 hover:bg-white/90 sm:p-5">
       <div className="flex items-start gap-3.5">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-prism-navy text-white shadow-md shadow-prism-navy/10">
           <Icon

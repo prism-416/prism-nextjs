@@ -25,7 +25,7 @@ export default function LandingCtaLink({ href, label, variant = "primary" }: Lan
     <Link
       href={href}
       className={cn(
-        "inline-flex h-12 items-center justify-center rounded-full px-8 text-sm font-semibold transition duration-150",
+        "inline-flex h-12 w-full items-center justify-center rounded-full px-6 text-sm font-semibold transition duration-150 sm:w-auto sm:px-8",
         CTA_VARIANTS[variant],
       )}
     >
