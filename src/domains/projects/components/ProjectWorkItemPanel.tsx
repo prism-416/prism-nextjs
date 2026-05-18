@@ -4,14 +4,18 @@ import { ArrowLeft, GitBranch, RefreshCw } from "lucide-react";
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { CreateProjectWorkItemForm } from "@/domains/projects/components/CreateProjectWorkItemForm";
+import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/ProjectWorkItemCommentsPanel";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import { ProjectWorkItemStatusBadge } from "@/domains/projects/components/ProjectWorkItemStatusBadge";
 import type {
+  ProjectMemberListItem,
   ProjectWorkItem,
+  ProjectWorkItemCommentSearchResult,
   ProjectWorkItemPriority,
   ProjectWorkItemStatus,
   ProjectWorkItemType,
 } from "@/domains/projects/types";
+import type { CurrentUser } from "@/shared/types/auth";
 import {
   formatProjectRelativeDateTime,
   getProjectWorkItemPriorityLabel,
@@ -26,13 +30,18 @@ type ProjectWorkItemPanelProps = {
   projectSlug: string;
   workItem: ProjectWorkItem;
   childItems: ProjectWorkItem[];
+  comments: ProjectWorkItemCommentSearchResult;
+  initialMembers?: ProjectMemberListItem[];
+  initialCurrentUser?: CurrentUser;
   isChildrenError: boolean;
+  isCommentsError: boolean;
   updatingItemId: string | null;
   isUpdatingItem: boolean;
   updateError: string | null;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
   onRetryChildren: () => void;
+  onRetryComments: () => void;
 };
 
 const WORK_ITEM_TYPE_LABELS: Record<ProjectWorkItemType, string> = {
@@ -188,13 +197,18 @@ export function ProjectWorkItemPanel({
   projectSlug,
   workItem,
   childItems,
+  comments,
+  initialMembers,
+  initialCurrentUser,
   isChildrenError,
+  isCommentsError,
   updatingItemId,
   isUpdatingItem,
   updateError,
   onStatusUpdate,
   onPriorityUpdate,
   onRetryChildren,
+  onRetryComments,
 }: ProjectWorkItemPanelProps) {
   const workItemsHref = `/projects/${encodeURIComponent(projectSlug)}/work-items`;
 
@@ -341,6 +355,16 @@ export function ProjectWorkItemPanel({
           </div>
         )}
       </div>
+
+      <ProjectWorkItemCommentsPanel
+        projectId={projectId}
+        itemId={workItem.itemId}
+        comments={comments}
+        initialMembers={initialMembers}
+        initialCurrentUser={initialCurrentUser}
+        isError={isCommentsError}
+        onRetry={onRetryComments}
+      />
     </section>
   );
 }

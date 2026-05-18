@@ -38,6 +38,10 @@ export const QUERY_KEYS = {
       [...QUERY_KEYS.project.workItems(projectId), "detail", itemId] as const,
     workItemChildren: (projectId: string, itemId: string) =>
       [...QUERY_KEYS.project.workItemDetail(projectId, itemId), "children"] as const,
+    workItemComments: (projectId: string, itemId: string) =>
+      [...QUERY_KEYS.project.workItemDetail(projectId, itemId), "comments"] as const,
+    workItemCommentList: (projectId: string, itemId: string, filters?: object) =>
+      [...QUERY_KEYS.project.workItemComments(projectId, itemId), "list", filters ?? {}] as const,
     sprints: (projectId: string) => [...QUERY_KEYS.project.detail(projectId), "sprints"] as const,
     sprintDetail: (projectId: string, sprintId: string) =>
       [...QUERY_KEYS.project.sprints(projectId), "detail", sprintId] as const,

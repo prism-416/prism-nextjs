@@ -22,6 +22,8 @@ import type {
 } from "../types";
 import { getDefinedProjectWorkItemSearchParams, getEmptyProjectWorkItemSearchResult } from "../utils/work-item";
 
+export * from "./comments";
+
 export async function getProjectsByWorkspaceId(workspaceId: string) {
   const response = await commonAxios<{ workspaceId: string }, ApiResponse<ProjectSummary[]>>({
     url: "/projects",
