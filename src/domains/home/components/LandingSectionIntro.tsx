@@ -21,7 +21,7 @@ export default function LandingSectionIntro({ eyebrow, title, description }: Lan
         variant="h2"
         tone="inherit"
         wrap="balance"
-        className="mt-4 text-prism-navy"
+        className="mt-4 text-[2rem] text-prism-navy sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3rem]"
       >
         {title}
       </Typography>
@@ -31,7 +31,7 @@ export default function LandingSectionIntro({ eyebrow, title, description }: Lan
         wrap="pretty"
         fontSize="lg"
         lineHeight="7"
-        className="mt-5 md:text-lg"
+        className="mt-4 md:mt-5 md:text-lg"
       >
         {description}
       </Typography>

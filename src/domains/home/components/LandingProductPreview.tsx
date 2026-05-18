@@ -32,17 +32,17 @@ export default function LandingProductPreview() {
   return (
     <LandingSectionShell
       id="workflow"
-      className="relative overflow-hidden border-b border-border bg-(image:--gradient-workflow-surface) py-20 md:py-24"
+      className="relative overflow-hidden border-b border-border bg-(image:--gradient-workflow-surface) py-16 md:py-20 lg:py-24"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-prism-teal-500/60 to-transparent" />
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:items-center">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:items-center lg:gap-12">
         <div>
           <LandingSectionIntro {...LANDING_PRODUCT_PREVIEW_INTRO} />
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-3 md:mt-8 md:gap-4">
             {LANDING_PRODUCT_METRICS.map(metric => (
               <div
                 key={metric.label}
-                className="rounded-3xl border border-border bg-white/72 p-5 shadow-[0_14px_40px_rgba(12,71,103,0.06)] transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/45"
+                className="rounded-3xl border border-border bg-white/72 p-4 shadow-[0_14px_40px_rgba(12,71,103,0.06)] transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/45 sm:p-5"
               >
                 <Typography
                   variant="bodySm"
@@ -65,11 +65,11 @@ export default function LandingProductPreview() {
 
         <div className="relative">
           <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_55%_45%,rgba(99,178,255,0.16),transparent_55%),radial-gradient(circle_at_22%_18%,rgba(255,107,198,0.08),transparent_32%)] blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-border bg-surface-strong/92 p-3 shadow-2xl shadow-prism-navy/12 backdrop-blur">
+          <div className="relative overflow-hidden rounded-[2rem] border border-border bg-surface-strong/92 p-2 shadow-2xl shadow-prism-navy/12 backdrop-blur sm:p-3">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(255,241,168,0.26),transparent_26%),radial-gradient(circle_at_85%_18%,rgba(157,123,255,0.1),transparent_28%)]" />
             <div className="relative rounded-[1.5rem] border border-border/70 bg-white/88">
               <PreviewHeader />
-              <div className="grid gap-3 border-t border-border/70 bg-prism-sand-soft/28 p-4 md:grid-cols-3">
+              <div className="grid gap-3 border-t border-border/70 bg-prism-sand-soft/28 p-3 sm:p-4 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
                 {LANDING_PRODUCT_BOARD.map(column => (
                   <PreviewColumn
                     key={column.title}
@@ -87,7 +87,7 @@ export default function LandingProductPreview() {
 
 function PreviewHeader() {
   return (
-    <div className="flex flex-col gap-5 p-5 md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-5 p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-3">
         <div className="flex size-12 items-center justify-center rounded-2xl bg-prism-navy text-white shadow-lg shadow-prism-navy/15">
           <Sparkles
@@ -165,7 +165,7 @@ function PreviewColumn({ column }: { column: LandingProductBoardColumn }) {
 
 function PreviewCard({ item }: { item: LandingProductBoardItem }) {
   return (
-    <article className="rounded-2xl border border-border/70 bg-white p-4 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/40 hover:shadow-md">
+    <article className="rounded-2xl border border-border/70 bg-white p-3 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/40 hover:shadow-md sm:p-4">
       <div className="flex items-start justify-between gap-3">
         <Typography
           variant="bodySm"

@@ -10,7 +10,7 @@ export default function LandingTrustBar() {
       className="border-b border-border bg-surface-strong/88 py-8"
     >
       <Container>
-        <div className="flex flex-col gap-5 rounded-[1.75rem] border border-border bg-white/72 px-5 py-5 shadow-[0_14px_40px_rgba(12,71,103,0.06)] md:flex-row md:items-center md:justify-between md:px-7">
+        <div className="flex flex-col gap-5 rounded-[1.75rem] border border-border bg-white/72 px-5 py-5 shadow-[0_14px_40px_rgba(12,71,103,0.06)] md:px-7 lg:flex-row lg:items-center lg:justify-between">
           <Typography
             variant="overline"
             tone="muted"
@@ -19,7 +19,7 @@ export default function LandingTrustBar() {
           >
             Trusted by teams shipping with
           </Typography>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex lg:flex-1 lg:justify-end">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex lg:flex-1 lg:flex-wrap lg:justify-end">
             {LANDING_TRUST_COMPANIES.map(company => (
               <div
                 key={company}
