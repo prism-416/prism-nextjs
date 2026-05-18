@@ -47,7 +47,7 @@ export type LandingProductBoardColumn = {
 
 export const HERO_CONTENT = {
   badge: "AI-powered project management",
-  title: "The Autonomous Project Management Platform",
+  title: "Your Project Manager Never Sleeps.",
   description:
     "Prizmatic brings AI agents, structured workflows, and deep integrations together in one place so teams can plan, coordinate, and ship with less manual project management.",
   primaryCta: {
