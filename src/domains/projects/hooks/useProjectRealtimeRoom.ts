@@ -2,9 +2,21 @@
 
 import * as React from "react";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { PROJECT_REALTIME_EVENTS } from "@/domains/projects/constants/realtime";
-import type { ProjectRealtimeErrorPayload, ProjectRealtimeSocket } from "@/domains/projects/types/realtime";
+import type {
+  ProjectRealtimeErrorPayload,
+  ProjectRealtimeSocket,
+  ProjectWorkItemDeletedPayload,
+} from "@/domains/projects/types/realtime";
+import type { ProjectWorkItem } from "@/domains/projects/types";
 import { createProjectRealtimeSocket } from "@/domains/projects/utils/realtime-client";
+import {
+  syncProjectWorkItemCreated,
+  syncProjectWorkItemDeleted,
+  syncProjectWorkItemUpdated,
+} from "@/domains/projects/utils/work-item-cache";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { getCookie } from "@/shared/utils/cookie";
 
@@ -15,6 +27,7 @@ type UseProjectRealtimeRoomParams = {
 };
 
 export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomParams) {
+  const queryClient = useQueryClient();
   const [status, setStatus] = React.useState<ProjectRealtimeRoomStatus>("idle");
   const [lastError, setLastError] = React.useState<ProjectRealtimeErrorPayload | null>(null);
 
@@ -63,11 +76,32 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
       }
     };
 
+    const handleWorkItemCreated = (payload: ProjectWorkItem) => {
+      if (payload.projectId === projectId) {
+        syncProjectWorkItemCreated(queryClient, payload);
+      }
+    };
+
+    const handleWorkItemUpdated = (payload: ProjectWorkItem) => {
+      if (payload.projectId === projectId) {
+        syncProjectWorkItemUpdated(queryClient, payload);
+      }
+    };
+
+    const handleWorkItemDeleted = (payload: ProjectWorkItemDeletedPayload) => {
+      if (payload.projectId === projectId) {
+        syncProjectWorkItemDeleted(queryClient, payload);
+      }
+    };
+
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
     socket.on("exception", handleException);
     socket.on(PROJECT_REALTIME_EVENTS.PROJECT_JOINED, handleProjectJoined);
+    socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_CREATED, handleWorkItemCreated);
+    socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_UPDATED, handleWorkItemUpdated);
+    socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_DELETED, handleWorkItemDeleted);
     socket.connect();
 
     return () => {
@@ -77,7 +111,7 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
 
       socket.disconnect();
     };
-  }, [projectId]);
+  }, [projectId, queryClient]);
 
   return {
     lastError,
