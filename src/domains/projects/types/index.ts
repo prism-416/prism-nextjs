@@ -133,6 +133,32 @@ export interface UpdateProjectWorkItemPayload {
   labelNames?: string[];
 }
 
+export interface ProjectWorkItemComment {
+  commentId: string;
+  projectId: string;
+  itemId: string;
+  authorUserId: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface ProjectWorkItemCommentSearchParams {
+  limit?: number;
+  offset?: number;
+}
+
+export interface ProjectWorkItemCommentSearchResult {
+  comments: ProjectWorkItemComment[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface CreateProjectWorkItemCommentPayload {
+  body: string;
+}
+
 export type ProjectSprintStatus = "backlog" | "in_progress" | "done";
 
 export interface ProjectSprint {

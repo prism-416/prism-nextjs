@@ -5,10 +5,18 @@ import * as React from "react";
 import { ProjectErrorState } from "@/domains/projects/components/ProjectErrorState";
 import { ProjectWorkItemPanel } from "@/domains/projects/components/ProjectWorkItemPanel";
 import { ProjectWorkItemSkeleton } from "@/domains/projects/components/ProjectWorkItemSkeleton";
+import { useProjectWorkItemComments } from "@/domains/projects/hooks/useProjectWorkItemComments";
 import { useProjectWorkItem } from "@/domains/projects/hooks/useProjectWorkItem";
 import { useProjectWorkItemChildren } from "@/domains/projects/hooks/useProjectWorkItemChildren";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
-import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
+import type {
+  ProjectMemberListItem,
+  ProjectWorkItem,
+  ProjectWorkItemCommentSearchResult,
+  ProjectWorkItemPriority,
+  ProjectWorkItemStatus,
+} from "@/domains/projects/types";
+import type { CurrentUser } from "@/shared/types/auth";
 
 type ProjectWorkItemClientProps = {
   projectId: string;
@@ -16,6 +24,9 @@ type ProjectWorkItemClientProps = {
   itemId: string;
   initialWorkItem?: ProjectWorkItem;
   initialChildren?: ProjectWorkItem[];
+  initialComments?: ProjectWorkItemCommentSearchResult;
+  initialMembers?: ProjectMemberListItem[];
+  initialCurrentUser?: CurrentUser;
 };
 
 export function ProjectWorkItemClient({
@@ -24,6 +35,9 @@ export function ProjectWorkItemClient({
   itemId,
   initialWorkItem,
   initialChildren,
+  initialComments,
+  initialMembers,
+  initialCurrentUser,
 }: ProjectWorkItemClientProps) {
   const [updatingItemId, setUpdatingItemId] = React.useState<string | null>(null);
   const [updateError, setUpdateError] = React.useState<string | null>(null);
@@ -38,6 +52,11 @@ export function ProjectWorkItemClient({
     isError: isChildrenError,
     refetch: refetchChildren,
   } = useProjectWorkItemChildren(projectId, itemId, initialChildren);
+  const {
+    data: comments,
+    isError: isCommentsError,
+    refetch: refetchComments,
+  } = useProjectWorkItemComments(projectId, itemId, undefined, initialComments);
   const { mutateAsync: updateWorkItem, isPending: isUpdatingItem } = useUpdateProjectWorkItem();
 
   const handleUpdate = React.useCallback(
@@ -89,7 +108,11 @@ export function ProjectWorkItemClient({
       projectSlug={projectSlug}
       workItem={workItem}
       childItems={childItems}
+      comments={comments ?? { comments: [], total: 0, limit: 50, offset: 0 }}
+      initialMembers={initialMembers}
+      initialCurrentUser={initialCurrentUser}
       isChildrenError={isChildrenError}
+      isCommentsError={isCommentsError}
       updatingItemId={updatingItemId}
       isUpdatingItem={isUpdatingItem}
       updateError={updateError}
@@ -102,6 +125,9 @@ export function ProjectWorkItemClient({
       onRetryChildren={() => {
         setUpdateError(null);
         void refetchChildren();
+      }}
+      onRetryComments={() => {
+        void refetchComments();
       }}
     />
   );

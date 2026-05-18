@@ -1,7 +1,13 @@
 import { notFound } from "next/navigation";
 
-import { getProjectWorkItem, getProjectWorkItemChildren } from "@/domains/projects/api";
+import {
+  getProjectMembers,
+  getProjectWorkItem,
+  getProjectWorkItemChildren,
+  getProjectWorkItemComments,
+} from "@/domains/projects/api";
 import { ProjectWorkItemClient } from "@/domains/projects/components/ProjectWorkItemClient";
+import { getCurrentUser } from "@/shared/api/auth";
 
 type ProjectWorkItemContentProps = {
   projectId: string;
@@ -16,7 +22,12 @@ export async function ProjectWorkItemContent({ projectId, projectSlug, itemId }:
     notFound();
   }
 
-  const initialChildren = await getProjectWorkItemChildren(projectId, itemId).catch(() => undefined);
+  const [initialChildren, initialComments, initialMembers, initialCurrentUser] = await Promise.all([
+    getProjectWorkItemChildren(projectId, itemId).catch(() => undefined),
+    getProjectWorkItemComments(projectId, itemId).catch(() => undefined),
+    getProjectMembers(projectId).catch(() => undefined),
+    getCurrentUser().catch(() => undefined),
+  ]);
 
   return (
     <ProjectWorkItemClient
@@ -25,6 +36,9 @@ export async function ProjectWorkItemContent({ projectId, projectSlug, itemId }:
       itemId={itemId}
       initialWorkItem={initialWorkItem}
       initialChildren={initialChildren}
+      initialComments={initialComments}
+      initialMembers={initialMembers}
+      initialCurrentUser={initialCurrentUser}
     />
   );
 }
