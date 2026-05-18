@@ -15,7 +15,7 @@ export default function LandingHeaderContent({ isAuthenticated = false }: Landin
   const mobileActionLabel = isAuthenticated ? "Open app" : mobileAction.label;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-surface/90 backdrop-blur">
+    <header className="sticky top-0 z-1000 border-b border-border bg-surface/90 backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-6">
         <Link
           href="/"
