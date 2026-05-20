@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Check, Plus, RefreshCw, Save, Search, Trash2, Users, X } from "lucide-react";
+import { Check, CircleCheck, Plus, RefreshCw, Save, Search, Trash2, Users, X } from "lucide-react";
 import Link from "next/link";
 
+import { Badge } from "@/atomics/atoms/Badge";
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Typography } from "@/atomics/atoms/Typography";
@@ -518,9 +519,12 @@ export function ProjectMembersPanel({
                               </span>
                             ) : null}
                             {isCurrentUserMember ? (
-                              <span className="shrink-0 rounded-full border border-border bg-surface-strong px-2 py-0.5 text-xs font-medium text-prism-muted">
+                              <Badge
+                                icon={CircleCheck}
+                                size="sm"
+                              >
                                 You
-                              </span>
+                              </Badge>
                             ) : null}
                           </div>
                           <Typography

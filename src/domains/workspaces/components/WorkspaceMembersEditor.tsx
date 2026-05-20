@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CircleCheck, UserPlus } from "lucide-react";
+import { CircleCheck, Crown, UserPlus } from "lucide-react";
 
+import { Badge } from "@/atomics/atoms/Badge";
 import { Button } from "@/atomics/atoms/Button";
 import { ConfirmDialog } from "@/atomics/organisms/ConfirmDialog";
 import { Typography } from "@/atomics/atoms/Typography";
@@ -16,6 +17,7 @@ import type { InvitationRole, Workspace, WorkspaceMember } from "@/domains/works
 import {
   getWorkspaceMemberDisplayName,
   getWorkspaceMemberInitial,
+  getWorkspaceMemberRoleBadgeClassName,
   getWorkspaceMemberSortRank,
 } from "@/domains/workspaces/utils/member";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
@@ -255,19 +257,20 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft }: Workspace
                   </Typography>
                 </div>
                 {isSelf ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-prism-glow-sky/35 bg-prism-glow-sky/10 px-1.5 py-0.5 text-[11px] font-medium leading-none text-prism-navy">
-                    <CircleCheck className="size-3 text-prism-glow-sky" />
+                  <Badge
+                    icon={CircleCheck}
+                    size="sm"
+                  >
                     You
-                  </span>
+                  </Badge>
                 ) : null}
                 <span
                   className={cn(
-                    "rounded-full border px-1.5 py-0.5 text-[11px] font-medium capitalize leading-none",
-                    isOwner || member.role === "admin"
-                      ? "border-prism-teal-500/30 bg-prism-teal-500/10 text-prism-navy"
-                      : "border-border bg-surface-strong text-prism-muted",
+                    "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] font-medium capitalize leading-none",
+                    getWorkspaceMemberRoleBadgeClassName(member, ownerId),
                   )}
                 >
+                  {isOwner ? <Crown className="size-3" /> : null}
                   {isOwner ? "owner" : member.role}
                 </span>
                 {canShowActions ? (

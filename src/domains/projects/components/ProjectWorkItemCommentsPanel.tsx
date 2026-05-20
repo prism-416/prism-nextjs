@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { RefreshCw, SendHorizontal } from "lucide-react";
+import { CircleCheck, RefreshCw, SendHorizontal } from "lucide-react";
 
+import { Badge } from "@/atomics/atoms/Badge";
 import { Button } from "@/atomics/atoms/Button";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Typography } from "@/atomics/atoms/Typography";
@@ -29,8 +30,6 @@ type ProjectWorkItemCommentsPanelProps = {
 };
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const CURRENT_USER_BADGE_CLASS =
-  "shrink-0 rounded-md bg-[rgba(156,124,255,0.14)] px-2 py-0.5 text-xs font-semibold text-prism-accent";
 const COMMENT_SUBMIT_BUTTON_BASE_CLASS = "h-10 rounded-lg border px-4 disabled:opacity-100 sm:self-end";
 const COMMENT_SUBMIT_BUTTON_IDLE_CLASS =
   "border-prism-navy/30 bg-prism-navy/18 text-prism-navy/70 hover:border-prism-navy/30 hover:bg-prism-navy/18";
@@ -114,7 +113,14 @@ function CommentRow({
             >
               {displayName}
             </Typography>
-            {isCurrentUser && <span className={CURRENT_USER_BADGE_CLASS}>You</span>}
+            {isCurrentUser && (
+              <Badge
+                icon={CircleCheck}
+                size="sm"
+              >
+                You
+              </Badge>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-prism-muted">
             <span>{formatCommentDate(comment.createdAt)}</span>
