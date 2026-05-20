@@ -15,6 +15,7 @@ import type {
 } from "@/domains/projects/types";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import type { CurrentUser } from "@/shared/types/auth";
+import { cn } from "@/shared/utils/cn";
 import { getCurrentUserDisplayName, getCurrentUserInitial } from "@/shared/utils/user-display";
 
 type ProjectWorkItemCommentsPanelProps = {
@@ -28,6 +29,13 @@ type ProjectWorkItemCommentsPanelProps = {
 };
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const CURRENT_USER_BADGE_CLASS =
+  "shrink-0 rounded-md bg-[rgba(156,124,255,0.14)] px-2 py-0.5 text-xs font-semibold text-prism-accent";
+const COMMENT_SUBMIT_BUTTON_BASE_CLASS = "h-10 rounded-lg border px-4 disabled:opacity-100 sm:self-end";
+const COMMENT_SUBMIT_BUTTON_IDLE_CLASS =
+  "border-prism-navy/30 bg-prism-navy/18 text-prism-navy/70 hover:border-prism-navy/30 hover:bg-prism-navy/18";
+const COMMENT_SUBMIT_BUTTON_READY_CLASS =
+  "border-prism-navy bg-prism-navy text-white hover:border-prism-navy/90 hover:bg-prism-navy/90";
 
 function padDatePart(value: number) {
   return value.toString().padStart(2, "0");
@@ -95,22 +103,23 @@ function CommentRow({
     <article className="flex gap-3">
       <CommentAvatar label={getInitial(displayName)} />
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <Typography
-            variant="bodySm"
-            tone="primary"
-            weight="semibold"
-            className="leading-5"
-          >
-            {displayName}
-          </Typography>
-          {isCurrentUser && (
-            <span className="rounded-md bg-prism-accent/10 px-2 py-0.5 text-xs font-semibold text-prism-accent">
-              You
-            </span>
-          )}
-          <span className="text-sm text-prism-muted">{formatCommentDate(comment.createdAt)}</span>
-          {comment.updatedAt && <span className="text-xs text-prism-muted">Edited</span>}
+        <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <Typography
+              as="span"
+              variant="bodySm"
+              tone="primary"
+              weight="semibold"
+              className="truncate leading-5"
+            >
+              {displayName}
+            </Typography>
+            {isCurrentUser && <span className={CURRENT_USER_BADGE_CLASS}>You</span>}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-prism-muted">
+            <span>{formatCommentDate(comment.createdAt)}</span>
+            {comment.updatedAt && <span className="text-xs">Edited</span>}
+          </div>
         </div>
         <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-prism-body">{comment.body}</p>
       </div>
@@ -233,7 +242,10 @@ export function ProjectWorkItemCommentsPanel({
               <Button
                 type="submit"
                 disabled={!trimmedBody || isPending}
-                className="h-10 rounded-lg border border-prism-navy bg-prism-navy px-4 text-white hover:border-prism-navy/90 hover:bg-prism-navy/90 disabled:border-prism-navy/20 disabled:bg-prism-navy/10 disabled:text-prism-navy/55 sm:self-end"
+                className={cn(
+                  COMMENT_SUBMIT_BUTTON_BASE_CLASS,
+                  trimmedBody && !isPending ? COMMENT_SUBMIT_BUTTON_READY_CLASS : COMMENT_SUBMIT_BUTTON_IDLE_CLASS,
+                )}
               >
                 <SendHorizontal className="size-4" />
                 {isPending ? "Posting..." : "Post comment"}

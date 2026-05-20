@@ -1,7 +1,7 @@
-import { formatDistanceToNow } from "date-fns";
-
 import { PROJECT_CARD_GRADIENTS } from "@/domains/projects/constants/display";
 import type { ProjectSummary } from "@/domains/projects/types";
+
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function hashIndex(value: string, length: number) {
   let hash = 0;
@@ -27,9 +27,11 @@ export function getProjectInitials(name: string) {
 }
 
 export function formatProjectRelativeDate(value: string) {
-  try {
-    return formatDistanceToNow(new Date(value), { addSuffix: true });
-  } catch {
-    return new Date(value).toLocaleDateString();
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Invalid date";
   }
+
+  return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 }

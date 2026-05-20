@@ -9,9 +9,17 @@ type ProjectSprintsClientProps = {
   projectId: string;
   projectSlug: string;
   initialData?: ProjectSprint[];
+  defaultSprintStartsAt: string;
+  defaultSprintEndsAt: string;
 };
 
-export function ProjectSprintsClient({ projectId, projectSlug, initialData }: ProjectSprintsClientProps) {
+export function ProjectSprintsClient({
+  projectId,
+  projectSlug,
+  initialData,
+  defaultSprintStartsAt,
+  defaultSprintEndsAt,
+}: ProjectSprintsClientProps) {
   const { data: sprints = [], isPending, isError, refetch } = useProjectSprints(projectId, initialData);
 
   if (isPending && sprints.length === 0) {
@@ -23,6 +31,8 @@ export function ProjectSprintsClient({ projectId, projectSlug, initialData }: Pr
       projectId={projectId}
       projectSlug={projectSlug}
       sprints={sprints}
+      defaultSprintStartsAt={defaultSprintStartsAt}
+      defaultSprintEndsAt={defaultSprintEndsAt}
       isError={isError}
       onRetry={() => {
         void refetch();

@@ -19,6 +19,8 @@ type ProjectSprintsPanelProps = {
   projectId: string;
   projectSlug: string;
   sprints: ProjectSprint[];
+  defaultSprintStartsAt: string;
+  defaultSprintEndsAt: string;
   isError: boolean;
   onRetry: () => void;
 };
@@ -154,7 +156,15 @@ function SprintStatusColumn({
   );
 }
 
-export function ProjectSprintsPanel({ projectId, projectSlug, sprints, isError, onRetry }: ProjectSprintsPanelProps) {
+export function ProjectSprintsPanel({
+  projectId,
+  projectSlug,
+  sprints,
+  defaultSprintStartsAt,
+  defaultSprintEndsAt,
+  isError,
+  onRetry,
+}: ProjectSprintsPanelProps) {
   const sprintsByStatus = getSprintsByStatus(sprints);
 
   return (
@@ -186,7 +196,13 @@ export function ProjectSprintsPanel({ projectId, projectSlug, sprints, isError, 
         </div>
       </div>
 
-      {!isError && <CreateProjectSprintForm projectId={projectId} />}
+      {!isError && (
+        <CreateProjectSprintForm
+          projectId={projectId}
+          defaultStartsAt={defaultSprintStartsAt}
+          defaultEndsAt={defaultSprintEndsAt}
+        />
+      )}
 
       {isError && (
         <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
