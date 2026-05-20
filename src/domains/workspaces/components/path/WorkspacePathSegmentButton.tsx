@@ -23,6 +23,16 @@ const iconByKind = {
   section: FolderKanban,
 } satisfies Record<NonNullable<WorkspacePathSegment["kind"]>, typeof Building2>;
 
+function getStableSegmentId(segment: WorkspacePathSegment) {
+  const source = `${segment.kind ?? "section"}-${segment.href ?? segment.name}`;
+  const normalized = source
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return `workspace-path-${normalized || "segment"}`;
+}
+
 export function WorkspacePathSegmentButton({ segment, isCurrent = false }: WorkspacePathSegmentButtonProps) {
   const Icon = iconByKind[segment.kind ?? "section"];
   const className = cn(
@@ -41,13 +51,16 @@ export function WorkspacePathSegmentButton({ segment, isCurrent = false }: Works
   if (segment.switcher) {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger
-          type="button"
-          className={className}
-          aria-current={isCurrent ? "page" : undefined}
-          aria-label={segment.switcher.ariaLabel}
-        >
-          {content}
+        <DropdownMenuTrigger asChild>
+          <button
+            id={getStableSegmentId(segment)}
+            type="button"
+            className={className}
+            aria-current={isCurrent ? "page" : undefined}
+            aria-label={segment.switcher.ariaLabel}
+          >
+            {content}
+          </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"

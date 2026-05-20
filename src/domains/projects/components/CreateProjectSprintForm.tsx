@@ -14,43 +14,30 @@ import { cn } from "@/shared/utils/cn";
 
 type CreateProjectSprintFormProps = {
   projectId: string;
+  defaultStartsAt: string;
+  defaultEndsAt: string;
 };
 
 const SPRINT_NAME_MAX_LENGTH = 120;
 const SPRINT_DESCRIPTION_MAX_LENGTH = 500;
 
-function formatDateInputValue(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
-
-function getDefaultEndDate() {
-  const date = new Date();
-  date.setDate(date.getDate() + 13);
-
-  return date;
-}
-
 function toStartOfDayIsoDate(value: string) {
   return new Date(`${value}T00:00:00.000Z`).toISOString();
 }
 
-function getInitialFormState() {
+function getInitialFormState(defaultStartsAt: string, defaultEndsAt: string) {
   return {
     name: "",
     description: "",
-    startsAt: formatDateInputValue(new Date()),
-    endsAt: formatDateInputValue(getDefaultEndDate()),
+    startsAt: defaultStartsAt,
+    endsAt: defaultEndsAt,
     status: "backlog" as ProjectSprintStatus,
   };
 }
 
-export function CreateProjectSprintForm({ projectId }: CreateProjectSprintFormProps) {
+export function CreateProjectSprintForm({ projectId, defaultStartsAt, defaultEndsAt }: CreateProjectSprintFormProps) {
   const formId = React.useId();
-  const [form, setForm] = React.useState(getInitialFormState);
+  const [form, setForm] = React.useState(() => getInitialFormState(defaultStartsAt, defaultEndsAt));
   const [formError, setFormError] = React.useState<string | null>(null);
   const { mutateAsync: createSprint, isPending } = useCreateProjectSprint();
 
@@ -63,9 +50,9 @@ export function CreateProjectSprintForm({ projectId }: CreateProjectSprintFormPr
   }, []);
 
   const resetForm = React.useCallback(() => {
-    setForm(getInitialFormState());
+    setForm(getInitialFormState(defaultStartsAt, defaultEndsAt));
     setFormError(null);
-  }, []);
+  }, [defaultEndsAt, defaultStartsAt]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
