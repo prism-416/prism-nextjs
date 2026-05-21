@@ -14,10 +14,25 @@ import {
 type WorkspaceActionsMenuProps = {
   workspaceName: string;
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 };
 
 export function WorkspaceActionsMenu({ workspaceName, onEdit, onDelete }: WorkspaceActionsMenuProps) {
+  if (!onDelete) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 shrink-0 text-prism-muted"
+        aria-label={`Edit ${workspaceName}`}
+        onClick={onEdit}
+      >
+        <MoreVertical className="size-4" />
+      </Button>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -42,7 +57,6 @@ export function WorkspaceActionsMenu({ workspaceName, onEdit, onDelete }: Worksp
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-
         <DropdownMenuItem
           onSelect={() => onDelete()}
           className="gap-2.5 whitespace-nowrap text-prism-danger data-[highlighted]:bg-prism-danger-soft/25 data-[highlighted]:text-prism-danger"

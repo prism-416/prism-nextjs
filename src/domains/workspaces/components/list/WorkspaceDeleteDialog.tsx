@@ -1,6 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import { Button } from "@/atomics/atoms/Button";
+import { Input } from "@/atomics/atoms/Input";
+import { Label } from "@/atomics/atoms/Label";
+import { Typography } from "@/atomics/atoms/Typography";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/atomics/molecules/Dialog";
-import { Typography } from "@/atomics/atoms/Typography";
 import { useDeleteWorkspace } from "@/domains/workspaces/hooks/useDeleteWorkspace";
 import type { Workspace } from "@/domains/workspaces/types";
 import { getDeleteWorkspaceErrorMessage } from "@/domains/workspaces/utils/error";
@@ -18,10 +22,13 @@ type WorkspaceDeleteDialogProps = {
   workspace: Workspace | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onDeleted?: () => void;
 };
 
-export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: WorkspaceDeleteDialogProps) {
+export function WorkspaceDeleteDialog({ workspace, open, onOpenChange, onDeleted }: WorkspaceDeleteDialogProps) {
   const { mutateAsync: mutateDeleteWorkspace, isPending, error } = useDeleteWorkspace();
+  const [input, setInput] = useState("");
+  const confirmed = input === workspace?.name;
 
   if (!workspace) {
     return null;
@@ -31,6 +38,7 @@ export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: Workspa
     try {
       await mutateDeleteWorkspace(workspace.workspaceId);
       onOpenChange(false);
+      onDeleted?.();
     } catch {
       // Mutation error is surfaced through `error`.
     }
@@ -41,6 +49,7 @@ export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: Workspa
       open={open}
       onOpenChange={nextOpen => {
         if (!isPending) {
+          if (!nextOpen) setInput("");
           onOpenChange(nextOpen);
         }
       }}
@@ -51,33 +60,56 @@ export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: Workspa
           <DialogDescription>This action cannot be undone.</DialogDescription>
         </DialogHeader>
 
-        <div className="mt-5 rounded-xl border border-prism-danger-soft bg-prism-danger-soft/20 px-4 py-3">
-          <Typography
-            variant="bodySm"
-            tone="primary"
-          >
-            Delete <span className="font-semibold">{workspace.name}</span> permanently?
-          </Typography>
-          <Typography
-            variant="caption"
-            tone="muted"
-            className="mt-1 block"
-          >
-            This will remove the workspace from your list and revoke access for its members.
-          </Typography>
-        </div>
-
-        {error != null && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2">
+        <div className="mt-2 space-y-4">
+          <div className="rounded-xl border border-prism-danger-soft bg-prism-danger-soft/20 px-4 py-3">
+            <Typography
+              variant="bodySm"
+              tone="primary"
+            >
+              Delete <span className="font-semibold">{workspace.name}</span> permanently?
+            </Typography>
             <Typography
               variant="caption"
-              tone="inherit"
-              className="text-red-700"
+              tone="muted"
+              className="mt-1 block"
             >
-              {getDeleteWorkspaceErrorMessage(error)}
+              This will remove the workspace and revoke access for all members.
             </Typography>
           </div>
-        )}
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="delete-confirm"
+              className="text-prism-body"
+            >
+              Type{" "}
+              <code className="rounded-md bg-neutral-100 px-[0.4em] py-[0.2em] font-mono text-[85%]">
+                {workspace.name}
+              </code>{" "}
+              to confirm
+            </Label>
+            <Input
+              id="delete-confirm"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder={workspace.name}
+              disabled={isPending}
+              className="h-11 rounded-xl border-border bg-surface-field"
+            />
+          </div>
+
+          {error != null && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2">
+              <Typography
+                variant="caption"
+                tone="inherit"
+                className="text-red-700"
+              >
+                {getDeleteWorkspaceErrorMessage(error)}
+              </Typography>
+            </div>
+          )}
+        </div>
 
         <DialogFooter>
           <Button
@@ -92,8 +124,8 @@ export function WorkspaceDeleteDialog({ workspace, open, onOpenChange }: Workspa
           <Button
             type="button"
             onClick={() => void handleDelete()}
-            disabled={isPending}
-            className="h-10 rounded-lg bg-prism-danger px-5 text-white hover:bg-prism-danger/90"
+            disabled={!confirmed || isPending}
+            className="h-10 rounded-lg bg-prism-danger px-5 text-white hover:bg-prism-danger/90 disabled:opacity-40"
           >
             {isPending ? "Deleting..." : "Delete workspace"}
           </Button>

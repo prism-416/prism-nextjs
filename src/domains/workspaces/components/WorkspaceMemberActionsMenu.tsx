@@ -55,23 +55,21 @@ export function WorkspaceMemberActionsMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="min-w-48">
-        {!isSelf
-          ? WORKSPACE_INVITATION_ROLE_OPTIONS.map(option => {
-              const Icon = ROLE_ACTION_ICONS[option.value];
+        {WORKSPACE_INVITATION_ROLE_OPTIONS.map(option => {
+          const Icon = ROLE_ACTION_ICONS[option.value];
 
-              return (
-                <DropdownMenuItem
-                  key={option.value}
-                  disabled={member.role === option.value || disabled}
-                  onSelect={() => onRoleChange(option.value)}
-                  className="gap-2.5 whitespace-nowrap"
-                >
-                  <Icon className="size-4 text-prism-muted" />
-                  Make {option.label.toLowerCase()}
-                </DropdownMenuItem>
-              );
-            })
-          : null}
+          return (
+            <DropdownMenuItem
+              key={option.value}
+              disabled={member.role === option.value || disabled}
+              onSelect={() => onRoleChange(option.value)}
+              className="gap-2.5 whitespace-nowrap"
+            >
+              <Icon className="size-4 text-prism-muted" />
+              Make {option.label.toLowerCase()}
+            </DropdownMenuItem>
+          );
+        })}
 
         {canTransferOwner && !isSelf ? (
           <>
