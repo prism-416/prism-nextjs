@@ -3,9 +3,7 @@ import { ArrowUpRight, FolderKanban, Users } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
-import { WorkspaceActionsMenu } from "@/domains/workspaces/components/list/WorkspaceActionsMenu";
 import { WorkspaceAvatar } from "@/domains/workspaces/components/list/WorkspaceAvatar";
-import { WorkspaceDetailsButton } from "@/domains/workspaces/components/list/WorkspaceDetailsButton";
 import { WorkspaceMetaItem } from "@/domains/workspaces/components/list/WorkspaceMetaItem";
 import type { Workspace } from "@/domains/workspaces/types";
 import {
@@ -17,12 +15,9 @@ import { cn } from "@/shared/utils/cn";
 
 type WorkspaceCardProps = {
   workspace: Workspace;
-  canManageWorkspace?: boolean;
-  onOpenDetails: (workspace: Workspace) => void;
-  onDelete: (workspace: Workspace) => void;
 };
 
-export function WorkspaceCard({ workspace, canManageWorkspace = false, onOpenDetails, onDelete }: WorkspaceCardProps) {
+export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
   const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
 
   return (
@@ -39,38 +34,24 @@ export function WorkspaceCard({ workspace, canManageWorkspace = false, onOpenDet
         style={{ backgroundImage: getWorkspaceGradient(workspace) }}
       />
 
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <WorkspaceAvatar workspace={workspace} />
-          <div className="min-w-0">
-            <Typography
-              variant="title"
-              tone="primary"
-              className="truncate"
-            >
-              {workspace.name}
-            </Typography>
-            <Typography
-              variant="bodySm"
-              tone="muted"
-              className="mt-0.5 truncate font-mono text-xs"
-            >
-              /{workspace.slug}
-            </Typography>
-          </div>
+      <div className="relative flex items-start gap-3">
+        <WorkspaceAvatar workspace={workspace} />
+        <div className="min-w-0">
+          <Typography
+            variant="title"
+            tone="primary"
+            className="truncate"
+          >
+            {workspace.name}
+          </Typography>
+          <Typography
+            variant="bodySm"
+            tone="muted"
+            className="mt-0.5 truncate font-mono text-xs"
+          >
+            /{workspace.slug}
+          </Typography>
         </div>
-        {canManageWorkspace ? (
-          <WorkspaceActionsMenu
-            workspaceName={workspace.name}
-            onEdit={() => onOpenDetails(workspace)}
-            onDelete={() => onDelete(workspace)}
-          />
-        ) : (
-          <WorkspaceDetailsButton
-            workspaceName={workspace.name}
-            onOpen={() => onOpenDetails(workspace)}
-          />
-        )}
       </div>
 
       <div className="mt-3 flex items-center gap-4">

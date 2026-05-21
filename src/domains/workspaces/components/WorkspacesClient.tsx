@@ -4,13 +4,11 @@ import { useMemo, useState } from "react";
 
 import { CreateWorkspaceDialog } from "@/domains/workspaces/components/CreateWorkspaceDialog";
 import { WorkspacesSkeleton } from "@/domains/workspaces/components/WorkspacesSkeleton";
-import { WorkspaceCardWithPermission } from "@/domains/workspaces/components/list/WorkspaceCardWithPermission";
-import { WorkspaceDeleteDialog } from "@/domains/workspaces/components/list/WorkspaceDeleteDialog";
+import { WorkspaceCard } from "@/domains/workspaces/components/list/WorkspaceCard";
 import { WorkspaceEmptyState } from "@/domains/workspaces/components/list/WorkspaceEmptyState";
-import { WorkspaceEditDialog } from "@/domains/workspaces/components/list/WorkspaceEditDialog";
 import { WorkspaceErrorState } from "@/domains/workspaces/components/list/WorkspaceErrorState";
 import { WorkspaceNoResults } from "@/domains/workspaces/components/list/WorkspaceNoResults";
-import { WorkspaceRowWithPermission } from "@/domains/workspaces/components/list/WorkspaceRowWithPermission";
+import { WorkspaceRow } from "@/domains/workspaces/components/list/WorkspaceRow";
 import { WorkspaceToolbar } from "@/domains/workspaces/components/list/WorkspaceToolbar";
 import { useWorkspaces } from "@/domains/workspaces/hooks/useWorkspaces";
 import type { Workspace } from "@/domains/workspaces/types";
@@ -29,8 +27,6 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [query, setQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [detailsWorkspace, setDetailsWorkspace] = useState<Workspace | null>(null);
-  const [deletingWorkspace, setDeletingWorkspace] = useState<Workspace | null>(null);
 
   const workspaces = data ?? EMPTY_WORKSPACES;
   const filteredWorkspaces = useMemo(() => filterWorkspaces(workspaces, query), [query, workspaces]);
@@ -60,11 +56,9 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
           {filteredWorkspaces.length > 0 && viewMode === "grid" && (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredWorkspaces.map(workspace => (
-                <WorkspaceCardWithPermission
+                <WorkspaceCard
                   key={workspace.workspaceId}
                   workspace={workspace}
-                  onOpenDetails={setDetailsWorkspace}
-                  onDelete={setDeletingWorkspace}
                 />
               ))}
             </div>
@@ -73,11 +67,9 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
           {filteredWorkspaces.length > 0 && viewMode === "list" && (
             <div className="flex flex-col gap-2">
               {filteredWorkspaces.map(workspace => (
-                <WorkspaceRowWithPermission
+                <WorkspaceRow
                   key={workspace.workspaceId}
                   workspace={workspace}
-                  onOpenDetails={setDetailsWorkspace}
-                  onDelete={setDeletingWorkspace}
                 />
               ))}
             </div>
@@ -88,28 +80,6 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
       <CreateWorkspaceDialog
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
-      />
-      {detailsWorkspace && (
-        <WorkspaceEditDialog
-          key={detailsWorkspace.workspaceId}
-          workspace={detailsWorkspace}
-          open
-          onOpenChange={open => {
-            if (!open) {
-              setDetailsWorkspace(null);
-            }
-          }}
-          onWorkspaceLeft={() => setDetailsWorkspace(null)}
-        />
-      )}
-      <WorkspaceDeleteDialog
-        workspace={deletingWorkspace}
-        open={deletingWorkspace !== null}
-        onOpenChange={open => {
-          if (!open) {
-            setDeletingWorkspace(null);
-          }
-        }}
       />
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CircleCheck, Crown, UserPlus } from "lucide-react";
 
 import { Badge } from "@/atomics/atoms/Badge";
@@ -8,19 +8,16 @@ import { Button } from "@/atomics/atoms/Button";
 import { ConfirmDialog } from "@/atomics/organisms/ConfirmDialog";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceInviteMembersDialog } from "@/domains/workspaces/components/WorkspaceInviteMembersDialog";
+import { WorkspaceLeaveDialog } from "@/domains/workspaces/components/WorkspaceLeaveDialog";
 import { WorkspaceMemberActionsMenu } from "@/domains/workspaces/components/WorkspaceMemberActionsMenu";
 import { WorkspaceMembersSkeleton } from "@/domains/workspaces/components/WorkspaceMembersSkeleton";
-import { useRemoveWorkspaceMember } from "@/domains/workspaces/hooks/useRemoveWorkspaceMember";
-import { useUpdateWorkspaceMemberRole } from "@/domains/workspaces/hooks/useUpdateWorkspaceMemberRole";
-import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
-import type { InvitationRole, Workspace, WorkspaceMember } from "@/domains/workspaces/types";
+import { useWorkspaceMemberManagement } from "@/domains/workspaces/hooks/useWorkspaceMemberManagement";
+import type { Workspace, WorkspaceMember } from "@/domains/workspaces/types";
 import {
-  getWorkspaceMemberDisplayName,
   getWorkspaceMemberInitial,
+  getWorkspaceMemberDisplayName,
   getWorkspaceMemberRoleBadgeClassName,
-  getWorkspaceMemberSortRank,
 } from "@/domains/workspaces/utils/member";
-import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import { cn } from "@/shared/utils/cn";
 
 type WorkspaceMembersClientProps = {
@@ -28,61 +25,42 @@ type WorkspaceMembersClientProps = {
   initialData?: WorkspaceMember[];
 };
 
-const EMPTY_MEMBERS: WorkspaceMember[] = [];
-
 export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMembersClientProps) {
-  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [pendingRemoveMember, setPendingRemoveMember] = useState<WorkspaceMember | null>(null);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const { data: currentUser } = useCurrentUser();
-  const { data, isPending, isError, refetch } = useWorkspaceMembers(workspace.workspaceId, initialData);
-  const removeMember = useRemoveWorkspaceMember();
-  const updateRole = useUpdateWorkspaceMemberRole();
-  const members = data ?? EMPTY_MEMBERS;
-  const currentMember = members.find(member => member.userId === currentUser?.userId);
-  const canManageMembers = currentUser?.userId === workspace.ownerId || currentMember?.role === "admin";
-  const isMutating = removeMember.isPending || updateRole.isPending;
-  const sortedMembers = useMemo(
-    () =>
-      [...members].sort(
-        (first, second) =>
-          getWorkspaceMemberSortRank(first, workspace.ownerId) - getWorkspaceMemberSortRank(second, workspace.ownerId),
-      ),
-    [members, workspace.ownerId],
-  );
-
-  async function handleConfirmRemove() {
-    if (!pendingRemoveMember) {
-      return;
-    }
-
-    setActionMessage(null);
-
-    try {
-      await removeMember.mutateAsync({
-        workspaceId: workspace.workspaceId,
-        userId: pendingRemoveMember.userId,
-      });
-      setPendingRemoveMember(null);
-    } catch {
-      setActionMessage("Member could not be removed.");
-      setPendingRemoveMember(null);
-    }
-  }
-
-  async function handleRoleChange(member: WorkspaceMember, role: InvitationRole) {
-    setActionMessage(null);
-
-    try {
-      await updateRole.mutateAsync({ workspaceId: workspace.workspaceId, userId: member.userId, role });
-    } catch {
-      setActionMessage("Member role could not be updated.");
-    }
-  }
+  const router = useRouter();
+  const {
+    currentUser,
+    currentMember,
+    sortedMembers,
+    members,
+    ownerId,
+    isWorkspaceOwner,
+    canManageMembers,
+    isMutating,
+    isPending,
+    isError,
+    refetch,
+    actionMessage,
+    isInviteDialogOpen,
+    setIsInviteDialogOpen,
+    isLeaveOpen,
+    setIsLeaveOpen,
+    pendingAction,
+    setPendingAction,
+    handleRoleChange,
+    handleRemove,
+    handleConfirmPendingAction,
+    getPendingActionCopy,
+    removeMember,
+  } = useWorkspaceMemberManagement(workspace, {
+    initialData,
+    onLeave: () => router.push("/workspaces"),
+  });
 
   if (isPending && members.length === 0) {
     return <WorkspaceMembersSkeleton />;
   }
+
+  const pendingActionCopy = getPendingActionCopy();
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -117,9 +95,7 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
           <p>Members could not be loaded.</p>
           <Button
             className="mt-3 h-9 rounded-lg border-prism-danger-soft bg-surface px-4 text-prism-danger hover:bg-prism-danger-soft/40"
-            onClick={() => {
-              void refetch();
-            }}
+            onClick={() => void refetch()}
             variant="outline"
           >
             Retry
@@ -149,9 +125,9 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
       {!isError && members.length > 0 ? (
         <div className="overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.05)]">
           {sortedMembers.map(member => {
-            const isOwner = member.userId === workspace.ownerId;
+            const isOwner = member.userId === ownerId;
             const isSelf = member.userId === currentUser?.userId;
-            const canShowActions = canManageMembers && !isOwner && !isSelf;
+            const canShowActions = !isOwner && (canManageMembers || isSelf);
 
             return (
               <div
@@ -188,7 +164,7 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
                 <span
                   className={cn(
                     "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium capitalize",
-                    getWorkspaceMemberRoleBadgeClassName(member, workspace.ownerId),
+                    getWorkspaceMemberRoleBadgeClassName(member, ownerId),
                   )}
                 >
                   {isOwner ? <Crown className="size-3.5" /> : null}
@@ -198,11 +174,21 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
                   <WorkspaceMemberActionsMenu
                     member={member}
                     disabled={isMutating}
-                    onRoleChange={role => {
-                      void handleRoleChange(member, role);
+                    onRoleChange={role => void handleRoleChange(member, role)}
+                    onRemove={() => {
+                      if (isSelf) {
+                        setIsLeaveOpen(true);
+                      } else {
+                        setPendingAction({ type: "remove", member });
+                      }
                     }}
-                    onRemove={() => setPendingRemoveMember(member)}
-                    onTransferOwner={() => undefined}
+                    onTransferOwner={() => {
+                      if (isWorkspaceOwner) {
+                        setPendingAction({ type: "transfer-owner", member });
+                      }
+                    }}
+                    canTransferOwner={isWorkspaceOwner}
+                    isSelf={isSelf}
                   />
                 ) : null}
               </div>
@@ -218,23 +204,26 @@ export function WorkspaceMembersClient({ workspace, initialData }: WorkspaceMemb
       />
 
       <ConfirmDialog
-        open={pendingRemoveMember != null}
-        title="Remove member"
-        description={
-          pendingRemoveMember
-            ? `Remove ${getWorkspaceMemberDisplayName(pendingRemoveMember)} from this workspace?`
-            : "Remove this member from this workspace?"
-        }
-        confirmLabel="Remove member"
-        isPending={removeMember.isPending}
-        tone="danger"
+        open={pendingAction != null}
+        title={pendingActionCopy.title}
+        description={pendingActionCopy.description}
+        confirmLabel={pendingActionCopy.confirmLabel}
+        isPending={isMutating}
+        tone={pendingActionCopy.tone}
         onOpenChange={open => {
-          if (!open) {
-            setPendingRemoveMember(null);
-          }
+          if (!open) setPendingAction(null);
         }}
+        onConfirm={() => void handleConfirmPendingAction()}
+      />
+
+      <WorkspaceLeaveDialog
+        workspaceName={workspace.name}
+        isOwner={isWorkspaceOwner}
+        open={isLeaveOpen}
+        isPending={removeMember.isPending}
+        onOpenChange={setIsLeaveOpen}
         onConfirm={() => {
-          void handleConfirmRemove();
+          if (currentMember) void handleRemove(currentMember);
         }}
       />
     </section>

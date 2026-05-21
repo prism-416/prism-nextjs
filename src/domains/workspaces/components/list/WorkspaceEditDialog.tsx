@@ -115,6 +115,7 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspace
           <WorkspaceMembersEditor
             workspace={workspace}
             onWorkspaceLeft={() => onWorkspaceLeft?.(workspace)}
+            onSelfRoleChanged={() => onOpenChange(false)}
           />
 
           {canEditWorkspace ? (
