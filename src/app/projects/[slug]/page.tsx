@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
-import { ProjectContent } from "@/domains/projects/components/ProjectContent";
-import { ProjectSkeleton } from "@/domains/projects/components/ProjectSkeleton";
+import { ProjectDashboardContent } from "@/domains/projects/components/ProjectDashboardContent";
+import { ProjectDashboardSkeleton } from "@/domains/projects/components/ProjectDashboardSkeleton";
 
 import { ProjectPageShell } from "./_components/ProjectPageShell";
 
@@ -16,11 +16,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <ProjectPageShell slug={slug}>
-      {({ workspaceSlug }) => (
-        <Suspense fallback={<ProjectSkeleton />}>
-          <ProjectContent
-            slug={slug}
-            workspaceSlug={workspaceSlug}
+      {({ projectId, projectSlug }) => (
+        <Suspense fallback={<ProjectDashboardSkeleton />}>
+          <ProjectDashboardContent
+            projectId={projectId}
+            projectSlug={projectSlug}
           />
         </Suspense>
       )}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FolderKanban, RefreshCw } from "lucide-react";
+import { LayoutDashboard, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
@@ -19,7 +19,7 @@ import {
 } from "@/domains/projects/utils/work-item-display";
 import { cn } from "@/shared/utils/cn";
 
-type ProjectWorkItemsPanelProps = {
+type ProjectDashboardPanelProps = {
   projectId: string;
   projectSlug: string;
   workItems: ProjectWorkItemSearchResult;
@@ -228,7 +228,7 @@ function WorkItemStatusColumn({
   );
 }
 
-export function ProjectWorkItemsPanel({
+export function ProjectDashboardPanel({
   projectId,
   projectSlug,
   workItems,
@@ -239,7 +239,7 @@ export function ProjectWorkItemsPanel({
   onStatusUpdate,
   onPriorityUpdate,
   onRetry,
-}: ProjectWorkItemsPanelProps) {
+}: ProjectDashboardPanelProps) {
   const topLevelItems = getTopLevelWorkItems(workItems.items);
   const itemsByStatus = getWorkItemsByStatus(topLevelItems);
 
@@ -248,13 +248,13 @@ export function ProjectWorkItemsPanel({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <FolderKanban className="size-5 text-prism-muted" />
+            <LayoutDashboard className="size-5 text-prism-muted" />
             <Typography
               variant="h3"
               tone="primary"
               className="text-xl tracking-normal md:text-xl"
             >
-              Work items
+              Dashboard
             </Typography>
           </div>
           <Typography

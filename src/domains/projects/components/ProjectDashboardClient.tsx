@@ -2,8 +2,8 @@
 
 import * as React from "react";
 
-import { ProjectWorkItemsPanel } from "@/domains/projects/components/ProjectWorkItemsPanel";
-import { ProjectWorkItemsSkeleton } from "@/domains/projects/components/ProjectWorkItemsSkeleton";
+import { ProjectDashboardPanel } from "@/domains/projects/components/ProjectDashboardPanel";
+import { ProjectDashboardSkeleton } from "@/domains/projects/components/ProjectDashboardSkeleton";
 import { useProjectWorkItems } from "@/domains/projects/hooks/useProjectWorkItems";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
 import type {
@@ -13,13 +13,13 @@ import type {
   ProjectWorkItemStatus,
 } from "@/domains/projects/types";
 
-type ProjectWorkItemsClientProps = {
+type ProjectDashboardClientProps = {
   projectId: string;
   projectSlug: string;
   initialData?: ProjectWorkItemSearchResult;
 };
 
-export function ProjectWorkItemsClient({ projectId, projectSlug, initialData }: ProjectWorkItemsClientProps) {
+export function ProjectDashboardClient({ projectId, projectSlug, initialData }: ProjectDashboardClientProps) {
   const [updatingItemId, setUpdatingItemId] = React.useState<string | null>(null);
   const [updateError, setUpdateError] = React.useState<string | null>(null);
   const { data, isPending, isError, refetch } = useProjectWorkItems(projectId, undefined, initialData);
@@ -53,11 +53,11 @@ export function ProjectWorkItemsClient({ projectId, projectSlug, initialData }: 
   );
 
   if (isPending && !data) {
-    return <ProjectWorkItemsSkeleton />;
+    return <ProjectDashboardSkeleton />;
   }
 
   return (
-    <ProjectWorkItemsPanel
+    <ProjectDashboardPanel
       projectId={projectId}
       projectSlug={projectSlug}
       workItems={data ?? { items: [], total: 0, limit: 50, offset: 0 }}

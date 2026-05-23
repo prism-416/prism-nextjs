@@ -210,7 +210,7 @@ export function ProjectWorkItemPanel({
   onRetryChildren,
   onRetryComments,
 }: ProjectWorkItemPanelProps) {
-  const workItemsHref = `/projects/${encodeURIComponent(projectSlug)}/work-items`;
+  const dashboardHref = `/projects/${encodeURIComponent(projectSlug)}`;
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -220,9 +220,9 @@ export function ProjectWorkItemPanel({
           variant="ghost"
           className="h-8 w-fit rounded-lg px-2 text-prism-muted hover:bg-prism-navy/5 hover:text-prism-body"
         >
-          <Link href={workItemsHref}>
+          <Link href={dashboardHref}>
             <ArrowLeft className="size-4" />
-            Back to work items
+            Back to dashboard
           </Link>
         </Button>
 

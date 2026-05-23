@@ -1,16 +1,16 @@
 import { getProjectWorkItems } from "@/domains/projects/api";
-import { ProjectWorkItemsClient } from "@/domains/projects/components/ProjectWorkItemsClient";
+import { ProjectDashboardClient } from "@/domains/projects/components/ProjectDashboardClient";
 
-type ProjectWorkItemsContentProps = {
+type ProjectDashboardContentProps = {
   projectId: string;
   projectSlug: string;
 };
 
-export async function ProjectWorkItemsContent({ projectId, projectSlug }: ProjectWorkItemsContentProps) {
+export async function ProjectDashboardContent({ projectId, projectSlug }: ProjectDashboardContentProps) {
   const initialData = await getProjectWorkItems(projectId).catch(() => undefined);
 
   return (
-    <ProjectWorkItemsClient
+    <ProjectDashboardClient
       projectId={projectId}
       projectSlug={projectSlug}
       initialData={initialData}
