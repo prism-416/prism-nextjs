@@ -14,14 +14,14 @@ type ProjectWorkItemPageProps = {
 
 export default async function ProjectWorkItemPage({ params }: ProjectWorkItemPageProps) {
   const { slug, itemId } = await params;
-  const workItemsHref = `/projects/${encodeURIComponent(slug)}/work-items`;
+  const dashboardHref = `/projects/${encodeURIComponent(slug)}`;
 
   return (
     <ProjectPageShell
       slug={slug}
       section={{
-        name: "Work items",
-        href: workItemsHref,
+        name: "Dashboard",
+        href: dashboardHref,
       }}
     >
       {({ projectId, projectSlug }) => (

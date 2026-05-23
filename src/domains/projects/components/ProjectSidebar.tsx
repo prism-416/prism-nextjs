@@ -44,6 +44,7 @@ type ProjectSidebarNavItem = {
   href: string;
   icon: LucideIcon;
   exact?: boolean;
+  activePathPrefixes?: string[];
 };
 
 type ProjectSidebarNavGroupProps = {
@@ -62,6 +63,15 @@ function getHrefPathname(href: string) {
 
 function isActiveProjectHref(pathname: string, item: ProjectSidebarNavItem) {
   const itemPathname = getHrefPathname(item.href);
+  const matchesAdditionalPath = item.activePathPrefixes?.some(prefix => {
+    const prefixPathname = getHrefPathname(prefix);
+
+    return pathname === prefixPathname || pathname.startsWith(`${prefixPathname}/`);
+  });
+
+  if (matchesAdditionalPath) {
+    return true;
+  }
 
   if (item.exact) {
     return pathname === itemPathname;
@@ -119,8 +129,13 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
   const projectLabel = projectName ?? "Project";
   const primaryNav = React.useMemo<ProjectSidebarNavItem[]>(
     () => [
-      { label: "Overview", href: projectHref, icon: FolderKanban, exact: true },
-      { label: "Work items", href: `${projectHref}/work-items`, icon: FolderKanban },
+      {
+        label: "Dashboard",
+        href: projectHref,
+        icon: LayoutDashboard,
+        exact: true,
+        activePathPrefixes: [`${projectHref}/work-items`],
+      },
       { label: "Members", href: `${projectHref}/members`, icon: Users, exact: true },
       { label: "Sprints", href: `${projectHref}/sprints`, icon: CalendarRange, exact: true },
       { label: "Documents", href: `${projectHref}/documents`, icon: Files, exact: true },
@@ -168,7 +183,7 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
             >
               <Link
                 href={projectHref}
-                aria-label={`${projectLabel} overview`}
+                aria-label={`${projectLabel} dashboard`}
               >
                 <span className="grid size-8 shrink-0 place-items-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
                   <FolderKanban className="size-4" />

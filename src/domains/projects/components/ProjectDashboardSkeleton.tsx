@@ -1,6 +1,6 @@
 import { Skeleton } from "@/atomics/atoms/Skeleton";
 
-export function ProjectWorkItemsSkeleton() {
+export function ProjectDashboardSkeleton() {
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
