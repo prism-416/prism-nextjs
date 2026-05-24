@@ -22,6 +22,12 @@ type ProjectSprintsPanelProps = {
   onCreateSprint: () => void;
 };
 
+const SPRINT_STATUS_DOT_CLASS_NAMES: Record<ProjectSprintStatus, string> = {
+  backlog: "bg-prism-muted",
+  in_progress: "bg-prism-info",
+  done: "bg-prism-success",
+};
+
 function getSprintsByStatus(sprints: ProjectSprint[]) {
   return PROJECT_SPRINT_STATUSES.reduce<Record<ProjectSprintStatus, ProjectSprint[]>>(
     (result, status) => ({
@@ -33,26 +39,6 @@ function getSprintsByStatus(sprints: ProjectSprint[]) {
       in_progress: [],
       done: [],
     },
-  );
-}
-
-function SprintSummaryCard({ status, count }: { status: ProjectSprintStatus; count: number }) {
-  return (
-    <div className="rounded-xl border border-border/80 bg-surface px-4 py-3">
-      <Typography
-        variant="caption"
-        tone="muted"
-      >
-        {getProjectSprintStatusLabel(status)}
-      </Typography>
-      <Typography
-        variant="title"
-        tone="primary"
-        className="mt-1 text-lg tracking-normal md:text-lg"
-      >
-        {count}
-      </Typography>
-    </div>
   );
 }
 
@@ -115,7 +101,11 @@ function SprintStatusColumn({
   return (
     <section className="overflow-hidden rounded-2xl border border-border/80 bg-surface">
       <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-surface-strong px-4 py-3">
-        <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
+          <span
+            className={cn("size-2 shrink-0 rounded-full", SPRINT_STATUS_DOT_CLASS_NAMES[status])}
+            aria-hidden="true"
+          />
           <Typography
             variant="bodySm"
             tone="primary"
@@ -232,28 +222,16 @@ export function ProjectSprintsPanel({
       )}
 
       {!isError && sprints.length > 0 && (
-        <>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {PROJECT_SPRINT_STATUSES.map(status => (
-              <SprintSummaryCard
-                key={status}
-                status={status}
-                count={sprintsByStatus[status].length}
-              />
-            ))}
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            {PROJECT_SPRINT_STATUSES.map(status => (
-              <SprintStatusColumn
-                key={status}
-                projectSlug={projectSlug}
-                status={status}
-                sprints={sprintsByStatus[status]}
-              />
-            ))}
-          </div>
-        </>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {PROJECT_SPRINT_STATUSES.map(status => (
+            <SprintStatusColumn
+              key={status}
+              projectSlug={projectSlug}
+              status={status}
+              sprints={sprintsByStatus[status]}
+            />
+          ))}
+        </div>
       )}
     </section>
   );

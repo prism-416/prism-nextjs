@@ -31,6 +31,13 @@ type ProjectDashboardPanelProps = {
   onCreateWorkItem: () => void;
 };
 
+const WORK_ITEM_STATUS_DOT_CLASS_NAMES: Record<ProjectWorkItemStatus, string> = {
+  todo: "bg-prism-muted",
+  in_progress: "bg-prism-info",
+  in_review: "bg-prism-review",
+  done: "bg-prism-success",
+};
+
 function getTopLevelWorkItems(items: ProjectWorkItem[]) {
   return items.filter(item => item.parentId === null);
 }
@@ -188,13 +195,19 @@ function WorkItemStatusColumn({
   return (
     <section className="flex min-h-72 min-w-[17rem] flex-col rounded-2xl border border-border/80 bg-surface-strong lg:min-w-0">
       <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-3">
-        <Typography
-          variant="bodySm"
-          tone="primary"
-          weight="semibold"
-        >
-          {getProjectWorkItemStatusLabel(status)}
-        </Typography>
+        <div className="flex items-center gap-2">
+          <span
+            className={cn("size-2 shrink-0 rounded-full", WORK_ITEM_STATUS_DOT_CLASS_NAMES[status])}
+            aria-hidden="true"
+          />
+          <Typography
+            variant="bodySm"
+            tone="primary"
+            weight="semibold"
+          >
+            {getProjectWorkItemStatusLabel(status)}
+          </Typography>
+        </div>
         <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-prism-navy/5 px-2 text-xs font-medium text-prism-muted">
           {items.length}
         </span>
