@@ -6,7 +6,6 @@ import { Plus } from "lucide-react";
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
-import { Typography } from "@/atomics/atoms/Typography";
 import { useCreateProjectSprint } from "@/domains/projects/hooks/useCreateProjectSprint";
 import type { ProjectSprintStatus } from "@/domains/projects/types";
 import { getProjectSprintStatusLabel, PROJECT_SPRINT_STATUSES } from "@/domains/projects/utils/work-item-display";
@@ -16,6 +15,7 @@ type CreateProjectSprintFormProps = {
   projectId: string;
   defaultStartsAt: string;
   defaultEndsAt: string;
+  onCreated?: () => void;
 };
 
 const SPRINT_NAME_MAX_LENGTH = 120;
@@ -35,7 +35,12 @@ function getInitialFormState(defaultStartsAt: string, defaultEndsAt: string) {
   };
 }
 
-export function CreateProjectSprintForm({ projectId, defaultStartsAt, defaultEndsAt }: CreateProjectSprintFormProps) {
+export function CreateProjectSprintForm({
+  projectId,
+  defaultStartsAt,
+  defaultEndsAt,
+  onCreated,
+}: CreateProjectSprintFormProps) {
   const formId = React.useId();
   const [form, setForm] = React.useState(() => getInitialFormState(defaultStartsAt, defaultEndsAt));
   const [formError, setFormError] = React.useState<string | null>(null);
@@ -87,6 +92,7 @@ export function CreateProjectSprintForm({ projectId, defaultStartsAt, defaultEnd
         },
       });
       resetForm();
+      onCreated?.();
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Sprint could not be created.");
     }
@@ -94,28 +100,12 @@ export function CreateProjectSprintForm({ projectId, defaultStartsAt, defaultEnd
 
   return (
     <form
-      className="rounded-2xl border border-border/80 bg-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.04)]"
+      className="mt-5"
       onSubmit={handleSubmit}
       noValidate
     >
-      <div className="flex flex-col gap-1">
-        <Typography
-          variant="bodySm"
-          tone="primary"
-          weight="semibold"
-        >
-          New sprint
-        </Typography>
-        <Typography
-          variant="caption"
-          tone="muted"
-        >
-          Fill in the sprint details here, then add it to the project.
-        </Typography>
-      </div>
-
-      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(12rem,1fr)_9rem_9rem_9rem_auto] lg:items-end">
-        <div className="space-y-2">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
           <label
             htmlFor={`${formId}-project-sprint-name`}
             className="text-xs font-medium text-prism-muted"
@@ -167,7 +157,7 @@ export function CreateProjectSprintForm({ projectId, defaultStartsAt, defaultEnd
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 sm:col-span-2">
           <label
             htmlFor={`${formId}-project-sprint-status`}
             className="text-xs font-medium text-prism-muted"
@@ -194,18 +184,9 @@ export function CreateProjectSprintForm({ projectId, defaultStartsAt, defaultEnd
             ))}
           </select>
         </div>
-
-        <Button
-          type="submit"
-          className="h-10 rounded-lg px-4"
-          disabled={isPending}
-        >
-          <Plus className="size-4" />
-          {isPending ? "Adding..." : "Add"}
-        </Button>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-4 space-y-2">
         <label
           htmlFor={`${formId}-project-sprint-description`}
           className="text-xs font-medium text-prism-muted"
@@ -228,6 +209,17 @@ export function CreateProjectSprintForm({ projectId, defaultStartsAt, defaultEnd
           {formError}
         </div>
       )}
+
+      <div className="mt-6 flex justify-end">
+        <Button
+          type="submit"
+          className="h-10 rounded-lg px-5"
+          disabled={isPending}
+        >
+          <Plus className="size-4" />
+          {isPending ? "Creating..." : "Create sprint"}
+        </Button>
+      </div>
     </form>
   );
 }
