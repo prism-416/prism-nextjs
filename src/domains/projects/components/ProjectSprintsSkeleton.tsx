@@ -8,7 +8,7 @@ export function ProjectSprintsSkeleton() {
           <Skeleton className="h-7 w-36 bg-prism-navy/5" />
           <Skeleton className="mt-2 h-4 w-80 bg-prism-navy/5" />
         </div>
-        <Skeleton className="h-7 w-24 rounded-full bg-prism-navy/5" />
+        <Skeleton className="h-10 w-32 rounded-lg bg-prism-navy/5" />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

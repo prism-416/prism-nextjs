@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { CalendarRange, RefreshCw } from "lucide-react";
+import { CalendarRange, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
-import { CreateProjectSprintForm } from "@/domains/projects/components/CreateProjectSprintForm";
 import { ProjectSprintStatusBadge } from "@/domains/projects/components/ProjectSprintStatusBadge";
 import type { ProjectSprint, ProjectSprintStatus } from "@/domains/projects/types";
 import {
@@ -16,13 +15,11 @@ import {
 import { cn } from "@/shared/utils/cn";
 
 type ProjectSprintsPanelProps = {
-  projectId: string;
   projectSlug: string;
   sprints: ProjectSprint[];
-  defaultSprintStartsAt: string;
-  defaultSprintEndsAt: string;
   isError: boolean;
   onRetry: () => void;
+  onCreateSprint: () => void;
 };
 
 function getSprintsByStatus(sprints: ProjectSprint[]) {
@@ -157,13 +154,11 @@ function SprintStatusColumn({
 }
 
 export function ProjectSprintsPanel({
-  projectId,
   projectSlug,
   sprints,
-  defaultSprintStartsAt,
-  defaultSprintEndsAt,
   isError,
   onRetry,
+  onCreateSprint,
 }: ProjectSprintsPanelProps) {
   const sprintsByStatus = getSprintsByStatus(sprints);
 
@@ -190,19 +185,18 @@ export function ProjectSprintsPanel({
           </Typography>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex h-7 w-fit items-center rounded-full border border-border bg-surface px-3 text-xs font-medium text-prism-muted">
-            {sprints.length} total
-          </span>
+          {!isError && (
+            <Button
+              type="button"
+              className="h-10 rounded-lg px-4"
+              onClick={onCreateSprint}
+            >
+              <Plus className="size-4" />
+              New sprint
+            </Button>
+          )}
         </div>
       </div>
-
-      {!isError && (
-        <CreateProjectSprintForm
-          projectId={projectId}
-          defaultStartsAt={defaultSprintStartsAt}
-          defaultEndsAt={defaultSprintEndsAt}
-        />
-      )}
 
       {isError && (
         <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
