@@ -34,6 +34,7 @@
   --info: #2563EB;
   --info-soft: #E7F0FF;
   --info-foreground: #FFFFFF;
+  --review: #7C3AED;
   --color-cream-050: var(--color-neutral-50);
   --color-cream-100: var(--color-neutral-100);
   --color-mint-050: #F3FBF8;
@@ -171,6 +172,7 @@
   --color-prism-warning-soft: var(--warning-soft);
   --color-prism-info: var(--info);
   --color-prism-info-soft: var(--info-soft);
+  --color-prism-review: var(--review);
   --color-prism-danger: var(--feedback-danger);
   --color-prism-danger-soft: var(--feedback-danger-soft);
   --color-prism-surface-field: var(--surface-field);

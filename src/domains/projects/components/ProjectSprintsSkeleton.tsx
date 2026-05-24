@@ -11,12 +11,6 @@ export function ProjectSprintsSkeleton() {
         <Skeleton className="h-10 w-32 rounded-lg bg-prism-navy/5" />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Skeleton className="h-20 rounded-xl bg-prism-navy/5" />
-        <Skeleton className="h-20 rounded-xl bg-prism-navy/5" />
-        <Skeleton className="h-20 rounded-xl bg-prism-navy/5" />
-      </div>
-
       <div className="grid gap-4 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, columnIndex) => (
           <div
