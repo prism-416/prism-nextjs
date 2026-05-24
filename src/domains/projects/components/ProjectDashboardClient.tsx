@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { CreateProjectWorkItemDialog } from "@/domains/projects/components/CreateProjectWorkItemDialog";
 import { ProjectDashboardPanel } from "@/domains/projects/components/ProjectDashboardPanel";
 import { ProjectDashboardSkeleton } from "@/domains/projects/components/ProjectDashboardSkeleton";
 import { useProjectWorkItems } from "@/domains/projects/hooks/useProjectWorkItems";
@@ -20,6 +21,7 @@ type ProjectDashboardClientProps = {
 };
 
 export function ProjectDashboardClient({ projectId, projectSlug, initialData }: ProjectDashboardClientProps) {
+  const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [updatingItemId, setUpdatingItemId] = React.useState<string | null>(null);
   const [updateError, setUpdateError] = React.useState<string | null>(null);
   const { data, isPending, isError, refetch } = useProjectWorkItems(projectId, undefined, initialData);
@@ -57,24 +59,33 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
   }
 
   return (
-    <ProjectDashboardPanel
-      projectId={projectId}
-      projectSlug={projectSlug}
-      workItems={data ?? { items: [], total: 0, limit: 50, offset: 0 }}
-      isError={isError}
-      updatingItemId={updatingItemId}
-      isUpdatingItem={isUpdatingItem}
-      updateError={updateError}
-      onStatusUpdate={(item, status) => {
-        void handleUpdate(item, { status });
-      }}
-      onPriorityUpdate={(item, priority) => {
-        void handleUpdate(item, { priority });
-      }}
-      onRetry={() => {
-        setUpdateError(null);
-        void refetch();
-      }}
-    />
+    <>
+      <ProjectDashboardPanel
+        projectSlug={projectSlug}
+        workItems={data ?? { items: [], total: 0, limit: 50, offset: 0 }}
+        isError={isError}
+        updatingItemId={updatingItemId}
+        isUpdatingItem={isUpdatingItem}
+        updateError={updateError}
+        onStatusUpdate={(item, status) => {
+          void handleUpdate(item, { status });
+        }}
+        onPriorityUpdate={(item, priority) => {
+          void handleUpdate(item, { priority });
+        }}
+        onRetry={() => {
+          setUpdateError(null);
+          void refetch();
+        }}
+        onCreateWorkItem={() => setIsCreateOpen(true)}
+      />
+
+      <CreateProjectWorkItemDialog
+        open={isCreateOpen}
+        projectId={projectId}
+        defaultType="epic"
+        onOpenChange={setIsCreateOpen}
+      />
+    </>
   );
 }

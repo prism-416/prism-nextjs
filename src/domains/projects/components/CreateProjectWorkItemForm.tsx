@@ -6,7 +6,6 @@ import { Plus } from "lucide-react";
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
-import { Typography } from "@/atomics/atoms/Typography";
 import { useCreateProjectWorkItem } from "@/domains/projects/hooks/useCreateProjectWorkItem";
 import type { ProjectWorkItemPriority, ProjectWorkItemType } from "@/domains/projects/types";
 import {
@@ -18,9 +17,8 @@ import { cn } from "@/shared/utils/cn";
 type CreateProjectWorkItemFormProps = {
   projectId: string;
   parentId?: string;
-  title?: string;
-  description?: string;
   defaultType?: ProjectWorkItemType;
+  onCreated?: () => void;
 };
 
 const WORK_ITEM_TYPES: ProjectWorkItemType[] = ["epic", "story", "task"];
@@ -45,9 +43,8 @@ function getInitialFormState(defaultType: ProjectWorkItemType) {
 export function CreateProjectWorkItemForm({
   projectId,
   parentId,
-  title = "New work item",
-  description = "Fill in the details, then add it to the project.",
   defaultType = "task",
+  onCreated,
 }: CreateProjectWorkItemFormProps) {
   const formId = React.useId();
   const [form, setForm] = React.useState(() => getInitialFormState(defaultType));
@@ -89,6 +86,7 @@ export function CreateProjectWorkItemForm({
         },
       });
       resetForm();
+      onCreated?.();
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Work item could not be created.");
     }
@@ -96,28 +94,12 @@ export function CreateProjectWorkItemForm({
 
   return (
     <form
-      className="rounded-2xl border border-border/80 bg-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.04)]"
+      className="mt-5"
       onSubmit={handleSubmit}
       noValidate
     >
-      <div className="flex flex-col gap-1">
-        <Typography
-          variant="bodySm"
-          tone="primary"
-          weight="semibold"
-        >
-          {title}
-        </Typography>
-        <Typography
-          variant="caption"
-          tone="muted"
-        >
-          {description}
-        </Typography>
-      </div>
-
-      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(12rem,1fr)_8rem_8rem_auto] lg:items-end">
-        <div className="space-y-2">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
           <label
             htmlFor={`${formId}-work-item-title`}
             className="text-xs font-medium text-prism-muted"
@@ -190,18 +172,9 @@ export function CreateProjectWorkItemForm({
             ))}
           </select>
         </div>
-
-        <Button
-          type="submit"
-          className="h-10 rounded-lg px-4"
-          disabled={isPending}
-        >
-          <Plus className="size-4" />
-          {isPending ? "Adding..." : "Add"}
-        </Button>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-4 space-y-2">
         <label
           htmlFor={`${formId}-work-item-description`}
           className="text-xs font-medium text-prism-muted"
@@ -224,6 +197,17 @@ export function CreateProjectWorkItemForm({
           {formError}
         </div>
       )}
+
+      <div className="mt-6 flex justify-end">
+        <Button
+          type="submit"
+          className="h-10 rounded-lg px-5"
+          disabled={isPending}
+        >
+          <Plus className="size-4" />
+          {isPending ? "Creating..." : "Create work item"}
+        </Button>
+      </div>
     </form>
   );
 }

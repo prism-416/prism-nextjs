@@ -8,10 +8,8 @@ export function ProjectDashboardSkeleton() {
           <Skeleton className="h-7 w-40 bg-prism-navy/5" />
           <Skeleton className="mt-2 h-4 w-80 bg-prism-navy/5" />
         </div>
-        <Skeleton className="h-7 w-24 rounded-full bg-prism-navy/5" />
+        <Skeleton className="h-10 w-36 rounded-lg bg-prism-navy/5" />
       </div>
-
-      <Skeleton className="h-64 rounded-2xl bg-prism-navy/5" />
 
       <div className="grid min-w-[72rem] gap-4 overflow-hidden lg:min-w-0 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, columnIndex) => (
