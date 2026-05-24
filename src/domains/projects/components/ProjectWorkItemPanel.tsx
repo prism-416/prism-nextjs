@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, GitBranch, RefreshCw } from "lucide-react";
+import { ArrowLeft, GitBranch, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
-import { CreateProjectWorkItemForm } from "@/domains/projects/components/CreateProjectWorkItemForm";
 import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/ProjectWorkItemCommentsPanel";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import { ProjectWorkItemStatusBadge } from "@/domains/projects/components/ProjectWorkItemStatusBadge";
@@ -42,6 +41,7 @@ type ProjectWorkItemPanelProps = {
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
   onRetryChildren: () => void;
   onRetryComments: () => void;
+  onCreateChildWorkItem: () => void;
 };
 
 const WORK_ITEM_TYPE_LABELS: Record<ProjectWorkItemType, string> = {
@@ -49,13 +49,6 @@ const WORK_ITEM_TYPE_LABELS: Record<ProjectWorkItemType, string> = {
   story: "Story",
   task: "Task",
 };
-
-function getDefaultChildType(type: ProjectWorkItemType): ProjectWorkItemType {
-  if (type === "epic") return "story";
-  if (type === "story") return "task";
-
-  return "task";
-}
 
 function WorkItemMetric({ label, value }: { label: string; value: string }) {
   return (
@@ -209,6 +202,7 @@ export function ProjectWorkItemPanel({
   onPriorityUpdate,
   onRetryChildren,
   onRetryComments,
+  onCreateChildWorkItem,
 }: ProjectWorkItemPanelProps) {
   const dashboardHref = `/projects/${encodeURIComponent(projectSlug)}`;
 
@@ -280,14 +274,6 @@ export function ProjectWorkItemPanel({
         </div>
       </div>
 
-      <CreateProjectWorkItemForm
-        projectId={projectId}
-        parentId={workItem.itemId}
-        title="New child work item"
-        description="Add the next level under this work item."
-        defaultType={getDefaultChildType(workItem.type)}
-      />
-
       {updateError && (
         <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
           {updateError}
@@ -303,7 +289,17 @@ export function ProjectWorkItemPanel({
           >
             Child work items
           </Typography>
-          <span className="text-xs font-medium text-prism-muted">{childItems.length} total</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-prism-muted">{childItems.length} total</span>
+            <Button
+              type="button"
+              className="h-9 rounded-lg px-3"
+              onClick={onCreateChildWorkItem}
+            >
+              <Plus className="size-4" />
+              New child item
+            </Button>
+          </div>
         </div>
 
         {isChildrenError && (

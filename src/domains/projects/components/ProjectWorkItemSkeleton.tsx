@@ -14,11 +14,10 @@ export function ProjectWorkItemSkeleton() {
         </div>
       </div>
 
-      <Skeleton className="h-64 rounded-2xl bg-prism-navy/5" />
-
       <div className="rounded-2xl border border-border/80 bg-surface">
-        <div className="border-b border-border/70 px-4 py-3">
+        <div className="flex items-center justify-between gap-2 border-b border-border/70 px-4 py-3">
           <Skeleton className="h-5 w-36 bg-prism-navy/5" />
+          <Skeleton className="h-9 w-36 rounded-lg bg-prism-navy/5" />
         </div>
         <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (

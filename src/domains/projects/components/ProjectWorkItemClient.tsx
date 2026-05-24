@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { CreateProjectWorkItemDialog } from "@/domains/projects/components/CreateProjectWorkItemDialog";
 import { ProjectErrorState } from "@/domains/projects/components/ProjectErrorState";
 import { ProjectWorkItemPanel } from "@/domains/projects/components/ProjectWorkItemPanel";
 import { ProjectWorkItemSkeleton } from "@/domains/projects/components/ProjectWorkItemSkeleton";
@@ -15,6 +16,7 @@ import type {
   ProjectWorkItemCommentSearchResult,
   ProjectWorkItemPriority,
   ProjectWorkItemStatus,
+  ProjectWorkItemType,
 } from "@/domains/projects/types";
 import type { CurrentUser } from "@/shared/types/auth";
 
@@ -29,6 +31,13 @@ type ProjectWorkItemClientProps = {
   initialCurrentUser?: CurrentUser;
 };
 
+function getDefaultChildType(type: ProjectWorkItemType): ProjectWorkItemType {
+  if (type === "epic") return "story";
+  if (type === "story") return "task";
+
+  return "task";
+}
+
 export function ProjectWorkItemClient({
   projectId,
   projectSlug,
@@ -39,6 +48,7 @@ export function ProjectWorkItemClient({
   initialMembers,
   initialCurrentUser,
 }: ProjectWorkItemClientProps) {
+  const [isCreateChildOpen, setIsCreateChildOpen] = React.useState(false);
   const [updatingItemId, setUpdatingItemId] = React.useState<string | null>(null);
   const [updateError, setUpdateError] = React.useState<string | null>(null);
   const {
@@ -103,32 +113,45 @@ export function ProjectWorkItemClient({
   }
 
   return (
-    <ProjectWorkItemPanel
-      projectId={projectId}
-      projectSlug={projectSlug}
-      workItem={workItem}
-      childItems={childItems}
-      comments={comments ?? { comments: [], total: 0, limit: 50, offset: 0 }}
-      initialMembers={initialMembers}
-      initialCurrentUser={initialCurrentUser}
-      isChildrenError={isChildrenError}
-      isCommentsError={isCommentsError}
-      updatingItemId={updatingItemId}
-      isUpdatingItem={isUpdatingItem}
-      updateError={updateError}
-      onStatusUpdate={(item, status) => {
-        void handleUpdate(item, { status });
-      }}
-      onPriorityUpdate={(item, priority) => {
-        void handleUpdate(item, { priority });
-      }}
-      onRetryChildren={() => {
-        setUpdateError(null);
-        void refetchChildren();
-      }}
-      onRetryComments={() => {
-        void refetchComments();
-      }}
-    />
+    <>
+      <ProjectWorkItemPanel
+        projectId={projectId}
+        projectSlug={projectSlug}
+        workItem={workItem}
+        childItems={childItems}
+        comments={comments ?? { comments: [], total: 0, limit: 50, offset: 0 }}
+        initialMembers={initialMembers}
+        initialCurrentUser={initialCurrentUser}
+        isChildrenError={isChildrenError}
+        isCommentsError={isCommentsError}
+        updatingItemId={updatingItemId}
+        isUpdatingItem={isUpdatingItem}
+        updateError={updateError}
+        onStatusUpdate={(item, status) => {
+          void handleUpdate(item, { status });
+        }}
+        onPriorityUpdate={(item, priority) => {
+          void handleUpdate(item, { priority });
+        }}
+        onRetryChildren={() => {
+          setUpdateError(null);
+          void refetchChildren();
+        }}
+        onRetryComments={() => {
+          void refetchComments();
+        }}
+        onCreateChildWorkItem={() => setIsCreateChildOpen(true)}
+      />
+
+      <CreateProjectWorkItemDialog
+        open={isCreateChildOpen}
+        projectId={projectId}
+        parentId={workItem.itemId}
+        title="Create child work item"
+        description="Add the next level under this work item."
+        defaultType={getDefaultChildType(workItem.type)}
+        onOpenChange={setIsCreateChildOpen}
+      />
+    </>
   );
 }

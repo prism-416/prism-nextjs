@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { LayoutDashboard, RefreshCw } from "lucide-react";
+import { LayoutDashboard, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
-import { CreateProjectWorkItemForm } from "@/domains/projects/components/CreateProjectWorkItemForm";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import type {
   ProjectWorkItem,
@@ -20,7 +19,6 @@ import {
 import { cn } from "@/shared/utils/cn";
 
 type ProjectDashboardPanelProps = {
-  projectId: string;
   projectSlug: string;
   workItems: ProjectWorkItemSearchResult;
   isError: boolean;
@@ -30,6 +28,7 @@ type ProjectDashboardPanelProps = {
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
   onRetry: () => void;
+  onCreateWorkItem: () => void;
 };
 
 function getTopLevelWorkItems(items: ProjectWorkItem[]) {
@@ -229,7 +228,6 @@ function WorkItemStatusColumn({
 }
 
 export function ProjectDashboardPanel({
-  projectId,
   projectSlug,
   workItems,
   isError,
@@ -239,6 +237,7 @@ export function ProjectDashboardPanel({
   onStatusUpdate,
   onPriorityUpdate,
   onRetry,
+  onCreateWorkItem,
 }: ProjectDashboardPanelProps) {
   const topLevelItems = getTopLevelWorkItems(workItems.items);
   const itemsByStatus = getWorkItemsByStatus(topLevelItems);
@@ -265,15 +264,19 @@ export function ProjectDashboardPanel({
             Review top-level work items by status. Open an item to see its child work items.
           </Typography>
         </div>
-        <span className="inline-flex h-7 w-fit items-center rounded-full border border-border bg-surface px-3 text-xs font-medium text-prism-muted">
-          {topLevelItems.length} of {workItems.total}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          {!isError && (
+            <Button
+              type="button"
+              className="h-10 rounded-lg px-4"
+              onClick={onCreateWorkItem}
+            >
+              <Plus className="size-4" />
+              New work item
+            </Button>
+          )}
+        </div>
       </div>
-
-      <CreateProjectWorkItemForm
-        projectId={projectId}
-        defaultType="epic"
-      />
 
       {updateError && (
         <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
