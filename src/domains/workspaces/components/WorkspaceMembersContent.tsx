@@ -1,4 +1,4 @@
-import { getWorkspaceMembers } from "@/domains/workspaces/api";
+import { getWorkspaceJobs, getWorkspaceMembers } from "@/domains/workspaces/api";
 import { WorkspaceMembersClient } from "@/domains/workspaces/components/WorkspaceMembersClient";
 import type { Workspace } from "@/domains/workspaces/types";
 
@@ -7,12 +7,16 @@ type WorkspaceMembersContentProps = {
 };
 
 export async function WorkspaceMembersContent({ workspace }: WorkspaceMembersContentProps) {
-  const initialData = await getWorkspaceMembers(workspace.workspaceId);
+  const [initialData, initialJobs] = await Promise.all([
+    getWorkspaceMembers(workspace.workspaceId),
+    getWorkspaceJobs(workspace.workspaceId),
+  ]);
 
   return (
     <WorkspaceMembersClient
       workspace={workspace}
       initialData={initialData}
+      initialJobs={initialJobs}
     />
   );
 }

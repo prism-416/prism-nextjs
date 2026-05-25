@@ -4,14 +4,11 @@ import { notFound } from "next/navigation";
 import { getProjectBySlug, getProjects } from "@/domains/projects/api";
 import { ProjectRealtimeRoomBridge } from "@/domains/projects/components/ProjectRealtimeRoomBridge";
 import { ProjectSidebar } from "@/domains/projects/components/ProjectSidebar";
-import { getWorkspaceById, getWorkspaceMembers, getWorkspaces } from "@/domains/workspaces/api";
+import { getWorkspaceById, getWorkspaces } from "@/domains/workspaces/api";
 import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
 import type { WorkspacePathSegment } from "@/domains/workspaces/types/path";
-import { getCurrentUser } from "@/shared/api/auth";
 
 type ProjectPageShellContext = {
-  canManageProjectMembers: boolean;
-  currentUserId?: string;
   projectId: string;
   projectSlug: string;
   workspaceId: string;
@@ -21,16 +18,10 @@ type ProjectPageShellContext = {
 type ProjectPageShellProps = {
   slug: string;
   section?: WorkspacePathSegment;
-  withMemberManagementPermission?: boolean;
   children: React.ReactNode | ((context: ProjectPageShellContext) => React.ReactNode);
 };
 
-export async function ProjectPageShell({
-  slug,
-  section,
-  withMemberManagementPermission = false,
-  children,
-}: ProjectPageShellProps) {
+export async function ProjectPageShell({ slug, section, children }: ProjectPageShellProps) {
   const project = await getProjectBySlug(slug);
 
   if (!project) {
@@ -43,25 +34,10 @@ export async function ProjectPageShell({
   ]);
   const projects = workspace?.slug ? await getProjects(workspace.slug).catch(() => []) : [];
   const workspaceSlug = workspace?.slug;
-  let canManageProjectMembers = false;
-  let currentUserId: string | undefined;
-
-  if (withMemberManagementPermission && workspace) {
-    const [currentUser, members] = await Promise.all([
-      getCurrentUser().catch(() => undefined),
-      getWorkspaceMembers(workspace.workspaceId).catch(() => []),
-    ]);
-    const currentMember = members.find(member => member.userId === currentUser?.userId);
-
-    currentUserId = currentUser?.userId;
-    canManageProjectMembers = currentUser?.userId === workspace.ownerId || currentMember?.role === "admin";
-  }
 
   const resolvedChildren =
     typeof children === "function"
       ? children({
-          canManageProjectMembers,
-          currentUserId,
           projectId: project.projectId,
           projectSlug: project.slug,
           workspaceId: project.workspaceId,

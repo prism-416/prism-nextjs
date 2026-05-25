@@ -6,28 +6,20 @@ import type { Project } from "@/domains/projects/types";
 
 type CreateProjectDialogProps = {
   open: boolean;
-  workspaceId?: string;
   workspaceSlug: string;
   onOpenChange: (open: boolean) => void;
   onCreated?: (project: Project) => void;
 };
 
-export function CreateProjectDialog({
-  open,
-  workspaceId,
-  workspaceSlug,
-  onOpenChange,
-  onCreated,
-}: CreateProjectDialogProps) {
+export function CreateProjectDialog({ open, workspaceSlug, onOpenChange, onCreated }: CreateProjectDialogProps) {
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="max-w-4xl overflow-hidden p-0">
+      <DialogContent className="max-w-xl overflow-hidden p-0">
         <CreateProjectDialogForm
           key={open ? "open" : "closed"}
-          workspaceId={workspaceId}
           workspaceSlug={workspaceSlug}
           onOpenChange={onOpenChange}
           onCreated={onCreated}

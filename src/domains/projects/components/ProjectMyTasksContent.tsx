@@ -10,7 +10,6 @@ export async function ProjectMyTasksContent({ projectId }: ProjectMyTasksContent
   const currentUser = await getCurrentUser().catch(() => undefined);
   const initialData = currentUser?.username
     ? await getProjectWorkItems(projectId, {
-        type: "task",
         assigneeUsername: currentUser.username,
       }).catch(() => undefined)
     : undefined;

@@ -3,18 +3,18 @@ import { notFound } from "next/navigation";
 
 import { getProjects } from "@/domains/projects/api";
 import { getWorkspaceMembers, getWorkspaces } from "@/domains/workspaces/api";
-import { WorkspaceProjectJobsContent } from "@/domains/workspaces/components/WorkspaceProjectJobsContent";
-import { WorkspaceProjectJobsSkeleton } from "@/domains/workspaces/components/WorkspaceProjectJobsSkeleton";
+import { WorkspaceJobsContent } from "@/domains/workspaces/components/WorkspaceJobsContent";
+import { WorkspaceJobsSkeleton } from "@/domains/workspaces/components/WorkspaceJobsSkeleton";
 import { WorkspaceShell } from "@/domains/workspaces/components/WorkspaceShell";
 import { getCurrentUser } from "@/shared/api/auth";
 
-type WorkspaceProjectJobsPageProps = {
+type WorkspaceJobsPageProps = {
   params: Promise<{
     slug: string;
   }>;
 };
 
-export default async function WorkspaceProjectJobsPage({ params }: WorkspaceProjectJobsPageProps) {
+export default async function WorkspaceJobsPage({ params }: WorkspaceJobsPageProps) {
   const { slug } = await params;
   const [workspaces, projects] = await Promise.all([getWorkspaces(), getProjects(slug).catch(() => [])]);
   const workspace = workspaces.find(item => item.slug === slug);
@@ -46,10 +46,10 @@ export default async function WorkspaceProjectJobsPage({ params }: WorkspaceProj
         name: project.name,
         href: `/projects/${encodeURIComponent(project.slug)}`,
       }))}
-      section={{ name: "Project jobs" }}
+      section={{ name: "Jobs" }}
     >
-      <Suspense fallback={<WorkspaceProjectJobsSkeleton />}>
-        <WorkspaceProjectJobsContent
+      <Suspense fallback={<WorkspaceJobsSkeleton />}>
+        <WorkspaceJobsContent
           workspace={workspace}
           canManageJobs={canManageJobs}
         />

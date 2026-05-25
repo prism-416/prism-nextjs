@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import {
-  getProjectMembers,
+  getProjectParticipants,
   getProjectWorkItem,
   getProjectWorkItemChildren,
   getProjectWorkItemComments,
@@ -25,7 +25,7 @@ export async function ProjectWorkItemContent({ projectId, projectSlug, itemId }:
   const [initialChildren, initialComments, initialMembers, initialCurrentUser] = await Promise.all([
     getProjectWorkItemChildren(projectId, itemId).catch(() => undefined),
     getProjectWorkItemComments(projectId, itemId).catch(() => undefined),
-    getProjectMembers(projectId).catch(() => undefined),
+    getProjectParticipants(initialWorkItem.workspaceId).catch(() => undefined),
     getCurrentUser().catch(() => undefined),
   ]);
 

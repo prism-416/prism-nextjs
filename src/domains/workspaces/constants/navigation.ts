@@ -1,4 +1,12 @@
-import { BriefcaseBusiness, FolderKanban, LayoutDashboard, Settings, Users, type LucideIcon } from "lucide-react";
+import {
+  BriefcaseBusiness,
+  CalendarRange,
+  FolderKanban,
+  LayoutDashboard,
+  Settings,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 
 export type WorkspaceNavItem = {
   label: string;
@@ -20,7 +28,12 @@ const WORKSPACE_PRIMARY_NAV: WorkspaceScopedNavItem[] = [
   },
   { label: "Members", href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/members`, icon: Users },
   {
-    label: "Project jobs",
+    label: "Sprints",
+    href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/sprints`,
+    icon: CalendarRange,
+  },
+  {
+    label: "Jobs",
     href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/jobs`,
     icon: BriefcaseBusiness,
   },

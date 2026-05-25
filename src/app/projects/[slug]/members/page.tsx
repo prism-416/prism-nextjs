@@ -1,9 +1,7 @@
-import { Suspense } from "react";
+import { notFound, redirect } from "next/navigation";
 
-import { ProjectMembersContent } from "@/domains/projects/components/ProjectMembersContent";
-import { ProjectMembersSkeleton } from "@/domains/projects/components/ProjectMembersSkeleton";
-
-import { ProjectPageShell } from "../_components/ProjectPageShell";
+import { getProjectBySlug } from "@/domains/projects/api";
+import { getWorkspaceById } from "@/domains/workspaces/api";
 
 type ProjectMembersPageProps = {
   params: Promise<{
@@ -13,23 +11,17 @@ type ProjectMembersPageProps = {
 
 export default async function ProjectMembersPage({ params }: ProjectMembersPageProps) {
   const { slug } = await params;
+  const project = await getProjectBySlug(slug);
 
-  return (
-    <ProjectPageShell
-      slug={slug}
-      section={{ name: "Members" }}
-      withMemberManagementPermission
-    >
-      {({ workspaceSlug, canManageProjectMembers, currentUserId }) => (
-        <Suspense fallback={<ProjectMembersSkeleton />}>
-          <ProjectMembersContent
-            slug={slug}
-            workspaceSlug={workspaceSlug}
-            canManageMembers={canManageProjectMembers}
-            currentUserId={currentUserId}
-          />
-        </Suspense>
-      )}
-    </ProjectPageShell>
-  );
+  if (!project) {
+    notFound();
+  }
+
+  const workspace = await getWorkspaceById(project.workspaceId);
+
+  if (!workspace) {
+    notFound();
+  }
+
+  redirect(`/workspaces/${encodeURIComponent(workspace.slug)}/members`);
 }

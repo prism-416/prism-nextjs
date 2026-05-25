@@ -7,7 +7,7 @@ import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { useCreateProjectWorkItem } from "@/domains/projects/hooks/useCreateProjectWorkItem";
-import type { ProjectWorkItemPriority, ProjectWorkItemType } from "@/domains/projects/types";
+import type { ProjectWorkItemPriority } from "@/domains/projects/types";
 import {
   getProjectWorkItemPriorityLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
@@ -17,37 +17,23 @@ import { cn } from "@/shared/utils/cn";
 type CreateProjectWorkItemFormProps = {
   projectId: string;
   parentId?: string;
-  defaultType?: ProjectWorkItemType;
   onCreated?: () => void;
 };
 
-const WORK_ITEM_TYPES: ProjectWorkItemType[] = ["epic", "story", "task"];
-const WORK_ITEM_NAME_MAX_LENGTH = 140;
+const WORK_ITEM_NAME_MAX_LENGTH = 100;
 const WORK_ITEM_DESCRIPTION_MAX_LENGTH = 800;
 
-const WORK_ITEM_TYPE_LABELS: Record<ProjectWorkItemType, string> = {
-  epic: "Epic",
-  story: "Story",
-  task: "Task",
-};
-
-function getInitialFormState(defaultType: ProjectWorkItemType) {
+function getInitialFormState() {
   return {
     title: "",
     description: "",
-    type: defaultType,
     priority: "medium" as ProjectWorkItemPriority,
   };
 }
 
-export function CreateProjectWorkItemForm({
-  projectId,
-  parentId,
-  defaultType = "task",
-  onCreated,
-}: CreateProjectWorkItemFormProps) {
+export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: CreateProjectWorkItemFormProps) {
   const formId = React.useId();
-  const [form, setForm] = React.useState(() => getInitialFormState(defaultType));
+  const [form, setForm] = React.useState(getInitialFormState);
   const [formError, setFormError] = React.useState<string | null>(null);
   const { mutateAsync: createWorkItem, isPending } = useCreateProjectWorkItem();
 
@@ -60,9 +46,9 @@ export function CreateProjectWorkItemForm({
   }, []);
 
   const resetForm = React.useCallback(() => {
-    setForm(getInitialFormState(defaultType));
+    setForm(getInitialFormState());
     setFormError(null);
-  }, [defaultType]);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -81,7 +67,6 @@ export function CreateProjectWorkItemForm({
           parentId,
           title: trimmedTitle,
           description: form.description.trim(),
-          type: form.type,
           priority: form.priority,
         },
       });
@@ -98,8 +83,8 @@ export function CreateProjectWorkItemForm({
       onSubmit={handleSubmit}
       noValidate
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
+      <div className="grid gap-4">
+        <div className="space-y-2">
           <label
             htmlFor={`${formId}-work-item-title`}
             className="text-xs font-medium text-prism-muted"
@@ -115,34 +100,6 @@ export function CreateProjectWorkItemForm({
             disabled={isPending}
             className="h-10 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
           />
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor={`${formId}-work-item-type`}
-            className="text-xs font-medium text-prism-muted"
-          >
-            Type
-          </label>
-          <select
-            id={`${formId}-work-item-type`}
-            value={form.type}
-            onChange={event => updateForm("type", event.target.value as ProjectWorkItemType)}
-            disabled={isPending}
-            className={cn(
-              "h-10 w-full rounded-lg border border-border bg-surface-field px-3 text-sm text-prism-body",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-            )}
-          >
-            {WORK_ITEM_TYPES.map(type => (
-              <option
-                key={type}
-                value={type}
-              >
-                {WORK_ITEM_TYPE_LABELS[type]}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className="space-y-2">

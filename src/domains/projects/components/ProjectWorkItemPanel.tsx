@@ -7,12 +7,11 @@ import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/Proj
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import { ProjectWorkItemStatusBadge } from "@/domains/projects/components/ProjectWorkItemStatusBadge";
 import type {
-  ProjectMemberListItem,
+  ProjectParticipant,
   ProjectWorkItem,
   ProjectWorkItemCommentSearchResult,
   ProjectWorkItemPriority,
   ProjectWorkItemStatus,
-  ProjectWorkItemType,
 } from "@/domains/projects/types";
 import type { CurrentUser } from "@/shared/types/auth";
 import {
@@ -30,7 +29,7 @@ type ProjectWorkItemPanelProps = {
   workItem: ProjectWorkItem;
   childItems: ProjectWorkItem[];
   comments: ProjectWorkItemCommentSearchResult;
-  initialMembers?: ProjectMemberListItem[];
+  initialMembers?: ProjectParticipant[];
   initialCurrentUser?: CurrentUser;
   isChildrenError: boolean;
   isCommentsError: boolean;
@@ -42,12 +41,6 @@ type ProjectWorkItemPanelProps = {
   onRetryChildren: () => void;
   onRetryComments: () => void;
   onCreateChildWorkItem: () => void;
-};
-
-const WORK_ITEM_TYPE_LABELS: Record<ProjectWorkItemType, string> = {
-  epic: "Epic",
-  story: "Story",
-  task: "Task",
 };
 
 function WorkItemMetric({ label, value }: { label: string; value: string }) {
@@ -248,11 +241,7 @@ export function ProjectWorkItemPanel({
           </span>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <WorkItemMetric
-            label="Type"
-            value={WORK_ITEM_TYPE_LABELS[workItem.type]}
-          />
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           <WorkItemMetric
             label="Created"
             value={formatProjectRelativeDateTime(workItem.createdAt)}

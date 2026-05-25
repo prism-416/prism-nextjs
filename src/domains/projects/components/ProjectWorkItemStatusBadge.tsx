@@ -11,6 +11,7 @@ const WORK_ITEM_STATUS_CLASS_NAMES: Record<ProjectWorkItemStatus, string> = {
   in_progress: "border-prism-teal-500/30 bg-prism-teal-500/10 text-prism-navy",
   in_review: "border-prism-glow-gold/45 bg-prism-glow-gold/15 text-prism-navy",
   done: "border-prism-glow-sky/35 bg-prism-glow-sky/10 text-prism-navy",
+  archived: "border-border bg-surface-strong text-prism-muted",
 };
 
 export function ProjectWorkItemStatusBadge({ status }: ProjectWorkItemStatusBadgeProps) {
