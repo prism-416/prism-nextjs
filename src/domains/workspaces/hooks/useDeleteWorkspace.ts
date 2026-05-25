@@ -24,7 +24,7 @@ export function useDeleteWorkspace() {
 
       queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.detail(workspaceId) });
       queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.members(workspaceId) });
-      queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.projectJobs(workspaceId) });
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.jobs(workspaceId) });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.list() });
     },
   });

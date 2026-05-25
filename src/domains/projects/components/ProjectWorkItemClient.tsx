@@ -11,12 +11,11 @@ import { useProjectWorkItem } from "@/domains/projects/hooks/useProjectWorkItem"
 import { useProjectWorkItemChildren } from "@/domains/projects/hooks/useProjectWorkItemChildren";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
 import type {
-  ProjectMemberListItem,
+  ProjectParticipant,
   ProjectWorkItem,
   ProjectWorkItemCommentSearchResult,
   ProjectWorkItemPriority,
   ProjectWorkItemStatus,
-  ProjectWorkItemType,
 } from "@/domains/projects/types";
 import type { CurrentUser } from "@/shared/types/auth";
 
@@ -27,16 +26,9 @@ type ProjectWorkItemClientProps = {
   initialWorkItem?: ProjectWorkItem;
   initialChildren?: ProjectWorkItem[];
   initialComments?: ProjectWorkItemCommentSearchResult;
-  initialMembers?: ProjectMemberListItem[];
+  initialMembers?: ProjectParticipant[];
   initialCurrentUser?: CurrentUser;
 };
-
-function getDefaultChildType(type: ProjectWorkItemType): ProjectWorkItemType {
-  if (type === "epic") return "story";
-  if (type === "story") return "task";
-
-  return "task";
-}
 
 export function ProjectWorkItemClient({
   projectId,
@@ -148,8 +140,7 @@ export function ProjectWorkItemClient({
         projectId={projectId}
         parentId={workItem.itemId}
         title="Create child work item"
-        description="Add the next level under this work item."
-        defaultType={getDefaultChildType(workItem.type)}
+        description="Add a child under this work item."
         onOpenChange={setIsCreateChildOpen}
       />
     </>

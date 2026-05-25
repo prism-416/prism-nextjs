@@ -43,6 +43,7 @@ export type ProjectCommentDeletedPayload = {
 
 export type ProjectDocumentCreatedPayload = {
   documentId: string;
+  workspaceId: string;
   projectId: string;
   title: string;
   description: string | null;

@@ -8,9 +8,8 @@ import { Button } from "@/atomics/atoms/Button";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Typography } from "@/atomics/atoms/Typography";
 import { useCreateProjectWorkItemComment } from "@/domains/projects/hooks/useCreateProjectWorkItemComment";
-import { useProjectMembers } from "@/domains/projects/hooks/useProjectMembers";
 import type {
-  ProjectMemberListItem,
+  ProjectParticipant,
   ProjectWorkItemComment,
   ProjectWorkItemCommentSearchResult,
 } from "@/domains/projects/types";
@@ -23,7 +22,7 @@ type ProjectWorkItemCommentsPanelProps = {
   projectId: string;
   itemId: string;
   comments: ProjectWorkItemCommentSearchResult;
-  initialMembers?: ProjectMemberListItem[];
+  initialMembers?: ProjectParticipant[];
   initialCurrentUser?: CurrentUser;
   isError: boolean;
   onRetry: () => void;
@@ -59,7 +58,7 @@ function getFallbackUserLabel(userId: string) {
 
 function getDisplayName(
   comment: ProjectWorkItemComment,
-  memberByUserId: Map<string, ProjectMemberListItem>,
+  memberByUserId: Map<string, ProjectParticipant>,
   currentUser?: CurrentUser,
 ) {
   if (currentUser?.userId === comment.authorUserId) {
@@ -93,7 +92,7 @@ function CommentRow({
 }: {
   comment: ProjectWorkItemComment;
   currentUser?: CurrentUser;
-  memberByUserId: Map<string, ProjectMemberListItem>;
+  memberByUserId: Map<string, ProjectParticipant>;
 }) {
   const displayName = getDisplayName(comment, memberByUserId, currentUser);
   const isCurrentUser = currentUser?.userId === comment.authorUserId;
@@ -145,9 +144,11 @@ export function ProjectWorkItemCommentsPanel({
   const [body, setBody] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const { data: currentUser } = useCurrentUser(initialCurrentUser);
-  const { data: members = [] } = useProjectMembers(projectId, initialMembers);
   const { mutateAsync: createComment, isPending } = useCreateProjectWorkItemComment();
-  const memberByUserId = React.useMemo(() => new Map(members.map(member => [member.userId, member])), [members]);
+  const memberByUserId = React.useMemo(
+    () => new Map((initialMembers ?? []).map(member => [member.userId, member])),
+    [initialMembers],
+  );
   const currentUserInitial = currentUser ? getCurrentUserInitial(currentUser) : "U";
   const trimmedBody = body.trim();
 

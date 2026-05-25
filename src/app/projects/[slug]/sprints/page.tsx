@@ -1,9 +1,7 @@
-import { Suspense } from "react";
+import { notFound, redirect } from "next/navigation";
 
-import { ProjectSprintsContent } from "@/domains/projects/components/ProjectSprintsContent";
-import { ProjectSprintsSkeleton } from "@/domains/projects/components/ProjectSprintsSkeleton";
-
-import { ProjectPageShell } from "../_components/ProjectPageShell";
+import { getProjectBySlug } from "@/domains/projects/api";
+import { getWorkspaceById } from "@/domains/workspaces/api";
 
 type ProjectSprintsPageProps = {
   params: Promise<{
@@ -13,20 +11,17 @@ type ProjectSprintsPageProps = {
 
 export default async function ProjectSprintsPage({ params }: ProjectSprintsPageProps) {
   const { slug } = await params;
+  const project = await getProjectBySlug(slug);
 
-  return (
-    <ProjectPageShell
-      slug={slug}
-      section={{ name: "Sprints" }}
-    >
-      {({ projectId, projectSlug }) => (
-        <Suspense fallback={<ProjectSprintsSkeleton />}>
-          <ProjectSprintsContent
-            projectId={projectId}
-            projectSlug={projectSlug}
-          />
-        </Suspense>
-      )}
-    </ProjectPageShell>
-  );
+  if (!project) {
+    notFound();
+  }
+
+  const workspace = await getWorkspaceById(project.workspaceId);
+
+  if (!workspace) {
+    notFound();
+  }
+
+  redirect(`/workspaces/${encodeURIComponent(workspace.slug)}/sprints`);
 }

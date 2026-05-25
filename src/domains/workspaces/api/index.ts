@@ -4,19 +4,20 @@ import type { ApiResponse } from "@/shared/types/api";
 import type {
   AcceptInvitationPayload,
   CreateInvitationPayload,
-  CreateWorkspaceProjectJobsPayload,
+  CreateWorkspaceJobsPayload,
   CreateWorkspacePayload,
   DeclineInvitationPayload,
   GetWorkspaceInvitationPayload,
   SearchWorkspaceMemberCandidatesPayload,
   TransferWorkspaceOwnerPayload,
-  UpdateWorkspaceProjectJobsPayload,
+  UpdateWorkspaceJobsPayload,
   UpdateWorkspaceMemberRolePayload,
+  UpdateWorkspaceMemberJobsPayload,
   UpdateWorkspacePayload,
   Workspace,
   WorkspaceInvitation,
   WorkspaceInvitationPreview,
-  WorkspaceProjectJob,
+  WorkspaceJob,
   WorkspaceMemberCandidateSearchResult,
   WorkspaceMember,
 } from "../types";
@@ -87,8 +88,8 @@ export async function getWorkspaceMembers(workspaceId: string) {
   return response?.data ?? [];
 }
 
-export async function getWorkspaceProjectJobs(workspaceId: string) {
-  const response = await commonAxios<null, ApiResponse<WorkspaceProjectJob[]>>({
+export async function getWorkspaceJobs(workspaceId: string) {
+  const response = await commonAxios<null, ApiResponse<WorkspaceJob[]>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/jobs`,
     method: "GET",
     version: null,
@@ -97,8 +98,8 @@ export async function getWorkspaceProjectJobs(workspaceId: string) {
   return response?.data ?? [];
 }
 
-export async function createWorkspaceProjectJobs(workspaceId: string, body: CreateWorkspaceProjectJobsPayload) {
-  const response = await commonAxios<CreateWorkspaceProjectJobsPayload, ApiResponse<WorkspaceProjectJob[]>>({
+export async function createWorkspaceJobs(workspaceId: string, body: CreateWorkspaceJobsPayload) {
+  const response = await commonAxios<CreateWorkspaceJobsPayload, ApiResponse<WorkspaceJob[]>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/jobs`,
     method: "POST",
     data: body,
@@ -108,8 +109,8 @@ export async function createWorkspaceProjectJobs(workspaceId: string, body: Crea
   return response?.data ?? [];
 }
 
-export async function updateWorkspaceProjectJobs(workspaceId: string, body: UpdateWorkspaceProjectJobsPayload) {
-  const response = await commonAxios<UpdateWorkspaceProjectJobsPayload, ApiResponse<WorkspaceProjectJob[]>>({
+export async function updateWorkspaceJobs(workspaceId: string, body: UpdateWorkspaceJobsPayload) {
+  const response = await commonAxios<UpdateWorkspaceJobsPayload, ApiResponse<WorkspaceJob[]>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/jobs`,
     method: "PATCH",
     data: body,
@@ -134,6 +135,21 @@ export async function updateWorkspaceMemberRole(
 ) {
   const response = await commonAxios<UpdateWorkspaceMemberRolePayload, ApiResponse<WorkspaceMember>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}/role`,
+    method: "PUT",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function updateWorkspaceMemberJobs(
+  workspaceId: string,
+  userId: string,
+  body: UpdateWorkspaceMemberJobsPayload,
+) {
+  const response = await commonAxios<UpdateWorkspaceMemberJobsPayload, ApiResponse<WorkspaceMember>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}/jobs`,
     method: "PUT",
     data: body,
     version: null,

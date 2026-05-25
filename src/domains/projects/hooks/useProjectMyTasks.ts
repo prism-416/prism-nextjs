@@ -11,7 +11,7 @@ import { QUERY_KEYS, useApiQuery } from "@/shared/query";
 const MISSING_PROJECT_ID = "__missing_project_id__";
 const MISSING_USERNAME = "__missing_username__";
 
-type ProjectMyTasksSearchParams = Omit<ProjectWorkItemSearchParams, "assigneeUsername" | "type">;
+type ProjectMyTasksSearchParams = Omit<ProjectWorkItemSearchParams, "assigneeUsername">;
 
 export function useProjectMyTasks(
   projectId?: string,
@@ -21,7 +21,6 @@ export function useProjectMyTasks(
 ) {
   const searchParams = getDefinedProjectWorkItemSearchParams({
     ...filters,
-    type: "task",
     assigneeUsername,
   });
   const enabled = Boolean(projectId && assigneeUsername);

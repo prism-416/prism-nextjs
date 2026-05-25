@@ -13,12 +13,11 @@ import { ProjectsSkeleton } from "./ProjectsSkeleton";
 
 type ProjectsClientProps = {
   slug: string;
-  workspaceId?: string;
   initialData?: ProjectSummary[];
   canCreateProject: boolean;
 };
 
-export function ProjectsClient({ slug, workspaceId, initialData, canCreateProject }: ProjectsClientProps) {
+export function ProjectsClient({ slug, initialData, canCreateProject }: ProjectsClientProps) {
   const {
     data,
     isPending: isProjectsPending,
@@ -117,7 +116,6 @@ export function ProjectsClient({ slug, workspaceId, initialData, canCreateProjec
       {hasCreatePermission && (
         <CreateProjectDialog
           open={isCreateOpen}
-          workspaceId={workspaceId}
           workspaceSlug={slug}
           onOpenChange={setIsCreateOpen}
         />

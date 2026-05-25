@@ -1,17 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  ArrowLeft,
-  CalendarRange,
-  Files,
-  FolderKanban,
-  LayoutDashboard,
-  ListTodo,
-  LogOut,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft, Files, FolderKanban, LayoutDashboard, ListTodo, LogOut, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -136,8 +126,6 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
         exact: true,
         activePathPrefixes: [`${projectHref}/work-items`],
       },
-      { label: "Members", href: `${projectHref}/members`, icon: Users, exact: true },
-      { label: "Sprints", href: `${projectHref}/sprints`, icon: CalendarRange, exact: true },
       { label: "Documents", href: `${projectHref}/documents`, icon: Files, exact: true },
       { label: "My tasks", href: `${projectHref}/my-tasks`, icon: ListTodo, exact: true },
     ],

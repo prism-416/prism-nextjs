@@ -83,7 +83,6 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
       <CreateProjectWorkItemDialog
         open={isCreateOpen}
         projectId={projectId}
-        defaultType="epic"
         onOpenChange={setIsCreateOpen}
       />
     </>

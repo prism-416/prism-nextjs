@@ -16,7 +16,11 @@ export const QUERY_KEYS = {
     list: () => ["workspace", "list"] as const,
     detail: (id: string) => ["workspace", "detail", id] as const,
     members: (id: string) => ["workspace", "members", id] as const,
-    projectJobs: (id: string) => ["workspace", "project-jobs", id] as const,
+    jobs: (id: string) => ["workspace", "jobs", id] as const,
+    sprints: (id: string) => [...QUERY_KEYS.workspace.detail(id), "sprints"] as const,
+    sprintDetail: (id: string, sprintId: string) => [...QUERY_KEYS.workspace.sprints(id), "detail", sprintId] as const,
+    sprintWorkItems: (id: string, sprintId: string, filters?: object) =>
+      [...QUERY_KEYS.workspace.sprintDetail(id, sprintId), "work-items", filters ?? {}] as const,
     invitation: (token: string) => ["workspace", "invitation", token] as const,
   },
   project: {
@@ -27,8 +31,6 @@ export const QUERY_KEYS = {
       [...QUERY_KEYS.project.lists(), "workspace-slug", workspaceSlug] as const,
     detail: (id: string) => ["project", "detail", id] as const,
     detailBySlug: (projectSlug: string) => [...QUERY_KEYS.project.all, "detail", "slug", projectSlug] as const,
-    members: (id: string) => [...QUERY_KEYS.project.detail(id), "members"] as const,
-    assignableMembers: (workspaceId: string) => [...QUERY_KEYS.project.all, "assignable-members", workspaceId] as const,
     workItems: (projectId: string) => [...QUERY_KEYS.project.detail(projectId), "work-items"] as const,
     workItemList: (projectId: string, filters?: object) =>
       [...QUERY_KEYS.project.workItems(projectId), "list", filters ?? {}] as const,
@@ -42,10 +44,5 @@ export const QUERY_KEYS = {
       [...QUERY_KEYS.project.workItemDetail(projectId, itemId), "comments"] as const,
     workItemCommentList: (projectId: string, itemId: string, filters?: object) =>
       [...QUERY_KEYS.project.workItemComments(projectId, itemId), "list", filters ?? {}] as const,
-    sprints: (projectId: string) => [...QUERY_KEYS.project.detail(projectId), "sprints"] as const,
-    sprintDetail: (projectId: string, sprintId: string) =>
-      [...QUERY_KEYS.project.sprints(projectId), "detail", sprintId] as const,
-    sprintWorkItems: (projectId: string, sprintId: string, filters?: object) =>
-      [...QUERY_KEYS.project.sprintDetail(projectId, sprintId), "work-items", filters ?? {}] as const,
   },
 } as const;

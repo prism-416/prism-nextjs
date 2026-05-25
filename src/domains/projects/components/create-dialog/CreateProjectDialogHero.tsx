@@ -19,7 +19,7 @@ export function CreateProjectDialogHero() {
         </span>
         <DialogHeader className="gap-0.5">
           <DialogTitle>Create a new project</DialogTitle>
-          <DialogDescription>Set up a project, assign members, and choose their jobs.</DialogDescription>
+          <DialogDescription>Define what this project will build and start organizing its work.</DialogDescription>
         </DialogHeader>
       </div>
     </div>

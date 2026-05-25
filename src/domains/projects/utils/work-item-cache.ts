@@ -66,25 +66,17 @@ function isProjectWorkItemChildrenQuery(queryKey: QueryKey, projectId: string) {
   );
 }
 
-function isProjectSprintWorkItemsQuery(queryKey: QueryKey, projectId: string) {
-  return (
-    queryKey[0] === "project" &&
-    queryKey[1] === "detail" &&
-    queryKey[2] === projectId &&
-    queryKey[3] === "sprints" &&
-    queryKey[4] === "detail" &&
-    queryKey[6] === "work-items"
-  );
-}
-
-function invalidateProjectWorkItemCollections(queryClient: QueryClient, projectId: string) {
+function invalidateProjectWorkItemCollections(queryClient: QueryClient, projectId: string, workspaceId?: string) {
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(projectId) });
-  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.sprints(projectId) });
+
+  if (workspaceId) {
+    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.sprints(workspaceId) });
+  }
 }
 
 export function syncProjectWorkItemCreated(queryClient: QueryClient, workItem: ProjectWorkItem) {
   queryClient.setQueryData(QUERY_KEYS.project.workItemDetail(workItem.projectId, workItem.itemId), workItem);
-  invalidateProjectWorkItemCollections(queryClient, workItem.projectId);
+  invalidateProjectWorkItemCollections(queryClient, workItem.projectId, workItem.workspaceId);
 }
 
 export function syncProjectWorkItemUpdated(queryClient: QueryClient, workItem: ProjectWorkItem) {
@@ -97,19 +89,13 @@ export function syncProjectWorkItemUpdated(queryClient: QueryClient, workItem: P
     },
     previous => replaceWorkItemInSearchResult(previous, workItem),
   );
-  queryClient.setQueriesData<ProjectWorkItemSearchResult>(
-    {
-      predicate: query => isProjectSprintWorkItemsQuery(query.queryKey, projectId),
-    },
-    previous => replaceWorkItemInSearchResult(previous, workItem),
-  );
   queryClient.setQueriesData<ProjectWorkItem[]>(
     {
       predicate: query => isProjectWorkItemChildrenQuery(query.queryKey, projectId),
     },
     previous => replaceWorkItemInChildren(previous, workItem),
   );
-  invalidateProjectWorkItemCollections(queryClient, projectId);
+  invalidateProjectWorkItemCollections(queryClient, projectId, workItem.workspaceId);
 }
 
 export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: ProjectWorkItemDeletedPayload) {
@@ -122,12 +108,6 @@ export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: Pr
     },
     previous => removeWorkItemFromSearchResult(previous, itemId),
   );
-  queryClient.setQueriesData<ProjectWorkItemSearchResult>(
-    {
-      predicate: query => isProjectSprintWorkItemsQuery(query.queryKey, projectId),
-    },
-    previous => removeWorkItemFromSearchResult(previous, itemId),
-  );
   queryClient.setQueriesData<ProjectWorkItem[]>(
     {
       predicate: query => isProjectWorkItemChildrenQuery(query.queryKey, projectId),
@@ -135,4 +115,8 @@ export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: Pr
     previous => removeWorkItemFromChildren(previous, itemId),
   );
   invalidateProjectWorkItemCollections(queryClient, projectId);
+  queryClient.invalidateQueries({
+    predicate: query =>
+      query.queryKey[0] === "workspace" && query.queryKey[1] === "detail" && query.queryKey[3] === "sprints",
+  });
 }

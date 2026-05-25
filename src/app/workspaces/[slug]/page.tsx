@@ -50,7 +50,6 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
       <Suspense fallback={<ProjectsSkeleton />}>
         <ProjectsContent
           slug={slug}
-          workspaceId={workspace.workspaceId}
           canCreateProject={canCreateProject}
         />
       </Suspense>

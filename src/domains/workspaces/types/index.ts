@@ -18,11 +18,13 @@ export interface WorkspaceMember {
   fullName: string;
   username: string;
   role: InvitationRole;
+  jobIds: string[];
+  jobNames: string[];
   joinedAt: string | null;
 }
 
 /** `GET /workspaces/{workspaceId}/jobs` response item */
-export interface WorkspaceProjectJob {
+export interface WorkspaceJob {
   jobId: string;
   workspaceId: string;
   name: string;
@@ -35,7 +37,7 @@ export type InvitationRole = "admin" | "member" | "viewer";
 export type WorkspaceMemberCandidateKind = "existing" | "external";
 
 export type WorkspaceMemberCandidateSearchReason = "success" | "self" | "already_member" | "no_results";
-export type WorkspaceInvitationStatus = "pending" | "accepted" | "declined" | "expired";
+export type WorkspaceInvitationStatus = "pending" | "accepted" | "declined" | "expired" | "cancelled";
 
 export interface WorkspaceInvitationRoleOption {
   value: InvitationRole;
@@ -81,31 +83,36 @@ export interface UpdateWorkspacePayload {
 }
 
 /** `POST /workspaces/{workspaceId}/jobs` body item */
-export interface CreateWorkspaceProjectJobPayload {
+export interface CreateWorkspaceJobPayload {
   name: string;
   description: string;
 }
 
 /** `POST /workspaces/{workspaceId}/jobs` body */
-export interface CreateWorkspaceProjectJobsPayload {
-  jobs: CreateWorkspaceProjectJobPayload[];
+export interface CreateWorkspaceJobsPayload {
+  jobs: CreateWorkspaceJobPayload[];
 }
 
 /** `PATCH /workspaces/{workspaceId}/jobs` body item */
-export interface UpdateWorkspaceProjectJobPayload {
+export interface UpdateWorkspaceJobPayload {
   jobId: string;
   name: string;
   description: string;
 }
 
 /** `PATCH /workspaces/{workspaceId}/jobs` body */
-export interface UpdateWorkspaceProjectJobsPayload {
-  jobs: UpdateWorkspaceProjectJobPayload[];
+export interface UpdateWorkspaceJobsPayload {
+  jobs: UpdateWorkspaceJobPayload[];
 }
 
 /** `PUT /workspaces/{workspaceId}/members/{userId}/role` body */
 export interface UpdateWorkspaceMemberRolePayload {
   role: InvitationRole;
+}
+
+/** `PUT /workspaces/{workspaceId}/members/{userId}/jobs` body */
+export interface UpdateWorkspaceMemberJobsPayload {
+  jobIds: string[];
 }
 
 /** `PUT /workspaces/{workspaceId}/owner` body */
