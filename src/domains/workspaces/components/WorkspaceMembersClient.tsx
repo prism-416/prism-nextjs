@@ -136,74 +136,81 @@ export function WorkspaceMembersClient({ workspace, initialData, initialJobs }: 
             return (
               <div
                 key={member.userId}
-                className="border-b border-border/60 px-5 py-4 last:border-b-0"
+                className="border-b border-border/60 px-3 py-4 last:border-b-0 sm:px-5"
               >
-                <div className="flex items-center gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-prism-navy text-sm font-semibold text-primary-foreground">
-                    {getWorkspaceMemberInitial(member)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <Typography
-                      variant="title"
-                      tone="primary"
-                      className="truncate text-base"
-                    >
-                      {getWorkspaceMemberDisplayName(member)}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      tone="muted"
-                      className="mt-0.5 block truncate"
-                    >
-                      @{member.username}
-                    </Typography>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-full bg-prism-navy text-sm font-semibold text-primary-foreground">
+                      {getWorkspaceMemberInitial(member)}
+                    </span>
+                    <div className="min-w-0">
+                      <Typography
+                        variant="title"
+                        tone="primary"
+                        className="truncate text-base"
+                      >
+                        {getWorkspaceMemberDisplayName(member)}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        tone="muted"
+                        className="mt-0.5 block truncate"
+                      >
+                        @{member.username}
+                      </Typography>
+                    </div>
                   </div>
-                  {isSelf ? (
-                    <Badge
-                      icon={CircleCheck}
-                      className="hidden sm:inline-flex"
+                  <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+                    {isSelf ? (
+                      <Badge
+                        icon={CircleCheck}
+                        size="sm"
+                        className="sm:px-2.5 sm:py-1 sm:text-xs sm:[&_svg]:size-3.5"
+                      >
+                        You
+                      </Badge>
+                    ) : null}
+                    <span
+                      className={cn(
+                        "inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] font-medium capitalize leading-none sm:px-2.5 sm:py-1 sm:text-xs",
+                        getWorkspaceMemberRoleBadgeClassName(member, ownerId),
+                      )}
                     >
-                      You
-                    </Badge>
-                  ) : null}
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium capitalize",
-                      getWorkspaceMemberRoleBadgeClassName(member, ownerId),
-                    )}
-                  >
-                    {isOwner ? <Crown className="size-3.5" /> : null}
-                    {isOwner ? "owner" : member.role}
-                  </span>
-                  {canShowActions ? (
-                    <WorkspaceMemberActionsMenu
-                      member={member}
-                      disabled={isMutating}
-                      onRoleChange={role => void handleRoleChange(member, role)}
-                      onRemove={() => {
-                        if (isSelf) {
-                          setIsLeaveOpen(true);
-                        } else {
-                          setPendingAction({ type: "remove", member });
-                        }
-                      }}
-                      onTransferOwner={() => {
-                        if (isWorkspaceOwner) {
-                          setPendingAction({ type: "transfer-owner", member });
-                        }
-                      }}
-                      canTransferOwner={isWorkspaceOwner}
-                      isSelf={isSelf}
-                    />
-                  ) : null}
+                      {isOwner ? <Crown className="size-3 sm:size-3.5" /> : null}
+                      {isOwner ? "owner" : member.role}
+                    </span>
+                    {canShowActions ? (
+                      <WorkspaceMemberActionsMenu
+                        member={member}
+                        disabled={isMutating}
+                        onRoleChange={role => void handleRoleChange(member, role)}
+                        onRemove={() => {
+                          if (isSelf) {
+                            setIsLeaveOpen(true);
+                          } else {
+                            setPendingAction({ type: "remove", member });
+                          }
+                        }}
+                        onTransferOwner={() => {
+                          if (isWorkspaceOwner) {
+                            setPendingAction({ type: "transfer-owner", member });
+                          }
+                        }}
+                        canTransferOwner={isWorkspaceOwner}
+                        isSelf={isSelf}
+                      />
+                    ) : null}
+                  </div>
                 </div>
-                <WorkspaceMemberJobsEditor
-                  key={`${member.userId}:${member.jobIds.join(",")}`}
-                  workspace={workspace}
-                  member={member}
-                  jobs={jobs}
-                  canManage={canManageMembers}
-                />
+                <div className="ml-12 sm:ml-[3.25rem]">
+                  <WorkspaceMemberJobsEditor
+                    key={`${member.userId}:${member.jobIds.join(",")}`}
+                    workspace={workspace}
+                    member={member}
+                    jobs={jobs}
+                    canManage={canManageMembers}
+                  />
+                </div>
               </div>
             );
           })}

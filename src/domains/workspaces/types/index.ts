@@ -28,7 +28,7 @@ export interface WorkspaceJob {
   jobId: string;
   workspaceId: string;
   name: string;
-  description: string;
+  description: string | null;
   createdAt: string;
 }
 
@@ -85,7 +85,7 @@ export interface UpdateWorkspacePayload {
 /** `POST /workspaces/{workspaceId}/jobs` body item */
 export interface CreateWorkspaceJobPayload {
   name: string;
-  description: string;
+  description: string | null;
 }
 
 /** `POST /workspaces/{workspaceId}/jobs` body */
@@ -97,7 +97,7 @@ export interface CreateWorkspaceJobsPayload {
 export interface UpdateWorkspaceJobPayload {
   jobId: string;
   name: string;
-  description: string;
+  description: string | null;
 }
 
 /** `PATCH /workspaces/{workspaceId}/jobs` body */

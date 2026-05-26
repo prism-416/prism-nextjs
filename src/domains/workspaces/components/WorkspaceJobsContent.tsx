@@ -12,6 +12,7 @@ export async function WorkspaceJobsContent({ workspace, canManageJobs }: Workspa
 
   return (
     <WorkspaceJobsClient
+      key={workspace.workspaceId}
       workspace={workspace}
       initialData={initialData}
       canManageJobs={canManageJobs}

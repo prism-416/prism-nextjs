@@ -14,6 +14,7 @@ export async function WorkspaceMembersContent({ workspace }: WorkspaceMembersCon
 
   return (
     <WorkspaceMembersClient
+      key={workspace.workspaceId}
       workspace={workspace}
       initialData={initialData}
       initialJobs={initialJobs}

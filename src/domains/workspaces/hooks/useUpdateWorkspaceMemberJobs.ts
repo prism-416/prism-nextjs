@@ -26,9 +26,14 @@ export function useUpdateWorkspaceMemberJobs() {
       return member;
     },
     onSuccess: (member, { workspaceId }) => {
-      queryClient.setQueryData<WorkspaceMember[]>(QUERY_KEYS.workspace.members(workspaceId), previous =>
-        previous?.map(item => (item.userId === member.userId ? member : item)),
-      );
+      queryClient.setQueryData<WorkspaceMember[]>(QUERY_KEYS.workspace.members(workspaceId), previous => {
+        if (!previous) {
+          return [member];
+        }
+
+        return previous.map(item => (item.userId === member.userId ? member : item));
+      });
+
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.members(workspaceId) });
     },
   });

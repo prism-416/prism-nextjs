@@ -120,6 +120,14 @@ export async function updateWorkspaceJobs(workspaceId: string, body: UpdateWorks
   return response?.data ?? [];
 }
 
+export async function deleteWorkspaceJob(workspaceId: string, jobId: string) {
+  await commonAxios<null, ApiResponse<null>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/jobs/${encodeURIComponent(jobId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
 export async function removeWorkspaceMember(workspaceId: string, userId: string) {
   await commonAxios<null, ApiResponse<null>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/members/${encodeURIComponent(userId)}`,
