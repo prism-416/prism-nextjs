@@ -1,43 +1,20 @@
 "use client";
 
-import { useMemo } from "react";
-import { CalendarDays, FolderKanban, Users } from "lucide-react";
+import { CalendarDays, FolderKanban, MoreVertical, Users } from "lucide-react";
 
+import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
-import { WorkspaceMemberRow } from "@/domains/workspaces/components/WorkspaceMemberRow";
-import { WorkspaceActionsMenu } from "@/domains/workspaces/components/list/WorkspaceActionsMenu";
 import { WorkspaceMetaItem } from "@/domains/workspaces/components/list/WorkspaceMetaItem";
-import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
 import type { Workspace } from "@/domains/workspaces/types";
 import { formatWorkspaceCount } from "@/domains/workspaces/utils/display";
-import { getWorkspaceMemberSortRank } from "@/domains/workspaces/utils/member";
 
 type WorkspaceSettingsCardProps = {
   workspace: Workspace;
   canManage: boolean;
-  isOwner: boolean;
-  currentUserId?: string;
   onEdit: () => void;
-  onDelete: () => void;
 };
 
-export function WorkspaceSettingsCard({
-  workspace,
-  canManage,
-  isOwner,
-  currentUserId,
-  onEdit,
-  onDelete,
-}: WorkspaceSettingsCardProps) {
-  const { data: members = [] } = useWorkspaceMembers(workspace.workspaceId);
-  const sortedMembers = useMemo(
-    () =>
-      [...members].sort(
-        (a, b) => getWorkspaceMemberSortRank(a, workspace.ownerId) - getWorkspaceMemberSortRank(b, workspace.ownerId),
-      ),
-    [members, workspace.ownerId],
-  );
-
+export function WorkspaceSettingsCard({ workspace, canManage, onEdit }: WorkspaceSettingsCardProps) {
   return (
     <div className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.05)]">
       <div className="flex items-start justify-between gap-3">
@@ -115,36 +92,18 @@ export function WorkspaceSettingsCard({
         </div>
 
         {canManage && (
-          <WorkspaceActionsMenu
-            workspaceName={workspace.name}
-            onEdit={onEdit}
-            onDelete={isOwner ? onDelete : undefined}
-          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 text-prism-muted"
+            aria-label={`Edit ${workspace.name}`}
+            onClick={onEdit}
+          >
+            <MoreVertical className="size-4" />
+          </Button>
         )}
       </div>
-
-      {sortedMembers.length > 0 && (
-        <div className="mt-5 border-t border-border/60 pt-4">
-          <Typography
-            variant="bodySm"
-            tone="default"
-            weight="medium"
-            className="mb-2.5"
-          >
-            Members
-          </Typography>
-          <div className="overflow-hidden rounded-lg border border-border/70">
-            {sortedMembers.map(member => (
-              <WorkspaceMemberRow
-                key={member.userId}
-                member={member}
-                ownerId={workspace.ownerId}
-                currentUserId={currentUserId}
-              />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

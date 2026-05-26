@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from "@/atomics/molecules/Dialog";
 import { CreateWorkspaceDetailsSection } from "@/domains/workspaces/components/create-dialog/CreateWorkspaceDetailsSection";
-import { WorkspaceMembersEditor } from "@/domains/workspaces/components/WorkspaceMembersEditor";
 import { useUpdateWorkspace } from "@/domains/workspaces/hooks/useUpdateWorkspace";
 import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
 import type { Workspace } from "@/domains/workspaces/types";
@@ -23,13 +22,12 @@ type WorkspaceEditDialogProps = {
   workspace: Workspace;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onWorkspaceLeft?: (workspace: Workspace) => void;
 };
 
 const NAME_MAX = 20;
 const DESCRIPTION_MAX = 1000;
 
-export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspaceLeft }: WorkspaceEditDialogProps) {
+export function WorkspaceEditDialog({ workspace, open, onOpenChange }: WorkspaceEditDialogProps) {
   const [name, setName] = useState(() => workspace.name);
   const [description, setDescription] = useState(() => workspace.description ?? "");
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -110,12 +108,6 @@ export function WorkspaceEditDialog({ workspace, open, onOpenChange, onWorkspace
               }
             }}
             onDescriptionChange={setDescription}
-          />
-
-          <WorkspaceMembersEditor
-            workspace={workspace}
-            onWorkspaceLeft={() => onWorkspaceLeft?.(workspace)}
-            onSelfRoleChanged={() => onOpenChange(false)}
           />
 
           {canEditWorkspace ? (
