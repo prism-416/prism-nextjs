@@ -135,6 +135,9 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft, onSelfRoleC
                   <WorkspaceMemberActionsMenu
                     member={member}
                     disabled={isMutating}
+                    canManage={canManageMembers}
+                    canTransferOwner={isWorkspaceOwner}
+                    isSelf={isSelf}
                     onRoleChange={role => void handleRoleChange(member, role)}
                     onRemove={() => {
                       if (isSelf) {
@@ -148,8 +151,6 @@ export function WorkspaceMembersEditor({ workspace, onWorkspaceLeft, onSelfRoleC
                         setPendingAction({ type: "transfer-owner", member });
                       }
                     }}
-                    canTransferOwner={isWorkspaceOwner}
-                    isSelf={isSelf}
                   />
                 ) : null}
               </WorkspaceMemberRow>

@@ -71,8 +71,8 @@
   --secondary-foreground: var(--color-navy-950);
   --muted: var(--color-neutral-500);
   --muted-foreground: var(--color-neutral-500);
-  --accent: var(--prism-spectrum-violet);
-  --accent-foreground: var(--color-neutral-0);
+  --accent: rgba(11, 21, 51, 0.06);
+  --accent-foreground: var(--heading);
   --ring: rgba(156, 124, 255, 0.42);
   --ring-offset-background: var(--background);
   --input: rgba(148, 163, 184, 0.42);

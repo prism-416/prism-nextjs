@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { WorkspaceLeaveDialog } from "@/domains/workspaces/components/WorkspaceLeaveDialog";
@@ -38,25 +38,57 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
         <WorkspaceSettingsCard
           workspace={workspace}
           canManage={canManage}
-          isOwner={isOwner}
-          currentUserId={currentUser?.userId}
           onEdit={() => setIsEditing(true)}
-          onDelete={() => setIsDeleteOpen(true)}
         />
       </section>
 
-      {currentUser && (
-        <div className="mx-auto flex w-full max-w-6xl justify-end pt-6">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => setIsLeaveOpen(true)}
-            className="h-9 gap-1.5 rounded-lg border border-red-400 bg-red-50 text-red-600 hover:border-red-500 hover:bg-red-100 hover:text-red-700"
-          >
-            <LogOut className="size-4" />
-            Leave Workspace
-          </Button>
-        </div>
+      {(currentUser || isOwner) && (
+        <section className="mx-auto w-full max-w-6xl overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.05)] mt-8">
+          <div className="flex items-center gap-2 border-b border-border/60 px-5 py-3">
+            <TriangleAlert className="size-3.5 text-prism-danger" />
+            <h2 className="text-sm font-semibold text-prism-danger">Danger Zone</h2>
+          </div>
+
+          <div className="divide-y divide-border/60">
+            {currentUser && (
+              <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-prism-heading">Leave workspace</p>
+                  <p className="mt-0.5 text-xs text-prism-muted">
+                    Remove yourself from this workspace. You&apos;ll need a new invitation to rejoin.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsLeaveOpen(true)}
+                  className="h-9 shrink-0 rounded-lg border-[#DC2626]/30 bg-transparent px-4 text-sm text-prism-danger hover:border-[#DC2626]/50 hover:bg-[#DC2626]/5 hover:text-prism-danger"
+                >
+                  Leave workspace
+                </Button>
+              </div>
+            )}
+
+            {isOwner && (
+              <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-prism-heading">Delete workspace</p>
+                  <p className="mt-0.5 text-xs text-prism-muted">
+                    Permanently delete this workspace and all its data. This action cannot be undone.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsDeleteOpen(true)}
+                  className="h-9 shrink-0 rounded-lg border-[#DC2626]/30 bg-transparent px-4 text-sm text-prism-danger hover:border-[#DC2626]/50 hover:bg-[#DC2626]/5 hover:text-prism-danger"
+                >
+                  Delete workspace
+                </Button>
+              </div>
+            )}
+          </div>
+        </section>
       )}
 
       {isEditing && (
@@ -67,7 +99,6 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
           onOpenChange={open => {
             if (!open) setIsEditing(false);
           }}
-          onWorkspaceLeft={() => router.push("/workspaces")}
         />
       )}
 
@@ -80,6 +111,7 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
 
       <WorkspaceLeaveDialog
         workspaceName={workspace.name}
+        workspaceSlug={workspace.slug}
         isOwner={isOwner}
         open={isLeaveOpen}
         isPending={removeMember.isPending}

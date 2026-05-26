@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import {
@@ -13,6 +16,7 @@ import {
 
 type WorkspaceLeaveDialogProps = {
   workspaceName: string;
+  workspaceSlug?: string;
   isOwner: boolean;
   open: boolean;
   isPending: boolean;
@@ -22,6 +26,7 @@ type WorkspaceLeaveDialogProps = {
 
 export function WorkspaceLeaveDialog({
   workspaceName,
+  workspaceSlug,
   isOwner,
   open,
   isPending,
@@ -59,9 +64,21 @@ export function WorkspaceLeaveDialog({
               tone="muted"
               className="mt-1 block"
             >
-              As the owner, you must transfer ownership to another member before leaving. You can do this via the Edit
-              workspace dialog.
+              As the owner, you must transfer ownership to another member before leaving.
             </Typography>
+            {workspaceSlug && (
+              <Button
+                asChild
+                size="sm"
+                className="mt-2 h-8 gap-1.5 rounded-lg bg-prism-navy px-2.5 text-xs text-white hover:bg-prism-navy/90"
+                onClick={() => onOpenChange(false)}
+              >
+                <Link href={`/workspaces/${encodeURIComponent(workspaceSlug)}/members`}>
+                  Go to Members
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              </Button>
+            )}
           </div>
         ) : (
           <div className="mt-2 rounded-xl border border-prism-danger-soft bg-prism-danger-soft/20 px-4 py-3">
@@ -81,17 +98,17 @@ export function WorkspaceLeaveDialog({
           </div>
         )}
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-            className="h-10 rounded-lg"
-          >
-            {isOwner ? "Close" : "Cancel"}
-          </Button>
-          {!isOwner && (
+        {!isOwner && (
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              disabled={isPending}
+              className="h-10 rounded-lg"
+            >
+              Cancel
+            </Button>
             <Button
               type="button"
               onClick={onConfirm}
@@ -100,8 +117,8 @@ export function WorkspaceLeaveDialog({
             >
               {isPending ? "Leaving..." : "Leave workspace"}
             </Button>
-          )}
-        </DialogFooter>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
