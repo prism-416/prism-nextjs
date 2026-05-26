@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
+import { PROJECT_MUTATION_KEYS } from "@/domains/projects/constants/mutations";
 import { PROJECT_REALTIME_EVENTS } from "@/domains/projects/constants/realtime";
 import type {
   ProjectCommentDeletedPayload,
@@ -105,7 +106,11 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
 
     const handleWorkItemsReordered = (payload: ProjectWorkItemsReorderedPayload) => {
       if (payload.projectId === projectId) {
-        syncProjectWorkItemsReordered(queryClient, payload.workItems);
+        const hasPendingLocalReorder =
+          queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.reorder(projectId) }) > 0;
+        syncProjectWorkItemsReordered(queryClient, payload.workItems, {
+          invalidateCollections: !hasPendingLocalReorder,
+        });
       }
     };
 

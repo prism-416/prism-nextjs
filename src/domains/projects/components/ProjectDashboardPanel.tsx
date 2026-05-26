@@ -1,19 +1,19 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   DndContext,
   DragOverlay,
   PointerSensor,
-  useDraggable,
   useDroppable,
   useSensor,
   useSensors,
-  type DragEndEvent,
   type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { LayoutDashboard, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
@@ -32,7 +32,6 @@ import {
   PROJECT_WORK_ITEM_STATUSES,
 } from "@/domains/projects/utils/work-item-display";
 import {
-  getProjectWorkItemDropId,
   getProjectWorkItemsByStatus,
   getProjectWorkItemStatusDropId,
   getTopLevelProjectWorkItems,
@@ -187,39 +186,28 @@ const WorkItemCardContent = memo(function WorkItemCardContent({
   );
 });
 
-const DraggableWorkItemCard = memo(function DraggableWorkItemCard({
+const SortableWorkItemCard = memo(function SortableWorkItemCard({
   projectSlug,
   item,
   disabled,
   onStatusUpdate,
   onPriorityUpdate,
 }: Omit<WorkItemCardContentProps, "isDragOverlay">) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef: setDraggableNodeRef,
-    isDragging,
-  } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging, isOver, transform, transition } = useSortable({
     id: item.itemId,
-    data: { item },
-    disabled,
-  });
-  const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
-    id: getProjectWorkItemDropId(item.itemId),
-    data: { status: item.status, itemId: item.itemId } satisfies ProjectWorkItemDropTarget,
-    disabled,
-  });
-  const setNodeRef = useCallback(
-    (element: HTMLElement | null) => {
-      setDraggableNodeRef(element);
-      setDroppableNodeRef(element);
+    data: { item, itemId: item.itemId, status: item.status } satisfies ProjectWorkItemDropTarget & {
+      item: ProjectWorkItem;
     },
-    [setDraggableNodeRef, setDroppableNodeRef],
-  );
+    disabled,
+  });
 
   return (
     <article
       ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
       className={cn(
         "group/card rounded-xl border border-border/80 bg-surface p-3",
         "shadow-[0_1px_0_rgba(255,255,255,0.65)_inset]",
@@ -303,18 +291,25 @@ const DroppableStatusColumn = memo(function DroppableStatusColumn({
           {isOver ? "Drop here" : "No top-level work items."}
         </Typography>
       ) : (
-        <div className="grid gap-3 p-3">
-          {items.map(item => (
-            <DraggableWorkItemCard
-              key={item.itemId}
-              projectSlug={projectSlug}
-              item={item}
-              disabled={disabled}
-              onStatusUpdate={onStatusUpdate}
-              onPriorityUpdate={onPriorityUpdate}
-            />
-          ))}
-        </div>
+        <SortableContext
+          id={getProjectWorkItemStatusDropId(status)}
+          items={items.map(item => item.itemId)}
+          strategy={verticalListSortingStrategy}
+          disabled={disabled}
+        >
+          <div className="grid gap-3 p-3">
+            {items.map(item => (
+              <SortableWorkItemCard
+                key={item.itemId}
+                projectSlug={projectSlug}
+                item={item}
+                disabled={disabled}
+                onStatusUpdate={onStatusUpdate}
+                onPriorityUpdate={onPriorityUpdate}
+              />
+            ))}
+          </div>
+        </SortableContext>
       )}
     </section>
   );
@@ -333,53 +328,60 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
   onCreateWorkItem,
 }: ProjectDashboardPanelProps) {
   const [activeItem, setActiveItem] = useState<ProjectWorkItem | null>(null);
-  const [dragItems, setDragItems] = useState<ProjectWorkItem[] | null>(null);
+  const [previewItems, setPreviewItems] = useState<ProjectWorkItem[] | null>(null);
+  const previewItemsRef = useRef<ProjectWorkItem[] | null>(null);
 
   const topLevelItems = useMemo(() => getTopLevelProjectWorkItems(workItems.items), [workItems.items]);
-  const displayItems = dragItems ?? topLevelItems;
+  const displayItems = previewItems ?? topLevelItems;
   const itemsByStatus = useMemo(() => getProjectWorkItemsByStatus(displayItems), [displayItems]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
-  const handleDragStart = useCallback(
-    (event: DragStartEvent) => {
-      const item = event.active.data.current?.item as ProjectWorkItem | undefined;
-      setActiveItem(item ?? null);
-      setDragItems(topLevelItems);
-    },
-    [topLevelItems],
-  );
+  const resetDragState = useCallback(() => {
+    setActiveItem(null);
+    setPreviewItems(null);
+    previewItemsRef.current = null;
+  }, []);
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const item = event.active.data.current?.item as ProjectWorkItem | undefined;
+    setActiveItem(item ?? null);
+    previewItemsRef.current = null;
+    setPreviewItems(null);
+  }, []);
 
   const handleDragOver = useCallback(
     (event: DragOverEvent) => {
+      const activeItemId = String(event.active.id);
       const target = event.over?.data.current as ProjectWorkItemDropTarget | undefined;
-      if (!target) return;
+      if (!target || target.itemId === activeItemId) {
+        return;
+      }
 
-      const nextItems = reorderTopLevelProjectWorkItems(topLevelItems, String(event.active.id), target);
-      setDragItems(nextItems);
+      const baseItems = previewItemsRef.current ?? topLevelItems;
+      const nextItems = reorderTopLevelProjectWorkItems(baseItems, activeItemId, target);
+      if (!hasProjectWorkItemOrderChanged(baseItems, nextItems)) {
+        return;
+      }
+
+      previewItemsRef.current = nextItems;
+      setPreviewItems(nextItems);
     },
     [topLevelItems],
   );
 
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const target = event.over?.data.current as ProjectWorkItemDropTarget | undefined;
-      const nextItems = target ? reorderTopLevelProjectWorkItems(topLevelItems, String(event.active.id), target) : null;
+  const handleDragEnd = useCallback(() => {
+    const finalItems = previewItemsRef.current;
+    resetDragState();
 
-      setActiveItem(null);
-      setDragItems(null);
-
-      if (nextItems && hasProjectWorkItemOrderChanged(topLevelItems, nextItems)) {
-        onItemsReorder(nextItems);
-      }
-    },
-    [onItemsReorder, topLevelItems],
-  );
+    if (finalItems && hasProjectWorkItemOrderChanged(topLevelItems, finalItems)) {
+      onItemsReorder(finalItems);
+    }
+  }, [onItemsReorder, resetDragState, topLevelItems]);
 
   const handleDragCancel = useCallback(() => {
-    setActiveItem(null);
-    setDragItems(null);
-  }, []);
+    resetDragState();
+  }, [resetDragState]);
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -440,6 +442,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
       {!isError && (
         <div className="overflow-x-auto pb-1">
           <DndContext
+            id={`project-dashboard-${projectSlug}-dnd`}
             sensors={sensors}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
