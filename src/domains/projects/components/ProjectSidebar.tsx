@@ -1,7 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, Files, FolderKanban, LayoutDashboard, ListTodo, LogOut, type LucideIcon } from "lucide-react";
+import {
+  Files,
+  FolderKanban,
+  LayoutDashboard,
+  Layers,
+  ListTodo,
+  LogOut,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -131,12 +140,13 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
     ],
     [projectHref],
   );
-  const secondaryNav = React.useMemo<ProjectSidebarNavItem[]>(
+  const generalNav = React.useMemo<ProjectSidebarNavItem[]>(
     () => [
-      { label: "Workspace projects", href: workspaceHref, icon: ArrowLeft, exact: true },
+      { label: "Settings", href: `${projectHref}/settings`, icon: Settings, exact: true },
+      { label: "Workspace projects", href: workspaceHref, icon: Layers, exact: true },
       { label: "All workspaces", href: "/workspaces", icon: LayoutDashboard, exact: true },
     ],
-    [workspaceHref],
+    [projectHref, workspaceHref],
   );
 
   async function handleLogout() {
@@ -193,8 +203,8 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
           pathname={pathname}
         />
         <ProjectSidebarNavGroup
-          label="Workspace"
-          items={secondaryNav}
+          label="General"
+          items={generalNav}
           pathname={pathname}
         />
       </SidebarContent>

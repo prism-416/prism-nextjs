@@ -2,13 +2,7 @@ import { isValid } from "date-fns";
 
 import type { ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 
-export const PROJECT_WORK_ITEM_STATUSES: ProjectWorkItemStatus[] = [
-  "todo",
-  "in_progress",
-  "in_review",
-  "done",
-  "archived",
-];
+export const PROJECT_WORK_ITEM_STATUSES: ProjectWorkItemStatus[] = ["todo", "in_progress", "in_review", "done"];
 
 export const PROJECT_WORK_ITEM_PRIORITIES: ProjectWorkItemPriority[] = ["low", "medium", "high", "urgent"];
 
