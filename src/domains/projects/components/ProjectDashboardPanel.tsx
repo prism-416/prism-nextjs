@@ -31,12 +31,11 @@ type ProjectDashboardPanelProps = {
   onCreateWorkItem: () => void;
 };
 
-const WORK_ITEM_STATUS_DOT_CLASS_NAMES: Record<ProjectWorkItemStatus, string> = {
+const WORK_ITEM_STATUS_DOT_CLASS_NAMES: Partial<Record<ProjectWorkItemStatus, string>> = {
   todo: "bg-prism-muted",
   in_progress: "bg-prism-info",
   in_review: "bg-prism-review",
   done: "bg-prism-success",
-  archived: "bg-prism-muted",
 };
 
 function getTopLevelWorkItems(items: ProjectWorkItem[]) {
@@ -55,7 +54,7 @@ function getWorkItemsByStatus(items: ProjectWorkItem[]) {
       in_review: [],
       done: [],
       archived: [],
-    },
+    } as Record<ProjectWorkItemStatus, ProjectWorkItem[]>,
   );
 }
 
@@ -315,7 +314,7 @@ export function ProjectDashboardPanel({
 
       {!isError && (
         <div className="overflow-x-auto pb-1">
-          <div className="grid min-w-[84rem] gap-4 lg:min-w-0 lg:grid-cols-5">
+          <div className="grid min-w-[68rem] gap-4 lg:min-w-0 lg:grid-cols-4">
             {PROJECT_WORK_ITEM_STATUSES.map(status => (
               <WorkItemStatusColumn
                 key={status}
