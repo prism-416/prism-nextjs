@@ -55,7 +55,7 @@ export function useSaveWorkspaceJobs() {
         mergeWorkspaceJobs(previous, result),
       );
 
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.jobs(workspaceId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.members(workspaceId) });
     },
   });
 }

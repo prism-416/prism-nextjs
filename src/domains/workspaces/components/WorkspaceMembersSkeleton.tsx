@@ -17,6 +17,7 @@ export function WorkspaceMembersSkeleton() {
             <div className="min-w-0 flex-1">
               <Skeleton className="h-4 w-36 bg-prism-navy/5" />
               <Skeleton className="mt-2 h-3 w-24 bg-prism-navy/5" />
+              <Skeleton className="mt-2 h-5 w-32 rounded-full bg-prism-navy/5" />
             </div>
             <Skeleton className="h-6 w-16 rounded-full bg-prism-navy/5" />
           </div>
