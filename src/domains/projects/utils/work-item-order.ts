@@ -10,10 +10,6 @@ export function getProjectWorkItemStatusDropId(status: ProjectWorkItemStatus) {
   return `status:${status}`;
 }
 
-export function getProjectWorkItemDropId(itemId: string) {
-  return `item:${itemId}`;
-}
-
 export function getTopLevelProjectWorkItems(items: ProjectWorkItem[]) {
   return items.filter(item => item.parentId === null);
 }

@@ -35,8 +35,8 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
     initialData,
   );
   const { mutate: updateWorkItem, isPending: isUpdatingWorkItem } = useUpdateProjectWorkItem();
-  const { mutate: reorderWorkItems, isPending: isReorderingWorkItems } = useReorderProjectWorkItems();
-  const isUpdating = isUpdatingWorkItem || isReorderingWorkItems;
+  const { mutate: reorderWorkItems } = useReorderProjectWorkItems(projectId);
+  const isUpdating = isUpdatingWorkItem;
 
   const handleUpdate = useCallback(
     (item: ProjectWorkItem, payload: { status?: ProjectWorkItemStatus; priority?: ProjectWorkItemPriority }) => {
@@ -91,25 +91,17 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
         return;
       }
 
-      setUpdateError(null);
-      const boardQueryKey = QUERY_KEYS.project.workItemList(projectId, PROJECT_DASHBOARD_WORK_ITEM_FILTERS);
-      void queryClient.cancelQueries({ queryKey: boardQueryKey });
-
-      const previousResult = queryClient.getQueryData<ProjectWorkItemSearchResult>(boardQueryKey);
+      const previousItems = getTopLevelProjectWorkItems(data?.items ?? []);
+      const previousById = new Map(previousItems.map(item => [item.itemId, item]));
       const changedItems = items.filter(item => {
-        const previousItem = previousResult?.items.find(previous => previous.itemId === item.itemId);
+        const previousItem = previousById.get(item.itemId);
         return !previousItem || previousItem.status !== item.status || previousItem.sortOrder !== item.sortOrder;
       });
       if (changedItems.length === 0) {
         return;
       }
 
-      queryClient.setQueryData<ProjectWorkItemSearchResult>(boardQueryKey, previous => {
-        if (!previous) return previous;
-        const childItems = previous.items.filter(item => item.parentId !== null);
-        return { ...previous, items: [...items, ...childItems] };
-      });
-
+      setUpdateError(null);
       reorderWorkItems(
         {
           projectId,
@@ -123,13 +115,12 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
         },
         {
           onError: error => {
-            queryClient.setQueryData(boardQueryKey, previousResult);
             setUpdateError(error instanceof Error ? error.message : "Work item order could not be updated.");
           },
         },
       );
     },
-    [isUpdating, projectId, queryClient, reorderWorkItems],
+    [data?.items, isUpdating, projectId, reorderWorkItems],
   );
 
   const handleStatusUpdate = useCallback(
