@@ -39,6 +39,7 @@ export interface ProjectWorkItem {
   description: string;
   priority: ProjectWorkItemPriority;
   status: ProjectWorkItemStatus;
+  sortOrder: number;
   statusChangedAt: string;
   createdAt: string;
   assigneeUsernames: string[];
@@ -48,6 +49,7 @@ export interface ProjectWorkItem {
 export interface ProjectWorkItemSearchParams {
   query?: string;
   parentId?: string;
+  topLevel?: boolean;
   priority?: ProjectWorkItemPriority;
   status?: ProjectWorkItemStatus;
   assigneeUsername?: string;
@@ -80,6 +82,14 @@ export interface UpdateProjectWorkItemPayload {
   status?: ProjectWorkItemStatus;
   assigneeUsernames?: string[];
   labelNames?: string[];
+}
+
+export interface ReorderProjectWorkItemsPayload {
+  items: Array<{
+    itemId: string;
+    status: ProjectWorkItemStatus;
+    sortOrder: number;
+  }>;
 }
 
 export interface ProjectWorkItemComment {

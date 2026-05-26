@@ -1,4 +1,19 @@
+"use client";
+
+import { memo, useCallback, useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
 import { LayoutDashboard, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
@@ -16,17 +31,26 @@ import {
   PROJECT_WORK_ITEM_PRIORITIES,
   PROJECT_WORK_ITEM_STATUSES,
 } from "@/domains/projects/utils/work-item-display";
+import {
+  getProjectWorkItemDropId,
+  getProjectWorkItemsByStatus,
+  getProjectWorkItemStatusDropId,
+  getTopLevelProjectWorkItems,
+  hasProjectWorkItemOrderChanged,
+  reorderTopLevelProjectWorkItems,
+  type ProjectWorkItemDropTarget,
+} from "@/domains/projects/utils/work-item-order";
 import { cn } from "@/shared/utils/cn";
 
 type ProjectDashboardPanelProps = {
   projectSlug: string;
   workItems: ProjectWorkItemSearchResult;
   isError: boolean;
-  updatingItemId: string | null;
-  isUpdatingItem: boolean;
+  isUpdating: boolean;
   updateError: string | null;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
+  onItemsReorder: (items: ProjectWorkItem[]) => void;
   onRetry: () => void;
   onCreateWorkItem: () => void;
 };
@@ -38,64 +62,51 @@ const WORK_ITEM_STATUS_DOT_CLASS_NAMES: Partial<Record<ProjectWorkItemStatus, st
   done: "bg-prism-success",
 };
 
-function getTopLevelWorkItems(items: ProjectWorkItem[]) {
-  return items.filter(item => item.parentId === null);
-}
-
-function getWorkItemsByStatus(items: ProjectWorkItem[]) {
-  return PROJECT_WORK_ITEM_STATUSES.reduce<Record<ProjectWorkItemStatus, ProjectWorkItem[]>>(
-    (result, status) => ({
-      ...result,
-      [status]: items.filter(item => item.status === status),
-    }),
-    {
-      todo: [],
-      in_progress: [],
-      in_review: [],
-      done: [],
-      archived: [],
-    } as Record<ProjectWorkItemStatus, ProjectWorkItem[]>,
-  );
-}
-
-function WorkItemCard({
-  projectSlug,
-  item,
-  disabled,
-  isUpdating,
-  onStatusUpdate,
-  onPriorityUpdate,
-}: {
+type WorkItemCardContentProps = {
   projectSlug: string;
   item: ProjectWorkItem;
-  disabled: boolean;
-  isUpdating: boolean;
+  isDragOverlay?: boolean;
+  disabled?: boolean;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
-}) {
+};
+
+const WorkItemCardContent = memo(function WorkItemCardContent({
+  projectSlug,
+  item,
+  isDragOverlay = false,
+  disabled = false,
+  onStatusUpdate,
+  onPriorityUpdate,
+}: WorkItemCardContentProps) {
   const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
   const visibleLabels = item.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(item.labelNames.length - visibleLabels.length, 0);
 
   return (
-    <article className="rounded-xl border border-border/80 bg-surface p-3 shadow-[0_1px_0_rgba(255,255,255,0.65)_inset]">
-      <Link
-        href={detailHref}
-        className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <Typography
-          variant="bodySm"
-          tone="primary"
-          weight="semibold"
-          className="line-clamp-2 hover:text-prism-navy"
+    <>
+      <div className="flex items-center gap-1.5">
+        <Link
+          href={detailHref}
+          className="min-w-0 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          tabIndex={isDragOverlay ? -1 : undefined}
+          onClick={e => isDragOverlay && e.preventDefault()}
         >
-          {item.title}
-        </Typography>
-      </Link>
+          <Typography
+            variant="bodySm"
+            tone="primary"
+            weight="semibold"
+            className="line-clamp-2 hover:text-prism-navy"
+          >
+            {item.title}
+          </Typography>
+        </Link>
+      </div>
+
       <Typography
         variant="caption"
         tone="muted"
-        className={cn("mt-1 line-clamp-3", !item.description && "italic opacity-70")}
+        className={cn("mt-1.5 line-clamp-3", !item.description && "italic opacity-70")}
       >
         {item.description || "No description."}
       </Typography>
@@ -104,7 +115,8 @@ function WorkItemCard({
         <select
           value={item.status}
           onChange={event => onStatusUpdate(item, event.target.value as ProjectWorkItemStatus)}
-          disabled={disabled}
+          disabled={isDragOverlay || disabled}
+          onPointerDown={e => e.stopPropagation()}
           className={cn(
             "h-9 rounded-lg border border-border bg-surface-field px-2 text-xs font-medium text-prism-body",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
@@ -123,7 +135,8 @@ function WorkItemCard({
         <select
           value={item.priority}
           onChange={event => onPriorityUpdate(item, event.target.value as ProjectWorkItemPriority)}
-          disabled={disabled}
+          disabled={isDragOverlay || disabled}
+          onPointerDown={e => e.stopPropagation()}
           className={cn(
             "h-9 rounded-lg border border-border bg-surface-field px-2 text-xs font-medium text-prism-body",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
@@ -170,18 +183,70 @@ function WorkItemCard({
           )}
         </div>
       )}
+    </>
+  );
+});
 
-      {isUpdating && <p className="mt-3 text-xs text-prism-muted">Updating...</p>}
+const DraggableWorkItemCard = memo(function DraggableWorkItemCard({
+  projectSlug,
+  item,
+  disabled,
+  onStatusUpdate,
+  onPriorityUpdate,
+}: Omit<WorkItemCardContentProps, "isDragOverlay">) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDraggableNodeRef,
+    isDragging,
+  } = useDraggable({
+    id: item.itemId,
+    data: { item },
+    disabled,
+  });
+  const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
+    id: getProjectWorkItemDropId(item.itemId),
+    data: { status: item.status, itemId: item.itemId } satisfies ProjectWorkItemDropTarget,
+    disabled,
+  });
+  const setNodeRef = useCallback(
+    (element: HTMLElement | null) => {
+      setDraggableNodeRef(element);
+      setDroppableNodeRef(element);
+    },
+    [setDraggableNodeRef, setDroppableNodeRef],
+  );
+
+  return (
+    <article
+      ref={setNodeRef}
+      className={cn(
+        "group/card rounded-xl border border-border/80 bg-surface p-3",
+        "shadow-[0_1px_0_rgba(255,255,255,0.65)_inset]",
+        "cursor-grab touch-none select-none active:cursor-grabbing",
+        "transition-[opacity,border-color,box-shadow] duration-100",
+        isOver && !isDragging && "border-prism-teal-500/40 shadow-[0_0_0_1px_rgba(19,177,165,0.18)]",
+        isDragging ? "opacity-35" : "opacity-100",
+      )}
+      {...attributes}
+      {...listeners}
+    >
+      <WorkItemCardContent
+        projectSlug={projectSlug}
+        item={item}
+        disabled={disabled}
+        onStatusUpdate={onStatusUpdate}
+        onPriorityUpdate={onPriorityUpdate}
+      />
     </article>
   );
-}
+});
 
-function WorkItemStatusColumn({
+const DroppableStatusColumn = memo(function DroppableStatusColumn({
   projectSlug,
   status,
   items,
   disabled,
-  updatingItemId,
   onStatusUpdate,
   onPriorityUpdate,
 }: {
@@ -189,12 +254,24 @@ function WorkItemStatusColumn({
   status: ProjectWorkItemStatus;
   items: ProjectWorkItem[];
   disabled: boolean;
-  updatingItemId: string | null;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
 }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: getProjectWorkItemStatusDropId(status),
+    data: { status } satisfies ProjectWorkItemDropTarget,
+    disabled,
+  });
+
   return (
-    <section className="flex min-h-72 min-w-[17rem] flex-col rounded-2xl border border-border/80 bg-surface-strong lg:min-w-0">
+    <section
+      ref={setNodeRef}
+      className={cn(
+        "flex min-h-72 min-w-[17rem] flex-col rounded-2xl border bg-surface-strong lg:min-w-0",
+        "transition-colors duration-200",
+        isOver ? "border-prism-teal-500/50 bg-prism-teal-500/[0.04]" : "border-border/80",
+      )}
+    >
       <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-3">
         <div className="flex items-center gap-2">
           <span
@@ -218,19 +295,21 @@ function WorkItemStatusColumn({
         <Typography
           variant="bodySm"
           tone="muted"
-          className="px-4 py-6 text-center italic"
+          className={cn(
+            "flex-1 px-4 py-6 text-center italic transition-colors duration-200",
+            isOver && "text-prism-teal-500/70",
+          )}
         >
-          No top-level work items.
+          {isOver ? "Drop here" : "No top-level work items."}
         </Typography>
       ) : (
         <div className="grid gap-3 p-3">
           {items.map(item => (
-            <WorkItemCard
+            <DraggableWorkItemCard
               key={item.itemId}
               projectSlug={projectSlug}
               item={item}
               disabled={disabled}
-              isUpdating={updatingItemId === item.itemId}
               onStatusUpdate={onStatusUpdate}
               onPriorityUpdate={onPriorityUpdate}
             />
@@ -239,22 +318,68 @@ function WorkItemStatusColumn({
       )}
     </section>
   );
-}
+});
 
-export function ProjectDashboardPanel({
+export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
   projectSlug,
   workItems,
   isError,
-  updatingItemId,
-  isUpdatingItem,
+  isUpdating,
   updateError,
   onStatusUpdate,
   onPriorityUpdate,
+  onItemsReorder,
   onRetry,
   onCreateWorkItem,
 }: ProjectDashboardPanelProps) {
-  const topLevelItems = getTopLevelWorkItems(workItems.items);
-  const itemsByStatus = getWorkItemsByStatus(topLevelItems);
+  const [activeItem, setActiveItem] = useState<ProjectWorkItem | null>(null);
+  const [dragItems, setDragItems] = useState<ProjectWorkItem[] | null>(null);
+
+  const topLevelItems = useMemo(() => getTopLevelProjectWorkItems(workItems.items), [workItems.items]);
+  const displayItems = dragItems ?? topLevelItems;
+  const itemsByStatus = useMemo(() => getProjectWorkItemsByStatus(displayItems), [displayItems]);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const item = event.active.data.current?.item as ProjectWorkItem | undefined;
+      setActiveItem(item ?? null);
+      setDragItems(topLevelItems);
+    },
+    [topLevelItems],
+  );
+
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const target = event.over?.data.current as ProjectWorkItemDropTarget | undefined;
+      if (!target) return;
+
+      const nextItems = reorderTopLevelProjectWorkItems(topLevelItems, String(event.active.id), target);
+      setDragItems(nextItems);
+    },
+    [topLevelItems],
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const target = event.over?.data.current as ProjectWorkItemDropTarget | undefined;
+      const nextItems = target ? reorderTopLevelProjectWorkItems(topLevelItems, String(event.active.id), target) : null;
+
+      setActiveItem(null);
+      setDragItems(null);
+
+      if (nextItems && hasProjectWorkItemOrderChanged(topLevelItems, nextItems)) {
+        onItemsReorder(nextItems);
+      }
+    },
+    [onItemsReorder, topLevelItems],
+  );
+
+  const handleDragCancel = useCallback(() => {
+    setActiveItem(null);
+    setDragItems(null);
+  }, []);
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
@@ -314,22 +439,46 @@ export function ProjectDashboardPanel({
 
       {!isError && (
         <div className="overflow-x-auto pb-1">
-          <div className="grid min-w-[68rem] gap-4 lg:min-w-0 lg:grid-cols-4">
-            {PROJECT_WORK_ITEM_STATUSES.map(status => (
-              <WorkItemStatusColumn
-                key={status}
-                projectSlug={projectSlug}
-                status={status}
-                items={itemsByStatus[status]}
-                disabled={isUpdatingItem}
-                updatingItemId={updatingItemId}
-                onStatusUpdate={onStatusUpdate}
-                onPriorityUpdate={onPriorityUpdate}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
+            <div className="grid min-w-[68rem] items-stretch gap-4 lg:min-w-0 lg:grid-cols-4">
+              {PROJECT_WORK_ITEM_STATUSES.map(status => (
+                <DroppableStatusColumn
+                  key={status}
+                  projectSlug={projectSlug}
+                  status={status}
+                  items={itemsByStatus[status]}
+                  disabled={isUpdating}
+                  onStatusUpdate={onStatusUpdate}
+                  onPriorityUpdate={onPriorityUpdate}
+                />
+              ))}
+            </div>
+
+            <DragOverlay
+              dropAnimation={null}
+              zIndex={40}
+            >
+              {activeItem && (
+                <article className="cursor-grabbing rounded-xl border border-prism-teal-500/40 bg-surface p-3 shadow-[0_24px_56px_rgba(12,71,103,0.24)] ring-1 ring-prism-teal-500/30">
+                  <WorkItemCardContent
+                    projectSlug={projectSlug}
+                    item={activeItem}
+                    isDragOverlay
+                    onStatusUpdate={onStatusUpdate}
+                    onPriorityUpdate={onPriorityUpdate}
+                  />
+                </article>
+              )}
+            </DragOverlay>
+          </DndContext>
         </div>
       )}
     </section>
   );
-}
+});
