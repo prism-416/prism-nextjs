@@ -26,12 +26,12 @@ const WORKSPACE_PRIMARY_NAV: WorkspaceScopedNavItem[] = [
     icon: FolderKanban,
     exact: true,
   },
-  { label: "Members", href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/members`, icon: Users },
   {
     label: "Sprints",
     href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/sprints`,
     icon: CalendarRange,
   },
+  { label: "Members", href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/members`, icon: Users },
   {
     label: "Jobs",
     href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/jobs`,
