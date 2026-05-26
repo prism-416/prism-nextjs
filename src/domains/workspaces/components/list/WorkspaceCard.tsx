@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { ArrowUpRight, FolderKanban, Users } from "lucide-react";
+import { FolderKanban, Users } from "lucide-react";
 
-import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { WorkspaceAvatar } from "@/domains/workspaces/components/list/WorkspaceAvatar";
 import { WorkspaceMetaItem } from "@/domains/workspaces/components/list/WorkspaceMetaItem";
@@ -21,9 +20,10 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
   const workspaceHref = `/workspaces/${encodeURIComponent(workspace.slug)}`;
 
   return (
-    <article
+    <Link
+      href={workspaceHref}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/80 bg-surface p-5",
+        "group relative flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface p-5",
         "shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.05)]",
         "transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_14px_40px_rgba(12,71,103,0.10)]",
       )}
@@ -68,43 +68,31 @@ export function WorkspaceCard({ workspace }: WorkspaceCardProps) {
       <Typography
         variant="bodySm"
         tone="muted"
-        className={cn("relative mt-4 line-clamp-2 min-h-10", !workspace.description && "italic opacity-60")}
+        className={cn("relative mt-4 flex-1 line-clamp-2 min-h-10", !workspace.description && "italic opacity-60")}
       >
         {workspace.description || "No description yet."}
       </Typography>
 
-      <div className="relative mt-5 space-y-3 border-t border-border/60 pt-4">
-        <div className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-2">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-prism-teal-500/40" />
-              <span className="relative inline-flex size-2 rounded-full bg-prism-teal-500" />
-            </span>
-            <Typography
-              variant="caption"
-              tone="muted"
-            >
-              Active
-            </Typography>
-          </div>
+      <div className="relative mt-5 flex items-center justify-between border-t border-border/60 pt-4">
+        <div className="inline-flex items-center gap-2">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-prism-teal-500/40" />
+            <span className="relative inline-flex size-2 rounded-full bg-prism-teal-500" />
+          </span>
           <Typography
             variant="caption"
             tone="muted"
           >
-            Created {formatWorkspaceRelativeDate(workspace.createdAt)}
+            Active
           </Typography>
         </div>
-        <Button
-          asChild
-          variant="outline"
-          className="h-9 w-full rounded-lg bg-surface"
+        <Typography
+          variant="caption"
+          tone="muted"
         >
-          <Link href={workspaceHref}>
-            Open workspace
-            <ArrowUpRight className="size-4" />
-          </Link>
-        </Button>
+          Created {formatWorkspaceRelativeDate(workspace.createdAt)}
+        </Typography>
       </div>
-    </article>
+    </Link>
   );
 }

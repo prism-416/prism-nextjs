@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, FolderKanban } from "lucide-react";
+import { CalendarDays, FolderKanban } from "lucide-react";
 
 import { Typography } from "@/atomics/atoms/Typography";
 import type { ProjectSummary } from "@/domains/projects/types";
@@ -29,7 +29,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         style={{ backgroundImage: getProjectGradient(project) }}
       />
 
-      <div className="relative flex items-start justify-between gap-3">
+      <div className="relative flex items-start gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <span
             aria-hidden
@@ -55,10 +55,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </Typography>
           </div>
         </div>
-
-        <span className="grid size-9 shrink-0 place-items-center rounded-full text-prism-muted transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:bg-surface-strong group-hover:text-primary">
-          <ArrowUpRight className="size-4" />
-        </span>
       </div>
 
       <div className="mt-3 flex items-center gap-4">
@@ -72,22 +68,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
             Project
           </Typography>
         </span>
-        <span className="inline-flex items-center gap-1.5 text-prism-muted">
-          <ArrowUpRight className="size-3.5" />
-          <Typography
-            as="span"
-            variant="caption"
-            tone="inherit"
-          >
-            Open
-          </Typography>
-        </span>
       </div>
 
       <Typography
         variant="bodySm"
         tone="muted"
-        className={cn("relative mt-4 line-clamp-2 min-h-10", !project.description && "italic opacity-60")}
+        className={cn("relative mt-4 flex-1 line-clamp-2 min-h-10", !project.description && "italic opacity-60")}
       >
         {project.description || "No description yet."}
       </Typography>
