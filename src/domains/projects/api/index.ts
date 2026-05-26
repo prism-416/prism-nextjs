@@ -9,6 +9,7 @@ import type {
   ProjectWorkItem,
   ProjectWorkItemSearchParams,
   ProjectWorkItemSearchResult,
+  ReorderProjectWorkItemsPayload,
   CreateProjectWorkItemPayload,
   UpdateProjectPayload,
   UpdateProjectWorkItemPayload,
@@ -142,6 +143,17 @@ export async function updateProjectWorkItem(projectId: string, itemId: string, b
   });
 
   return response?.data;
+}
+
+export async function reorderProjectWorkItems(projectId: string, body: ReorderProjectWorkItemsPayload) {
+  const response = await commonAxios<ReorderProjectWorkItemsPayload, ApiResponse<ProjectWorkItem[]>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/reorder`,
+    method: "PATCH",
+    data: body,
+    version: null,
+  });
+
+  return response?.data ?? [];
 }
 
 export async function deleteProjectWorkItem(projectId: string, itemId: string) {

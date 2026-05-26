@@ -11,6 +11,7 @@ import type {
   ProjectRealtimeErrorPayload,
   ProjectRealtimeSocket,
   ProjectWorkItemDeletedPayload,
+  ProjectWorkItemsReorderedPayload,
 } from "@/domains/projects/types/realtime";
 import type { ProjectWorkItem } from "@/domains/projects/types";
 import { createProjectRealtimeSocket } from "@/domains/projects/utils/realtime-client";
@@ -23,6 +24,7 @@ import {
   syncProjectWorkItemCreated,
   syncProjectWorkItemDeleted,
   syncProjectWorkItemUpdated,
+  syncProjectWorkItemsReordered,
 } from "@/domains/projects/utils/work-item-cache";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { getCookie } from "@/shared/utils/cookie";
@@ -101,6 +103,12 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
       }
     };
 
+    const handleWorkItemsReordered = (payload: ProjectWorkItemsReorderedPayload) => {
+      if (payload.projectId === projectId) {
+        syncProjectWorkItemsReordered(queryClient, payload.workItems);
+      }
+    };
+
     const handleCommentCreated = (payload: ProjectCommentPayload) => {
       if (payload.projectId === projectId) {
         syncProjectCommentCreated(queryClient, payload);
@@ -126,6 +134,7 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
     socket.on(PROJECT_REALTIME_EVENTS.PROJECT_JOINED, handleProjectJoined);
     socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_CREATED, handleWorkItemCreated);
     socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_UPDATED, handleWorkItemUpdated);
+    socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEMS_REORDERED, handleWorkItemsReordered);
     socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_DELETED, handleWorkItemDeleted);
     socket.on(PROJECT_REALTIME_EVENTS.COMMENT_CREATED, handleCommentCreated);
     socket.on(PROJECT_REALTIME_EVENTS.COMMENT_UPDATED, handleCommentUpdated);

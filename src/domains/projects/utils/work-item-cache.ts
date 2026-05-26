@@ -98,6 +98,19 @@ export function syncProjectWorkItemUpdated(queryClient: QueryClient, workItem: P
   invalidateProjectWorkItemCollections(queryClient, projectId, workItem.workspaceId);
 }
 
+export function syncProjectWorkItemsReordered(queryClient: QueryClient, workItems: ProjectWorkItem[]) {
+  const firstWorkItem = workItems[0];
+  if (!firstWorkItem) {
+    return;
+  }
+
+  workItems.forEach(workItem => {
+    queryClient.setQueryData(QUERY_KEYS.project.workItemDetail(workItem.projectId, workItem.itemId), workItem);
+  });
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(firstWorkItem.projectId) });
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.sprints(firstWorkItem.workspaceId) });
+}
+
 export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: ProjectWorkItemDeletedPayload) {
   const { itemId, projectId } = payload;
 

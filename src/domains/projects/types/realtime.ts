@@ -25,6 +25,11 @@ export type ProjectWorkItemDeletedPayload = {
   itemId: string;
 };
 
+export type ProjectWorkItemsReorderedPayload = {
+  projectId: string;
+  workItems: ProjectWorkItem[];
+};
+
 export type ProjectCommentPayload = {
   commentId: string;
   projectId: string;
@@ -67,6 +72,7 @@ export type ProjectRealtimeServerToClientEvents = {
   [PROJECT_REALTIME_EVENTS.PROJECT_DELETED]: (payload: ProjectDeletedPayload) => void;
   [PROJECT_REALTIME_EVENTS.WORK_ITEM_CREATED]: (payload: ProjectWorkItem) => void;
   [PROJECT_REALTIME_EVENTS.WORK_ITEM_UPDATED]: (payload: ProjectWorkItem) => void;
+  [PROJECT_REALTIME_EVENTS.WORK_ITEMS_REORDERED]: (payload: ProjectWorkItemsReorderedPayload) => void;
   [PROJECT_REALTIME_EVENTS.WORK_ITEM_DELETED]: (payload: ProjectWorkItemDeletedPayload) => void;
   [PROJECT_REALTIME_EVENTS.COMMENT_CREATED]: (payload: ProjectCommentPayload) => void;
   [PROJECT_REALTIME_EVENTS.COMMENT_UPDATED]: (payload: ProjectCommentPayload) => void;
