@@ -106,7 +106,7 @@ export function WorkspaceInviteMembersDialogContent({
       {message ? (
         <p
           role="alert"
-          className="rounded-lg border border-prism-danger-soft bg-prism-danger-soft/20 px-3 py-2 text-sm text-prism-danger"
+          className="mt-4 rounded-lg border border-prism-danger-soft bg-prism-danger-soft/20 px-3 py-2 text-sm text-prism-danger"
         >
           {message}
         </p>

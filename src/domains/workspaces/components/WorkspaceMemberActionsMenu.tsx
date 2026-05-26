@@ -17,6 +17,7 @@ import type { InvitationRole, WorkspaceMember } from "@/domains/workspaces/types
 type WorkspaceMemberActionsMenuProps = {
   member: WorkspaceMember;
   disabled?: boolean;
+  canManage?: boolean;
   canTransferOwner?: boolean;
   isSelf?: boolean;
   onRoleChange: (role: InvitationRole) => void;
@@ -33,6 +34,7 @@ const ROLE_ACTION_ICONS = {
 export function WorkspaceMemberActionsMenu({
   member,
   disabled = false,
+  canManage = false,
   canTransferOwner = false,
   isSelf = false,
   onRoleChange,
@@ -55,21 +57,23 @@ export function WorkspaceMemberActionsMenu({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="min-w-48">
-        {WORKSPACE_INVITATION_ROLE_OPTIONS.map(option => {
-          const Icon = ROLE_ACTION_ICONS[option.value];
+        {canManage
+          ? WORKSPACE_INVITATION_ROLE_OPTIONS.map(option => {
+              const Icon = ROLE_ACTION_ICONS[option.value];
 
-          return (
-            <DropdownMenuItem
-              key={option.value}
-              disabled={member.role === option.value || disabled}
-              onSelect={() => onRoleChange(option.value)}
-              className="gap-2.5 whitespace-nowrap"
-            >
-              <Icon className="size-4 text-prism-muted" />
-              Make {option.label.toLowerCase()}
-            </DropdownMenuItem>
-          );
-        })}
+              return (
+                <DropdownMenuItem
+                  key={option.value}
+                  disabled={member.role === option.value || disabled}
+                  onSelect={() => onRoleChange(option.value)}
+                  className="gap-2.5 whitespace-nowrap"
+                >
+                  <Icon className="size-4 text-prism-muted" />
+                  Make {option.label.toLowerCase()}
+                </DropdownMenuItem>
+              );
+            })
+          : null}
 
         {canTransferOwner && !isSelf ? (
           <>
@@ -86,7 +90,7 @@ export function WorkspaceMemberActionsMenu({
           </>
         ) : null}
 
-        {!isSelf ? <DropdownMenuSeparator /> : null}
+        {canManage ? <DropdownMenuSeparator /> : null}
 
         <DropdownMenuItem
           disabled={disabled}
