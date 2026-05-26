@@ -183,6 +183,9 @@ export function WorkspaceMembersClient({ workspace, initialData, initialJobs }: 
                       <WorkspaceMemberActionsMenu
                         member={member}
                         disabled={isMutating}
+                        canManage={canManageMembers}
+                        canTransferOwner={isWorkspaceOwner}
+                        isSelf={isSelf}
                         onRoleChange={role => void handleRoleChange(member, role)}
                         onRemove={() => {
                           if (isSelf) {
@@ -196,8 +199,6 @@ export function WorkspaceMembersClient({ workspace, initialData, initialJobs }: 
                             setPendingAction({ type: "transfer-owner", member });
                           }
                         }}
-                        canTransferOwner={isWorkspaceOwner}
-                        isSelf={isSelf}
                       />
                     ) : null}
                   </div>
