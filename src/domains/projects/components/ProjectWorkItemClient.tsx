@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { CreateProjectWorkItemDialog } from "@/domains/projects/components/CreateProjectWorkItemDialog";
 import { ProjectErrorState } from "@/domains/projects/components/ProjectErrorState";
@@ -20,7 +21,9 @@ import type {
   ProjectWorkItemPriority,
   ProjectWorkItemStatus,
 } from "@/domains/projects/types";
+import { PROJECT_MUTATION_KEYS } from "@/domains/projects/constants/mutations";
 import type { CurrentUser } from "@/shared/types/auth";
+import { QUERY_KEYS } from "@/shared/query/queryKeys";
 
 type ProjectWorkItemClientProps = {
   projectId: string;
@@ -44,10 +47,10 @@ export function ProjectWorkItemClient({
   initialCurrentUser,
 }: ProjectWorkItemClientProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isCreateChildOpen, setIsCreateChildOpen] = React.useState(false);
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
-  const [updatingItemId, setUpdatingItemId] = React.useState<string | null>(null);
   const [updateError, setUpdateError] = React.useState<string | null>(null);
   const {
     data: workItem,
@@ -65,10 +68,28 @@ export function ProjectWorkItemClient({
     isError: isCommentsError,
     refetch: refetchComments,
   } = useProjectWorkItemComments(projectId, itemId, undefined, initialComments);
-  const { mutateAsync: updateWorkItem, isPending: isUpdatingItem } = useUpdateProjectWorkItem();
+  const { mutate: updateWorkItem } = useUpdateProjectWorkItem({
+    mutationKey: PROJECT_MUTATION_KEYS.workItems.update(projectId),
+    syncResult: false,
+  });
+
+  const applyOptimisticPatch = React.useCallback(
+    (item: ProjectWorkItem, patch: Partial<ProjectWorkItem>) => {
+      queryClient.setQueryData<ProjectWorkItem>(QUERY_KEYS.project.workItemDetail(projectId, item.itemId), previous =>
+        previous ? { ...previous, ...patch } : previous,
+      );
+      if (item.parentId) {
+        queryClient.setQueryData<ProjectWorkItem[]>(
+          QUERY_KEYS.project.workItemChildren(projectId, item.parentId),
+          previous => previous?.map(child => (child.itemId === item.itemId ? { ...child, ...patch } : child)),
+        );
+      }
+    },
+    [projectId, queryClient],
+  );
 
   const handleUpdate = React.useCallback(
-    async (item: ProjectWorkItem, payload: { status?: ProjectWorkItemStatus; priority?: ProjectWorkItemPriority }) => {
+    (item: ProjectWorkItem, payload: { status?: ProjectWorkItemStatus; priority?: ProjectWorkItemPriority }) => {
       if (
         (payload.status && item.status === payload.status) ||
         (payload.priority && item.priority === payload.priority)
@@ -77,21 +98,19 @@ export function ProjectWorkItemClient({
       }
 
       setUpdateError(null);
-      setUpdatingItemId(item.itemId);
+      applyOptimisticPatch(item, payload);
 
-      try {
-        await updateWorkItem({
-          projectId,
-          itemId: item.itemId,
-          payload,
-        });
-      } catch (error) {
-        setUpdateError(error instanceof Error ? error.message : "Work item could not be updated.");
-      } finally {
-        setUpdatingItemId(null);
-      }
+      updateWorkItem(
+        { projectId, itemId: item.itemId, payload },
+        {
+          onError: error => {
+            applyOptimisticPatch(item, { status: item.status, priority: item.priority });
+            setUpdateError(error instanceof Error ? error.message : "Work item could not be updated.");
+          },
+        },
+      );
     },
-    [projectId, updateWorkItem],
+    [applyOptimisticPatch, projectId, updateWorkItem],
   );
 
   if (isWorkItemPending && !workItem) {
@@ -126,14 +145,12 @@ export function ProjectWorkItemClient({
         initialCurrentUser={initialCurrentUser}
         isChildrenError={isChildrenError}
         isCommentsError={isCommentsError}
-        updatingItemId={updatingItemId}
-        isUpdatingItem={isUpdatingItem}
         updateError={updateError}
         onStatusUpdate={(item, status) => {
-          void handleUpdate(item, { status });
+          handleUpdate(item, { status });
         }}
         onPriorityUpdate={(item, priority) => {
-          void handleUpdate(item, { priority });
+          handleUpdate(item, { priority });
         }}
         onRetryChildren={() => {
           setUpdateError(null);
