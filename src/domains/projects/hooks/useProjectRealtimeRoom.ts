@@ -108,9 +108,9 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
       if (payload.projectId === projectId) {
         const hasPendingLocalReorder =
           queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.reorder(projectId) }) > 0;
-        syncProjectWorkItemsReordered(queryClient, payload.workItems, {
-          invalidateCollections: !hasPendingLocalReorder,
-        });
+        if (!hasPendingLocalReorder) {
+          syncProjectWorkItemsReordered(queryClient, payload.workItems);
+        }
       }
     };
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { memo, useCallback, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useRouter } from "next/navigation";
 import {
   DndContext,
   DragOverlay,
@@ -62,7 +62,6 @@ const WORK_ITEM_STATUS_DOT_CLASS_NAMES: Partial<Record<ProjectWorkItemStatus, st
 };
 
 type WorkItemCardContentProps = {
-  projectSlug: string;
   item: ProjectWorkItem;
   isDragOverlay?: boolean;
   disabled?: boolean;
@@ -71,35 +70,26 @@ type WorkItemCardContentProps = {
 };
 
 const WorkItemCardContent = memo(function WorkItemCardContent({
-  projectSlug,
   item,
   isDragOverlay = false,
   disabled = false,
   onStatusUpdate,
   onPriorityUpdate,
 }: WorkItemCardContentProps) {
-  const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
   const visibleLabels = item.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(item.labelNames.length - visibleLabels.length, 0);
 
   return (
     <>
       <div className="flex items-center gap-1.5">
-        <Link
-          href={detailHref}
-          className="min-w-0 flex-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          tabIndex={isDragOverlay ? -1 : undefined}
-          onClick={e => isDragOverlay && e.preventDefault()}
+        <Typography
+          variant="bodySm"
+          tone="primary"
+          weight="semibold"
+          className="min-w-0 flex-1 line-clamp-2 group-hover/card:text-prism-navy"
         >
-          <Typography
-            variant="bodySm"
-            tone="primary"
-            weight="semibold"
-            className="line-clamp-2 hover:text-prism-navy"
-          >
-            {item.title}
-          </Typography>
-        </Link>
+          {item.title}
+        </Typography>
       </div>
 
       <Typography
@@ -192,7 +182,10 @@ const SortableWorkItemCard = memo(function SortableWorkItemCard({
   disabled,
   onStatusUpdate,
   onPriorityUpdate,
-}: Omit<WorkItemCardContentProps, "isDragOverlay">) {
+}: Omit<WorkItemCardContentProps, "isDragOverlay"> & { projectSlug: string }) {
+  const router = useRouter();
+  const didDragRef = useRef(false);
+  const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
   const { attributes, listeners, setNodeRef, isDragging, isOver, transform, transition } = useSortable({
     id: item.itemId,
     data: { item, itemId: item.itemId, status: item.status } satisfies ProjectWorkItemDropTarget & {
@@ -200,6 +193,41 @@ const SortableWorkItemCard = memo(function SortableWorkItemCard({
     },
     disabled,
   });
+
+  useEffect(() => {
+    if (isDragging) {
+      didDragRef.current = true;
+    }
+  }, [isDragging]);
+
+  const handleClick = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      if (didDragRef.current) {
+        event.preventDefault();
+        didDragRef.current = false;
+        return;
+      }
+
+      if ((event.target as HTMLElement).closest("select, button, input, textarea, a")) {
+        return;
+      }
+
+      router.push(detailHref);
+    },
+    [detailHref, router],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (event.target !== event.currentTarget || (event.key !== "Enter" && event.key !== " ")) {
+        return;
+      }
+
+      event.preventDefault();
+      router.push(detailHref);
+    },
+    [detailHref, router],
+  );
 
   return (
     <article
@@ -211,16 +239,20 @@ const SortableWorkItemCard = memo(function SortableWorkItemCard({
       className={cn(
         "group/card rounded-xl border border-border/80 bg-surface p-3",
         "shadow-[0_1px_0_rgba(255,255,255,0.65)_inset]",
-        "cursor-grab touch-none select-none active:cursor-grabbing",
+        "cursor-pointer touch-none select-none active:cursor-grabbing",
         "transition-[opacity,border-color,box-shadow] duration-100",
         isOver && !isDragging && "border-prism-teal-500/40 shadow-[0_0_0_1px_rgba(19,177,165,0.18)]",
         isDragging ? "opacity-35" : "opacity-100",
       )}
       {...attributes}
       {...listeners}
+      onPointerDownCapture={() => {
+        didDragRef.current = false;
+      }}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       <WorkItemCardContent
-        projectSlug={projectSlug}
         item={item}
         disabled={disabled}
         onStatusUpdate={onStatusUpdate}
@@ -330,6 +362,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
   const [activeItem, setActiveItem] = useState<ProjectWorkItem | null>(null);
   const [previewItems, setPreviewItems] = useState<ProjectWorkItem[] | null>(null);
   const previewItemsRef = useRef<ProjectWorkItem[] | null>(null);
+  const lastDragOverTargetRef = useRef<string | null>(null);
 
   const topLevelItems = useMemo(() => getTopLevelProjectWorkItems(workItems.items), [workItems.items]);
   const displayItems = previewItems ?? topLevelItems;
@@ -341,12 +374,14 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
     setActiveItem(null);
     setPreviewItems(null);
     previewItemsRef.current = null;
+    lastDragOverTargetRef.current = null;
   }, []);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const item = event.active.data.current?.item as ProjectWorkItem | undefined;
     setActiveItem(item ?? null);
     previewItemsRef.current = null;
+    lastDragOverTargetRef.current = null;
     setPreviewItems(null);
   }, []);
 
@@ -354,9 +389,19 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
     (event: DragOverEvent) => {
       const activeItemId = String(event.active.id);
       const target = event.over?.data.current as ProjectWorkItemDropTarget | undefined;
-      if (!target || target.itemId === activeItemId) {
+      if (!target) {
+        lastDragOverTargetRef.current = null;
         return;
       }
+      if (target.itemId === activeItemId) {
+        return;
+      }
+
+      const targetId = target.itemId ?? getProjectWorkItemStatusDropId(target.status);
+      if (lastDragOverTargetRef.current === targetId) {
+        return;
+      }
+      lastDragOverTargetRef.current = targetId;
 
       const baseItems = previewItemsRef.current ?? topLevelItems;
       const nextItems = reorderTopLevelProjectWorkItems(baseItems, activeItemId, target);
@@ -470,7 +515,6 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
               {activeItem && (
                 <article className="cursor-grabbing rounded-xl border border-prism-teal-500/40 bg-surface p-3 shadow-[0_24px_56px_rgba(12,71,103,0.24)] ring-1 ring-prism-teal-500/30">
                   <WorkItemCardContent
-                    projectSlug={projectSlug}
                     item={activeItem}
                     isDragOverlay
                     onStatusUpdate={onStatusUpdate}

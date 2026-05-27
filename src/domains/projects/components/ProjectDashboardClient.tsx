@@ -16,6 +16,7 @@ import type {
   ProjectWorkItemSearchResult,
   ProjectWorkItemStatus,
 } from "@/domains/projects/types";
+import { applyOptimisticProjectWorkItemReorder } from "@/domains/projects/utils/work-item-cache";
 import { getTopLevelProjectWorkItems, reorderTopLevelProjectWorkItems } from "@/domains/projects/utils/work-item-order";
 import { QUERY_KEYS } from "@/shared/query";
 
@@ -102,16 +103,19 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
       }
 
       setUpdateError(null);
+      const payload = {
+        items: items.map(item => ({
+          itemId: item.itemId,
+          status: item.status,
+          sortOrder: item.sortOrder,
+        })),
+      };
+      void queryClient.cancelQueries({ queryKey: QUERY_KEYS.project.workItems(projectId) });
+      applyOptimisticProjectWorkItemReorder(queryClient, projectId, payload);
       reorderWorkItems(
         {
           projectId,
-          payload: {
-            items: changedItems.map(item => ({
-              itemId: item.itemId,
-              status: item.status,
-              sortOrder: item.sortOrder,
-            })),
-          },
+          payload,
         },
         {
           onError: error => {
@@ -120,7 +124,7 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
         },
       );
     },
-    [data?.items, isUpdating, projectId, reorderWorkItems],
+    [data?.items, isUpdating, projectId, queryClient, reorderWorkItems],
   );
 
   const handleStatusUpdate = useCallback(
