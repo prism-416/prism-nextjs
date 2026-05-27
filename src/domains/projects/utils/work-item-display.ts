@@ -67,3 +67,7 @@ export function formatProjectDateTime(value: string) {
 export function formatProjectRelativeDateTime(value: string) {
   return formatProjectDateTime(value);
 }
+
+export function formatProjectScheduleDate(value: string | null) {
+  return value ? formatProjectDate(value) : "Not set";
+}

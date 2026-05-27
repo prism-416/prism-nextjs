@@ -7,7 +7,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 import {
-  formatProjectRelativeDateTime,
+  formatProjectScheduleDate,
   getProjectWorkItemPriorityLabel,
   getProjectWorkItemStatusLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
@@ -162,8 +162,8 @@ function TaskRow({ task, isUpdating, isStatusUpdateDisabled, onStatusUpdate }: T
         <ProjectWorkItemPriorityBadge priority={task.priority} />
       </div>
       <div className="text-sm text-prism-muted">
-        <span className="mb-1 block text-xs font-medium md:hidden">Created</span>
-        {formatProjectRelativeDateTime(task.createdAt)}
+        <span className="mb-1 block text-xs font-medium md:hidden">Due date</span>
+        {formatProjectScheduleDate(task.dueDate)}
       </div>
     </article>
   );
@@ -329,7 +329,7 @@ export function ProjectMyTasksPanel({
             <span>Task</span>
             <span>Status</span>
             <span>Priority</span>
-            <span>Created</span>
+            <span>Due date</span>
           </div>
           {tasks.map(task => (
             <TaskRow

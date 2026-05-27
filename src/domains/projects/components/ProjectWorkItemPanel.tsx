@@ -3,7 +3,9 @@ import { ArrowLeft, GitBranch, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
+import { ProjectWorkItemActionsMenu } from "@/domains/projects/components/ProjectWorkItemActionsMenu";
 import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/ProjectWorkItemCommentsPanel";
+import { ProjectWorkItemInlineControls } from "@/domains/projects/components/ProjectWorkItemInlineControls";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import { ProjectWorkItemStatusBadge } from "@/domains/projects/components/ProjectWorkItemStatusBadge";
 import type {
@@ -15,7 +17,7 @@ import type {
 } from "@/domains/projects/types";
 import type { CurrentUser } from "@/shared/types/auth";
 import {
-  formatProjectRelativeDateTime,
+  formatProjectScheduleDate,
   getProjectWorkItemPriorityLabel,
   getProjectWorkItemStatusLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
@@ -41,28 +43,9 @@ type ProjectWorkItemPanelProps = {
   onRetryChildren: () => void;
   onRetryComments: () => void;
   onCreateChildWorkItem: () => void;
+  onEditWorkItem: () => void;
+  onDeleteWorkItem: () => void;
 };
-
-function WorkItemMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-border/80 bg-surface-strong px-4 py-3">
-      <Typography
-        variant="caption"
-        tone="muted"
-      >
-        {label}
-      </Typography>
-      <Typography
-        variant="bodySm"
-        tone="primary"
-        weight="semibold"
-        className="mt-1"
-      >
-        {value}
-      </Typography>
-    </div>
-  );
-}
 
 function WorkItemControls({
   item,
@@ -159,6 +142,12 @@ function ChildWorkItemCard({
         {item.description || "No description."}
       </Typography>
 
+      {item.dueDate && (
+        <p className="mt-2 text-xs text-prism-muted">
+          Due <span className="font-medium text-prism-body">{formatProjectScheduleDate(item.dueDate)}</span>
+        </p>
+      )}
+
       <div className="mt-3 flex flex-wrap gap-2">
         <ProjectWorkItemStatusBadge status={item.status} />
         <ProjectWorkItemPriorityBadge priority={item.priority} />
@@ -196,6 +185,8 @@ export function ProjectWorkItemPanel({
   onRetryChildren,
   onRetryComments,
   onCreateChildWorkItem,
+  onEditWorkItem,
+  onDeleteWorkItem,
 }: ProjectWorkItemPanelProps) {
   const dashboardHref = `/projects/${encodeURIComponent(projectSlug)}`;
 
@@ -215,15 +206,10 @@ export function ProjectWorkItemPanel({
 
         <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <GitBranch className="size-5 text-prism-muted" />
-              <ProjectWorkItemStatusBadge status={workItem.status} />
-              <ProjectWorkItemPriorityBadge priority={workItem.priority} />
-            </div>
             <Typography
               variant="h2"
               tone="primary"
-              className="mt-3 text-2xl tracking-normal md:text-3xl"
+              className="text-2xl tracking-normal md:text-3xl"
             >
               {workItem.title}
             </Typography>
@@ -236,30 +222,39 @@ export function ProjectWorkItemPanel({
             </Typography>
           </div>
 
-          <span className="inline-flex h-7 w-fit items-center rounded-full border border-border bg-surface-strong px-3 text-xs font-medium text-prism-muted">
-            {childItems.length} child items
-          </span>
+          <div className="flex shrink-0 items-center">
+            <ProjectWorkItemActionsMenu
+              title={workItem.title}
+              onEdit={onEditWorkItem}
+              onDelete={onDeleteWorkItem}
+            />
+          </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <WorkItemMetric
-            label="Created"
-            value={formatProjectRelativeDateTime(workItem.createdAt)}
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border/70 pt-4 text-sm text-prism-muted">
+          <p>
+            Start date{" "}
+            <span className="ml-1 font-medium text-prism-body">{formatProjectScheduleDate(workItem.startDate)}</span>
+          </p>
+          <span
+            className="hidden h-4 w-px bg-border sm:block"
+            aria-hidden="true"
           />
-          <WorkItemMetric
-            label="Status changed"
-            value={formatProjectRelativeDateTime(workItem.statusChangedAt)}
-          />
+          <p>
+            Due date{" "}
+            <span className="ml-1 font-medium text-prism-body">{formatProjectScheduleDate(workItem.dueDate)}</span>
+          </p>
         </div>
 
-        <div className="mt-5 max-w-xl">
-          <WorkItemControls
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <GitBranch className="size-5 text-prism-muted" />
+          <ProjectWorkItemInlineControls
             item={workItem}
             disabled={isUpdatingItem}
+            isUpdating={updatingItemId === workItem.itemId}
             onStatusUpdate={onStatusUpdate}
             onPriorityUpdate={onPriorityUpdate}
           />
-          {updatingItemId === workItem.itemId && <p className="mt-2 text-xs text-prism-muted">Updating...</p>}
         </div>
       </div>
 

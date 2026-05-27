@@ -6,6 +6,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { SprintStatusBadge } from "@/domains/sprints/components/SprintStatusBadge";
 import type { Sprint, SprintWorkItem, SprintWorkItemSearchResult } from "@/domains/sprints/types";
 import {
+  formatSprintDate,
   formatSprintRange,
   getSprintDurationText,
   getSprintWorkItemPriorityLabel,
@@ -43,7 +44,7 @@ function WorkItemRow({ item, projectSlug }: { item: SprintWorkItem; projectSlug?
   );
 
   return (
-    <article className="grid gap-3 border-b border-border/70 px-4 py-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_8rem_8rem] md:items-center">
+    <article className="grid gap-3 border-b border-border/70 px-4 py-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_8rem_8rem_8rem] md:items-center">
       <div className="min-w-0">
         {projectSlug ? (
           <Link href={`/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`}>
@@ -56,6 +57,7 @@ function WorkItemRow({ item, projectSlug }: { item: SprintWorkItem; projectSlug?
       </div>
       <span className="text-sm text-prism-body">{getSprintWorkItemStatusLabel(item.status)}</span>
       <span className="text-sm text-prism-body">{getSprintWorkItemPriorityLabel(item.priority)}</span>
+      <span className="text-sm text-prism-muted">{item.dueDate ? formatSprintDate(item.dueDate) : "No due date"}</span>
     </article>
   );
 }

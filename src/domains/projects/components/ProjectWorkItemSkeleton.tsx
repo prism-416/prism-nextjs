@@ -7,10 +7,13 @@ export function ProjectWorkItemSkeleton() {
         <Skeleton className="h-5 w-32 bg-prism-navy/5" />
         <Skeleton className="mt-4 h-8 w-72 bg-prism-navy/5" />
         <Skeleton className="mt-3 h-4 w-full max-w-xl bg-prism-navy/5" />
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <Skeleton className="h-20 rounded-xl bg-prism-navy/5" />
-          <Skeleton className="h-20 rounded-xl bg-prism-navy/5" />
-          <Skeleton className="h-20 rounded-xl bg-prism-navy/5" />
+        <div className="mt-5 flex gap-5 border-t border-border/70 pt-4">
+          <Skeleton className="h-5 w-32 bg-prism-navy/5" />
+          <Skeleton className="h-5 w-32 bg-prism-navy/5" />
+        </div>
+        <div className="mt-4 flex gap-2">
+          <Skeleton className="h-7 w-20 rounded-full bg-prism-navy/5" />
+          <Skeleton className="h-7 w-20 rounded-full bg-prism-navy/5" />
         </div>
       </div>
 

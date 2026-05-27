@@ -14,15 +14,16 @@ const WORK_ITEM_STATUS_CLASS_NAMES: Record<ProjectWorkItemStatus, string> = {
   archived: "border-border bg-surface-strong text-prism-muted",
 };
 
+export function getProjectWorkItemStatusBadgeClassName(status: ProjectWorkItemStatus, className?: string) {
+  return cn(
+    "inline-flex h-7 items-center rounded-full border px-2.5 text-xs font-medium",
+    WORK_ITEM_STATUS_CLASS_NAMES[status],
+    className,
+  );
+}
+
 export function ProjectWorkItemStatusBadge({ status }: ProjectWorkItemStatusBadgeProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex h-7 items-center rounded-full border px-2.5 text-xs font-medium",
-        WORK_ITEM_STATUS_CLASS_NAMES[status],
-      )}
-    >
-      {getProjectWorkItemStatusLabel(status)}
-    </span>
+    <span className={getProjectWorkItemStatusBadgeClassName(status)}>{getProjectWorkItemStatusLabel(status)}</span>
   );
 }

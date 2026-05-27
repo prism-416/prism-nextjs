@@ -1,9 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
 import { CreateProjectWorkItemDialog } from "@/domains/projects/components/CreateProjectWorkItemDialog";
 import { ProjectErrorState } from "@/domains/projects/components/ProjectErrorState";
+import { ProjectWorkItemDeleteDialog } from "@/domains/projects/components/ProjectWorkItemDeleteDialog";
+import { ProjectWorkItemEditDialog } from "@/domains/projects/components/ProjectWorkItemEditDialog";
 import { ProjectWorkItemPanel } from "@/domains/projects/components/ProjectWorkItemPanel";
 import { ProjectWorkItemSkeleton } from "@/domains/projects/components/ProjectWorkItemSkeleton";
 import { useProjectWorkItemComments } from "@/domains/projects/hooks/useProjectWorkItemComments";
@@ -40,7 +43,10 @@ export function ProjectWorkItemClient({
   initialMembers,
   initialCurrentUser,
 }: ProjectWorkItemClientProps) {
+  const router = useRouter();
   const [isCreateChildOpen, setIsCreateChildOpen] = React.useState(false);
+  const [isEditOpen, setIsEditOpen] = React.useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
   const [updatingItemId, setUpdatingItemId] = React.useState<string | null>(null);
   const [updateError, setUpdateError] = React.useState<string | null>(null);
   const {
@@ -104,6 +110,10 @@ export function ProjectWorkItemClient({
     );
   }
 
+  const afterDeleteHref = workItem.parentId
+    ? `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(workItem.parentId)}`
+    : `/projects/${encodeURIComponent(projectSlug)}`;
+
   return (
     <>
       <ProjectWorkItemPanel
@@ -133,6 +143,8 @@ export function ProjectWorkItemClient({
           void refetchComments();
         }}
         onCreateChildWorkItem={() => setIsCreateChildOpen(true)}
+        onEditWorkItem={() => setIsEditOpen(true)}
+        onDeleteWorkItem={() => setIsDeleteOpen(true)}
       />
 
       <CreateProjectWorkItemDialog
@@ -142,6 +154,27 @@ export function ProjectWorkItemClient({
         title="Create child work item"
         description="Add a child under this work item."
         onOpenChange={setIsCreateChildOpen}
+      />
+
+      {isEditOpen && (
+        <ProjectWorkItemEditDialog
+          key={workItem.itemId}
+          projectId={projectId}
+          workItem={workItem}
+          open
+          onOpenChange={open => {
+            if (!open) setIsEditOpen(false);
+          }}
+        />
+      )}
+
+      <ProjectWorkItemDeleteDialog
+        projectId={projectId}
+        workItem={workItem}
+        childCount={childItems.length}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        onDeleted={() => router.replace(afterDeleteHref)}
       />
     </>
   );
