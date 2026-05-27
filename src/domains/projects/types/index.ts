@@ -124,3 +124,7 @@ export interface ProjectWorkItemCommentSearchResult {
 export interface CreateProjectWorkItemCommentPayload {
   body: string;
 }
+
+export interface UpdateProjectWorkItemCommentPayload {
+  body: string;
+}

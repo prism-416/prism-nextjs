@@ -1,21 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { CircleCheck, RefreshCw, SendHorizontal } from "lucide-react";
+import { RefreshCw, SendHorizontal } from "lucide-react";
 
-import { Badge } from "@/atomics/atoms/Badge";
 import { Button } from "@/atomics/atoms/Button";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Typography } from "@/atomics/atoms/Typography";
+import { ProjectWorkItemCommentAvatar } from "@/domains/projects/components/ProjectWorkItemCommentAvatar";
+import { ProjectWorkItemCommentRow } from "@/domains/projects/components/ProjectWorkItemCommentRow";
 import { useCreateProjectWorkItemComment } from "@/domains/projects/hooks/useCreateProjectWorkItemComment";
-import type {
-  ProjectParticipant,
-  ProjectWorkItemComment,
-  ProjectWorkItemCommentSearchResult,
-} from "@/domains/projects/types";
+import type { ProjectParticipant, ProjectWorkItemCommentSearchResult } from "@/domains/projects/types";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import type { CurrentUser } from "@/shared/types/auth";
-import { getCurrentUserDisplayName, getCurrentUserInitial } from "@/shared/utils/user-display";
+import { getCurrentUserInitial } from "@/shared/utils/user-display";
 
 type ProjectWorkItemCommentsPanelProps = {
   projectId: string;
@@ -27,106 +24,9 @@ type ProjectWorkItemCommentsPanelProps = {
   onRetry: () => void;
 };
 
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const COMMENT_BODY_MAX_LENGTH = 2000;
 const COMMENT_SUBMIT_BUTTON_CLASS =
-  "h-10 rounded-lg bg-prism-navy px-4 text-white hover:bg-prism-navy/90 disabled:opacity-50";
-
-function padDatePart(value: number) {
-  return value.toString().padStart(2, "0");
-}
-
-function formatCommentDate(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Invalid date";
-  }
-
-  const hours = padDatePart(date.getUTCHours());
-  const minutes = padDatePart(date.getUTCMinutes());
-
-  return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()} ${hours}:${minutes} UTC`;
-}
-
-function getFallbackUserLabel(userId: string) {
-  return `Member ${userId.slice(0, 8)}`;
-}
-
-function getDisplayName(
-  comment: ProjectWorkItemComment,
-  memberByUserId: Map<string, ProjectParticipant>,
-  currentUser?: CurrentUser,
-) {
-  if (currentUser?.userId === comment.authorUserId) {
-    return getCurrentUserDisplayName(currentUser);
-  }
-
-  const member = memberByUserId.get(comment.authorUserId);
-
-  return member?.fullName || member?.username || getFallbackUserLabel(comment.authorUserId);
-}
-
-function getInitial(displayName: string) {
-  return (displayName.trim().at(0) || "U").toUpperCase();
-}
-
-function CommentAvatar({ label }: { label: string }) {
-  return (
-    <div
-      className="flex size-10 shrink-0 items-center justify-center rounded-full bg-prism-navy text-sm font-semibold text-white"
-      aria-hidden="true"
-    >
-      {label}
-    </div>
-  );
-}
-
-function CommentRow({
-  comment,
-  currentUser,
-  memberByUserId,
-}: {
-  comment: ProjectWorkItemComment;
-  currentUser?: CurrentUser;
-  memberByUserId: Map<string, ProjectParticipant>;
-}) {
-  const displayName = getDisplayName(comment, memberByUserId, currentUser);
-  const isCurrentUser = currentUser?.userId === comment.authorUserId;
-
-  return (
-    <article className="flex gap-3">
-      <CommentAvatar label={getInitial(displayName)} />
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <Typography
-              as="span"
-              variant="bodySm"
-              tone="primary"
-              weight="semibold"
-              className="truncate leading-5"
-            >
-              {displayName}
-            </Typography>
-            {isCurrentUser && (
-              <Badge
-                icon={CircleCheck}
-                size="sm"
-              >
-                You
-              </Badge>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-prism-muted">
-            <span>{formatCommentDate(comment.createdAt)}</span>
-            {comment.updatedAt && <span className="text-xs">Edited</span>}
-          </div>
-        </div>
-        <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-prism-body">{comment.body}</p>
-      </div>
-    </article>
-  );
-}
+  "h-10 rounded-lg bg-prism-navy px-4 text-white hover:bg-prism-navy/90 disabled:opacity-50 disabled:cursor-default";
 
 export function ProjectWorkItemCommentsPanel({
   projectId,
@@ -150,24 +50,20 @@ export function ProjectWorkItemCommentsPanel({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (!trimmedBody) {
-      return;
-    }
-
+    if (!trimmedBody) return;
     setError(null);
-
     try {
-      await createComment({
-        projectId,
-        itemId,
-        payload: {
-          body: trimmedBody,
-        },
-      });
+      await createComment({ projectId, itemId, payload: { body: trimmedBody } });
       setBody("");
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Comment could not be posted.");
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      event.currentTarget.form?.requestSubmit();
     }
   };
 
@@ -195,15 +91,27 @@ export function ProjectWorkItemCommentsPanel({
         )}
       </div>
 
-      <div className="mt-5 space-y-5">
-        {comments.comments.map(comment => (
-          <CommentRow
-            key={comment.commentId}
-            comment={comment}
-            currentUser={currentUser}
-            memberByUserId={memberByUserId}
-          />
-        ))}
+      <div className="mt-5">
+        {comments.comments.map((comment, index) => {
+          const prev = comments.comments[index - 1];
+          const isConsecutive = !!prev && prev.authorUserId === comment.authorUserId;
+
+          return (
+            <div
+              key={comment.commentId}
+              className={isConsecutive ? "mt-0.5" : index === 0 ? "" : "mt-4"}
+            >
+              <ProjectWorkItemCommentRow
+                projectId={projectId}
+                itemId={itemId}
+                comment={comment}
+                currentUser={currentUser}
+                memberByUserId={memberByUserId}
+                isConsecutive={isConsecutive}
+              />
+            </div>
+          );
+        })}
 
         {!isError && comments.comments.length === 0 && (
           <div className="rounded-xl border border-dashed border-border bg-surface-strong px-4 py-6 text-center">
@@ -229,19 +137,22 @@ export function ProjectWorkItemCommentsPanel({
         className="mt-6 border-t border-border/70 pt-5"
         onSubmit={handleSubmit}
       >
-        <div className="flex gap-3">
-          <CommentAvatar label={currentUserInitial} />
+        <div className="flex gap-2.5">
+          <ProjectWorkItemCommentAvatar label={currentUserInitial} />
           <div className="min-w-0 flex-1">
             <Textarea
               value={body}
               onChange={event => setBody(event.target.value)}
-              placeholder="Write a comment... (@ mentions supported)"
-              maxLength={2000}
+              onKeyDown={handleKeyDown}
+              placeholder="Write a comment... (Cmd+Enter to send)"
+              maxLength={COMMENT_BODY_MAX_LENGTH}
               disabled={isPending}
-              className="min-h-24 resize-y rounded-xl border-border bg-surface-field px-4 py-3 text-sm text-prism-body placeholder:text-prism-muted focus-visible:ring-ring"
+              className="min-h-24 resize-y rounded-xl border-border bg-surface-field px-4 py-3 text-sm text-prism-body placeholder:text-prism-muted focus-visible:ring-ring disabled:cursor-default"
             />
             <div className="mt-1 flex justify-end">
-              <span className="text-xs text-prism-muted">{trimmedBody.length}/2000</span>
+              <span className="text-xs text-prism-muted">
+                {trimmedBody.length}/{COMMENT_BODY_MAX_LENGTH}
+              </span>
             </div>
             <div className="mt-2 flex justify-end">
               <Button
