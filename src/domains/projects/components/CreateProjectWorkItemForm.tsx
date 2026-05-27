@@ -27,6 +27,8 @@ function getInitialFormState() {
   return {
     title: "",
     description: "",
+    startDate: "",
+    dueDate: "",
     priority: "medium" as ProjectWorkItemPriority,
   };
 }
@@ -60,6 +62,11 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
       return;
     }
 
+    if (form.startDate && form.dueDate && form.startDate > form.dueDate) {
+      setFormError("Due date must be on or after start date.");
+      return;
+    }
+
     try {
       await createWorkItem({
         projectId,
@@ -67,6 +74,8 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
           parentId,
           title: trimmedTitle,
           description: form.description.trim(),
+          startDate: form.startDate || null,
+          dueDate: form.dueDate || null,
           priority: form.priority,
         },
       });
@@ -147,6 +156,42 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
           disabled={isPending}
           className="min-h-20 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
         />
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label
+            htmlFor={`${formId}-work-item-start-date`}
+            className="text-xs font-medium text-prism-muted"
+          >
+            Start date
+          </label>
+          <Input
+            id={`${formId}-work-item-start-date`}
+            type="date"
+            value={form.startDate}
+            onChange={event => updateForm("startDate", event.target.value)}
+            disabled={isPending}
+            className="h-10 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+        <div className="space-y-2">
+          <label
+            htmlFor={`${formId}-work-item-due-date`}
+            className="text-xs font-medium text-prism-muted"
+          >
+            Due date
+          </label>
+          <Input
+            id={`${formId}-work-item-due-date`}
+            type="date"
+            value={form.dueDate}
+            onChange={event => updateForm("dueDate", event.target.value)}
+            min={form.startDate || undefined}
+            disabled={isPending}
+            className="h-10 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
       </div>
 
       {formError && (

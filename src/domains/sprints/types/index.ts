@@ -32,6 +32,8 @@ export interface SprintWorkItem {
   parentId: string | null;
   title: string;
   description: string;
+  startDate: string | null;
+  dueDate: string | null;
   priority: SprintWorkItemPriority;
   status: SprintWorkItemStatus;
   statusChangedAt: string;

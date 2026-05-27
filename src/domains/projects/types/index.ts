@@ -37,6 +37,8 @@ export interface ProjectWorkItem {
   parentId: string | null;
   title: string;
   description: string;
+  startDate: string | null;
+  dueDate: string | null;
   priority: ProjectWorkItemPriority;
   status: ProjectWorkItemStatus;
   sortOrder: number;
@@ -69,6 +71,8 @@ export interface CreateProjectWorkItemPayload {
   parentId?: string;
   title: string;
   description: string;
+  startDate?: string | null;
+  dueDate?: string | null;
   priority?: ProjectWorkItemPriority;
   assigneeUsernames?: string[];
   labelNames?: string[];
@@ -78,6 +82,8 @@ export interface UpdateProjectWorkItemPayload {
   parentId?: string | null;
   title?: string;
   description?: string;
+  startDate?: string | null;
+  dueDate?: string | null;
   priority?: ProjectWorkItemPriority;
   status?: ProjectWorkItemStatus;
   assigneeUsernames?: string[];

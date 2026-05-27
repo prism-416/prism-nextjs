@@ -13,14 +13,17 @@ const WORK_ITEM_PRIORITY_CLASS_NAMES: Record<ProjectWorkItemPriority, string> = 
   urgent: "border-prism-danger-soft bg-prism-danger-soft/25 text-prism-danger",
 };
 
+export function getProjectWorkItemPriorityBadgeClassName(priority: ProjectWorkItemPriority, className?: string) {
+  return cn(
+    "inline-flex h-7 items-center rounded-full border px-2.5 text-xs font-medium",
+    WORK_ITEM_PRIORITY_CLASS_NAMES[priority],
+    className,
+  );
+}
+
 export function ProjectWorkItemPriorityBadge({ priority }: ProjectWorkItemPriorityBadgeProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex h-7 items-center rounded-full border px-2.5 text-xs font-medium",
-        WORK_ITEM_PRIORITY_CLASS_NAMES[priority],
-      )}
-    >
+    <span className={getProjectWorkItemPriorityBadgeClassName(priority)}>
       {getProjectWorkItemPriorityLabel(priority)}
     </span>
   );

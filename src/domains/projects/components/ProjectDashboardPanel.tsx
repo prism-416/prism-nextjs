@@ -26,6 +26,7 @@ import type {
   ProjectWorkItemStatus,
 } from "@/domains/projects/types";
 import {
+  formatProjectScheduleDate,
   getProjectWorkItemPriorityLabel,
   getProjectWorkItemStatusLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
@@ -146,6 +147,12 @@ const WorkItemCardContent = memo(function WorkItemCardContent({
       <div className="mt-3">
         <ProjectWorkItemPriorityBadge priority={item.priority} />
       </div>
+
+      {item.dueDate && (
+        <p className="mt-3 text-xs text-prism-muted">
+          Due <span className="font-medium text-prism-body">{formatProjectScheduleDate(item.dueDate)}</span>
+        </p>
+      )}
 
       {(item.assigneeUsernames.length > 0 || item.labelNames.length > 0) && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
