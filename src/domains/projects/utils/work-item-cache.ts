@@ -103,11 +103,6 @@ export function syncProjectWorkItemUpdated(queryClient: QueryClient, workItem: P
   invalidateProjectWorkItemCollections(queryClient, projectId, workItem.workspaceId);
 }
 
-export type ProjectWorkItemReorderSnapshot = {
-  lists: Array<[QueryKey, ProjectWorkItemSearchResult | undefined]>;
-  details: Array<[QueryKey, ProjectWorkItem | undefined]>;
-};
-
 function sortTopLevelProjectWorkItemsForDisplay(items: ProjectWorkItem[]) {
   return [...items].sort((a, b) => {
     const aStatusIndex = PROJECT_WORK_ITEM_STATUSES.indexOf(a.status);
@@ -116,35 +111,6 @@ function sortTopLevelProjectWorkItemsForDisplay(items: ProjectWorkItem[]) {
       return aStatusIndex - bStatusIndex;
     }
     return a.sortOrder - b.sortOrder;
-  });
-}
-
-export function snapshotProjectWorkItemReorderCaches(
-  queryClient: QueryClient,
-  projectId: string,
-  itemIds: string[],
-): ProjectWorkItemReorderSnapshot {
-  const lists = queryClient.getQueriesData<ProjectWorkItemSearchResult>({
-    predicate: query => isProjectWorkItemListQuery(query.queryKey, projectId),
-  });
-
-  const details: ProjectWorkItemReorderSnapshot["details"] = itemIds.map(itemId => {
-    const key = QUERY_KEYS.project.workItemDetail(projectId, itemId);
-    return [key, queryClient.getQueryData<ProjectWorkItem>(key)];
-  });
-
-  return { lists, details };
-}
-
-export function restoreProjectWorkItemReorderCaches(
-  queryClient: QueryClient,
-  snapshot: ProjectWorkItemReorderSnapshot,
-) {
-  snapshot.lists.forEach(([key, data]) => {
-    queryClient.setQueryData(key, data);
-  });
-  snapshot.details.forEach(([key, data]) => {
-    queryClient.setQueryData(key, data);
   });
 }
 
@@ -183,11 +149,7 @@ export function applyOptimisticProjectWorkItemReorder(
   });
 }
 
-export function syncProjectWorkItemsReordered(
-  queryClient: QueryClient,
-  workItems: ProjectWorkItem[],
-  { invalidateCollections = true }: { invalidateCollections?: boolean } = {},
-) {
+export function syncProjectWorkItemsReordered(queryClient: QueryClient, workItems: ProjectWorkItem[]) {
   const firstWorkItem = workItems[0];
   if (!firstWorkItem) {
     return;
@@ -197,10 +159,8 @@ export function syncProjectWorkItemsReordered(
     queryClient.setQueryData(QUERY_KEYS.project.workItemDetail(workItem.projectId, workItem.itemId), workItem);
   });
 
-  if (invalidateCollections) {
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(firstWorkItem.projectId) });
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.sprints(firstWorkItem.workspaceId) });
-  }
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(firstWorkItem.projectId) });
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.sprints(firstWorkItem.workspaceId) });
 }
 
 export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: ProjectWorkItemDeletedPayload) {
