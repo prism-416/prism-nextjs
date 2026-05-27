@@ -94,7 +94,11 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
 
     const handleWorkItemUpdated = (payload: ProjectWorkItem) => {
       if (payload.projectId === projectId) {
-        syncProjectWorkItemUpdated(queryClient, payload);
+        const hasPendingLocalUpdate =
+          queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.update(projectId) }) > 0;
+        if (!hasPendingLocalUpdate) {
+          syncProjectWorkItemUpdated(queryClient, payload);
+        }
       }
     };
 
@@ -108,7 +112,9 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
       if (payload.projectId === projectId) {
         const hasPendingLocalReorder =
           queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.reorder(projectId) }) > 0;
-        if (!hasPendingLocalReorder) {
+        const hasPendingLocalUpdate =
+          queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.update(projectId) }) > 0;
+        if (!hasPendingLocalReorder && !hasPendingLocalUpdate) {
           syncProjectWorkItemsReordered(queryClient, payload.workItems);
         }
       }

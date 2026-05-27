@@ -71,3 +71,29 @@ export function formatProjectRelativeDateTime(value: string) {
 export function formatProjectScheduleDate(value: string | null) {
   return value ? formatProjectDate(value) : "Not set";
 }
+
+function formatProjectCompactDate(value: string) {
+  const date = parseDate(value);
+
+  if (!date) {
+    return "Invalid date";
+  }
+
+  return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}`;
+}
+
+export function formatProjectScheduleSummary(startDate: string | null, dueDate: string | null) {
+  if (startDate && dueDate) {
+    return `${formatProjectCompactDate(startDate)} - ${formatProjectCompactDate(dueDate)}`;
+  }
+
+  if (startDate) {
+    return `Starts ${formatProjectCompactDate(startDate)}`;
+  }
+
+  if (dueDate) {
+    return `Due ${formatProjectCompactDate(dueDate)}`;
+  }
+
+  return "";
+}

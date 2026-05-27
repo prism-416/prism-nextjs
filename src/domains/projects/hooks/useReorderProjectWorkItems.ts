@@ -32,13 +32,17 @@ export function useReorderProjectWorkItems(projectId: string) {
     },
     onError: (_error, variables) => {
       const hasQueuedReorder = queryClient.isMutating({ mutationKey }) > 1;
-      if (!hasQueuedReorder) {
+      const hasPendingLocalUpdate =
+        queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.update(variables.projectId) }) > 0;
+      if (!hasQueuedReorder && !hasPendingLocalUpdate) {
         queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(variables.projectId) });
       }
     },
     onSuccess: workItems => {
       const hasQueuedReorder = queryClient.isMutating({ mutationKey }) > 1;
-      if (!hasQueuedReorder) {
+      const hasPendingLocalUpdate =
+        queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.update(projectId) }) > 0;
+      if (!hasQueuedReorder && !hasPendingLocalUpdate) {
         syncProjectWorkItemsReordered(queryClient, workItems);
       }
     },
