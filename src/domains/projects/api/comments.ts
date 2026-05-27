@@ -6,6 +6,7 @@ import type {
   ProjectWorkItemComment,
   ProjectWorkItemCommentSearchParams,
   ProjectWorkItemCommentSearchResult,
+  UpdateProjectWorkItemCommentPayload,
 } from "../types";
 import { getDefinedProjectCommentSearchParams, getEmptyProjectCommentSearchResult } from "../utils/comment";
 
@@ -36,6 +37,22 @@ export async function createProjectWorkItemComment(
   const response = await commonAxios<CreateProjectWorkItemCommentPayload, ApiResponse<ProjectWorkItemComment>>({
     url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}/comments`,
     method: "POST",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function updateProjectWorkItemComment(
+  projectId: string,
+  itemId: string,
+  commentId: string,
+  body: UpdateProjectWorkItemCommentPayload,
+) {
+  const response = await commonAxios<UpdateProjectWorkItemCommentPayload, ApiResponse<ProjectWorkItemComment>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}/comments/${encodeURIComponent(commentId)}`,
+    method: "PATCH",
     data: body,
     version: null,
   });
