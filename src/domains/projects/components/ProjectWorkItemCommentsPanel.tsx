@@ -15,7 +15,6 @@ import type {
 } from "@/domains/projects/types";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import type { CurrentUser } from "@/shared/types/auth";
-import { cn } from "@/shared/utils/cn";
 import { getCurrentUserDisplayName, getCurrentUserInitial } from "@/shared/utils/user-display";
 
 type ProjectWorkItemCommentsPanelProps = {
@@ -29,11 +28,8 @@ type ProjectWorkItemCommentsPanelProps = {
 };
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const COMMENT_SUBMIT_BUTTON_BASE_CLASS = "h-10 rounded-lg border px-4 disabled:opacity-100 sm:self-end";
-const COMMENT_SUBMIT_BUTTON_IDLE_CLASS =
-  "border-prism-navy/30 bg-prism-navy/18 text-prism-navy/70 hover:border-prism-navy/30 hover:bg-prism-navy/18";
-const COMMENT_SUBMIT_BUTTON_READY_CLASS =
-  "border-prism-navy bg-prism-navy text-white hover:border-prism-navy/90 hover:bg-prism-navy/90";
+const COMMENT_SUBMIT_BUTTON_CLASS =
+  "h-10 rounded-lg bg-prism-navy px-4 text-white hover:bg-prism-navy/90 disabled:opacity-50";
 
 function padDatePart(value: number) {
   return value.toString().padStart(2, "0");
@@ -244,15 +240,14 @@ export function ProjectWorkItemCommentsPanel({
               disabled={isPending}
               className="min-h-24 resize-y rounded-xl border-border bg-surface-field px-4 py-3 text-sm text-prism-body placeholder:text-prism-muted focus-visible:ring-ring"
             />
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-1 flex justify-end">
               <span className="text-xs text-prism-muted">{trimmedBody.length}/2000</span>
+            </div>
+            <div className="mt-2 flex justify-end">
               <Button
                 type="submit"
                 disabled={!trimmedBody || isPending}
-                className={cn(
-                  COMMENT_SUBMIT_BUTTON_BASE_CLASS,
-                  trimmedBody && !isPending ? COMMENT_SUBMIT_BUTTON_READY_CLASS : COMMENT_SUBMIT_BUTTON_IDLE_CLASS,
-                )}
+                className={COMMENT_SUBMIT_BUTTON_CLASS}
               >
                 <SendHorizontal className="size-4" />
                 {isPending ? "Posting..." : "Post comment"}

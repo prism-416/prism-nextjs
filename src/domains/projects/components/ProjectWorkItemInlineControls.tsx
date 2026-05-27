@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/atomics/molecules/DropdownMenu";
 import { getProjectWorkItemPriorityBadgeClassName } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
-import { getProjectWorkItemStatusBadgeClassName } from "@/domains/projects/components/ProjectWorkItemStatusBadge";
 import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 import {
   getProjectWorkItemPriorityLabel,
@@ -17,22 +16,43 @@ import {
   PROJECT_WORK_ITEM_PRIORITIES,
   PROJECT_WORK_ITEM_STATUSES,
 } from "@/domains/projects/utils/work-item-display";
+import { cn } from "@/shared/utils/cn";
 
 type ProjectWorkItemInlineControlsProps = {
   item: ProjectWorkItem;
-  disabled: boolean;
-  isUpdating: boolean;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
 };
 
-const TRIGGER_CLASS_NAME =
+const STATUS_DOT_CLASS_NAMES: Record<ProjectWorkItemStatus, string> = {
+  todo: "bg-prism-muted/55",
+  in_progress: "bg-prism-info",
+  in_review: "bg-prism-review",
+  done: "bg-prism-success",
+  archived: "bg-prism-muted/55",
+};
+
+const STATUS_TRIGGER_CLASS_NAME = cn(
+  "inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 text-xs font-medium text-prism-body",
+  "transition-colors hover:border-border-strong hover:bg-surface-strong",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+  "disabled:cursor-not-allowed disabled:opacity-60",
+);
+
+const PRIORITY_TRIGGER_CLASS_NAME =
   "gap-1.5 cursor-pointer transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60";
+
+function StatusContent({ status }: { status: ProjectWorkItemStatus }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={cn("size-2 rounded-full", STATUS_DOT_CLASS_NAMES[status])} />
+      <span>{getProjectWorkItemStatusLabel(status)}</span>
+    </span>
+  );
+}
 
 export function ProjectWorkItemInlineControls({
   item,
-  disabled,
-  isUpdating,
   onStatusUpdate,
   onPriorityUpdate,
 }: ProjectWorkItemInlineControlsProps) {
@@ -42,11 +62,10 @@ export function ProjectWorkItemInlineControls({
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            disabled={disabled}
-            className={getProjectWorkItemStatusBadgeClassName(item.status, TRIGGER_CLASS_NAME)}
+            className={STATUS_TRIGGER_CLASS_NAME}
             aria-label={`Change ${item.title} status`}
           >
-            {getProjectWorkItemStatusLabel(item.status)}
+            <StatusContent status={item.status} />
             <ChevronDown className="size-3 opacity-60" />
           </button>
         </DropdownMenuTrigger>
@@ -62,9 +81,7 @@ export function ProjectWorkItemInlineControls({
                 if (status !== item.status) onStatusUpdate(item, status);
               }}
             >
-              <span className={getProjectWorkItemStatusBadgeClassName(status)}>
-                {getProjectWorkItemStatusLabel(status)}
-              </span>
+              <StatusContent status={status} />
               {status === item.status && <Check className="size-4 text-prism-muted" />}
             </DropdownMenuItem>
           ))}
@@ -75,8 +92,7 @@ export function ProjectWorkItemInlineControls({
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            disabled={disabled}
-            className={getProjectWorkItemPriorityBadgeClassName(item.priority, TRIGGER_CLASS_NAME)}
+            className={getProjectWorkItemPriorityBadgeClassName(item.priority, PRIORITY_TRIGGER_CLASS_NAME)}
             aria-label={`Change ${item.title} priority`}
           >
             {getProjectWorkItemPriorityLabel(item.priority)}
@@ -103,8 +119,6 @@ export function ProjectWorkItemInlineControls({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {isUpdating && <span className="text-xs text-prism-muted">Updating...</span>}
     </div>
   );
 }
