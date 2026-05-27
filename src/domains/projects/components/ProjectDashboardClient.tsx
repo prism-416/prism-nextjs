@@ -1,23 +1,19 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { CreateProjectWorkItemDialog } from "@/domains/projects/components/CreateProjectWorkItemDialog";
 import { ProjectDashboardPanel } from "@/domains/projects/components/ProjectDashboardPanel";
 import { ProjectDashboardSkeleton } from "@/domains/projects/components/ProjectDashboardSkeleton";
 import { PROJECT_DASHBOARD_WORK_ITEM_FILTERS } from "@/domains/projects/constants/dashboard";
+import { PROJECT_MUTATION_KEYS } from "@/domains/projects/constants/mutations";
 import { useProjectWorkItems } from "@/domains/projects/hooks/useProjectWorkItems";
 import { useReorderProjectWorkItems } from "@/domains/projects/hooks/useReorderProjectWorkItems";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
-import type {
-  ProjectWorkItem,
-  ProjectWorkItemPriority,
-  ProjectWorkItemSearchResult,
-  ProjectWorkItemStatus,
-} from "@/domains/projects/types";
+import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemSearchResult } from "@/domains/projects/types";
 import { applyOptimisticProjectWorkItemReorder } from "@/domains/projects/utils/work-item-cache";
-import { getTopLevelProjectWorkItems, reorderTopLevelProjectWorkItems } from "@/domains/projects/utils/work-item-order";
+import { getTopLevelProjectWorkItems } from "@/domains/projects/utils/work-item-order";
 import { QUERY_KEYS } from "@/shared/query";
 
 type ProjectDashboardClientProps = {
@@ -26,72 +22,117 @@ type ProjectDashboardClientProps = {
   initialData?: ProjectWorkItemSearchResult;
 };
 
+type PendingPriorityUpdate = {
+  initialPriority: ProjectWorkItemPriority;
+  desiredPriority: ProjectWorkItemPriority;
+  confirmedPriority: ProjectWorkItemPriority | null;
+};
+
 export function ProjectDashboardClient({ projectId, projectSlug, initialData }: ProjectDashboardClientProps) {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const pendingPriorityUpdatesRef = useRef<Map<string, PendingPriorityUpdate>>(new Map());
+  const submitPriorityUpdateRef = useRef<(itemId: string, priority: ProjectWorkItemPriority) => void>(() => undefined);
   const { data, isPending, isError, refetch } = useProjectWorkItems(
     projectId,
     PROJECT_DASHBOARD_WORK_ITEM_FILTERS,
     initialData,
   );
-  const { mutate: updateWorkItem, isPending: isUpdatingWorkItem } = useUpdateProjectWorkItem();
+  const { mutate: updateWorkItem } = useUpdateProjectWorkItem({
+    mutationKey: PROJECT_MUTATION_KEYS.workItems.update(projectId),
+    syncResult: false,
+  });
   const { mutate: reorderWorkItems } = useReorderProjectWorkItems(projectId);
-  const isUpdating = isUpdatingWorkItem;
 
-  const handleUpdate = useCallback(
-    (item: ProjectWorkItem, payload: { status?: ProjectWorkItemStatus; priority?: ProjectWorkItemPriority }) => {
-      if (isUpdating) {
-        return;
-      }
-
-      if (
-        (payload.status && item.status === payload.status) ||
-        (payload.priority && item.priority === payload.priority)
-      ) {
-        return;
-      }
-
-      setUpdateError(null);
+  const applyOptimisticPriority = useCallback(
+    (itemId: string, priority: ProjectWorkItemPriority) => {
       const boardQueryKey = QUERY_KEYS.project.workItemList(projectId, PROJECT_DASHBOARD_WORK_ITEM_FILTERS);
-      void queryClient.cancelQueries({ queryKey: boardQueryKey });
-
-      const previousResult = queryClient.getQueryData<ProjectWorkItemSearchResult>(boardQueryKey);
-
       queryClient.setQueryData<ProjectWorkItemSearchResult>(boardQueryKey, previous => {
         if (!previous) return previous;
         return {
           ...previous,
           items: previous.items.map(currentItem =>
-            currentItem.itemId === item.itemId ? { ...currentItem, ...payload } : currentItem,
+            currentItem.itemId === itemId ? { ...currentItem, priority } : currentItem,
           ),
         };
       });
+    },
+    [projectId, queryClient],
+  );
 
+  const submitPriorityUpdate = useCallback(
+    (itemId: string, priority: ProjectWorkItemPriority) => {
       updateWorkItem(
-        { projectId, itemId: item.itemId, payload },
+        { projectId, itemId, payload: { priority } },
         {
           onError: error => {
-            queryClient.setQueryData(boardQueryKey, previousResult);
-            setUpdateError(error instanceof Error ? error.message : "Work item could not be updated.");
+            if (pendingPriorityUpdatesRef.current.get(itemId)?.desiredPriority === priority) {
+              setUpdateError(error instanceof Error ? error.message : "Work item could not be updated.");
+            }
+          },
+          onSuccess: () => {
+            const pendingUpdate = pendingPriorityUpdatesRef.current.get(itemId);
+            if (pendingUpdate) {
+              pendingUpdate.confirmedPriority = priority;
+            }
+          },
+          onSettled: () => {
+            const pendingUpdate = pendingPriorityUpdatesRef.current.get(itemId);
+            if (!pendingUpdate) return;
+
+            if (pendingUpdate.desiredPriority !== priority) {
+              submitPriorityUpdateRef.current(itemId, pendingUpdate.desiredPriority);
+              return;
+            }
+
+            pendingPriorityUpdatesRef.current.delete(itemId);
+            if (pendingUpdate.confirmedPriority !== priority) {
+              applyOptimisticPriority(itemId, pendingUpdate.confirmedPriority ?? pendingUpdate.initialPriority);
+            }
+            const hasPendingReorder =
+              queryClient.isMutating({ mutationKey: PROJECT_MUTATION_KEYS.workItems.reorder(projectId) }) > 0;
+            if (pendingPriorityUpdatesRef.current.size === 0 && !hasPendingReorder) {
+              void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(projectId) });
+            }
           },
         },
       );
     },
-    [isUpdating, projectId, queryClient, updateWorkItem],
+    [applyOptimisticPriority, projectId, queryClient, updateWorkItem],
   );
 
+  useEffect(() => {
+    submitPriorityUpdateRef.current = submitPriorityUpdate;
+  }, [submitPriorityUpdate]);
+
   const handlePriorityUpdate = useCallback(
-    (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => handleUpdate(item, { priority }),
-    [handleUpdate],
+    (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => {
+      if (item.priority === priority) {
+        return;
+      }
+
+      setUpdateError(null);
+      applyOptimisticPriority(item.itemId, priority);
+
+      const pendingUpdate = pendingPriorityUpdatesRef.current.get(item.itemId);
+      if (pendingUpdate) {
+        pendingUpdate.desiredPriority = priority;
+        return;
+      }
+
+      pendingPriorityUpdatesRef.current.set(item.itemId, {
+        initialPriority: item.priority,
+        desiredPriority: priority,
+        confirmedPriority: null,
+      });
+      submitPriorityUpdate(item.itemId, priority);
+    },
+    [applyOptimisticPriority, submitPriorityUpdate],
   );
 
   const handleItemsReorder = useCallback(
     (items: ProjectWorkItem[]) => {
-      if (isUpdating) {
-        return;
-      }
-
       const previousItems = getTopLevelProjectWorkItems(data?.items ?? []);
       const previousById = new Map(previousItems.map(item => [item.itemId, item]));
       const changedItems = items.filter(item => {
@@ -124,19 +165,7 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
         },
       );
     },
-    [data?.items, isUpdating, projectId, queryClient, reorderWorkItems],
-  );
-
-  const handleStatusUpdate = useCallback(
-    (item: ProjectWorkItem, status: ProjectWorkItemStatus) => {
-      if (item.status === status || isUpdating) {
-        return;
-      }
-
-      const items = getTopLevelProjectWorkItems(data?.items ?? []);
-      handleItemsReorder(reorderTopLevelProjectWorkItems(items, item.itemId, { status }));
-    },
-    [data?.items, handleItemsReorder, isUpdating],
+    [data?.items, projectId, queryClient, reorderWorkItems],
   );
 
   const handleRetry = useCallback(() => {
@@ -156,9 +185,7 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
         projectSlug={projectSlug}
         workItems={data ?? { items: [], total: 0, limit: 50, offset: 0 }}
         isError={isError}
-        isUpdating={isUpdating}
         updateError={updateError}
-        onStatusUpdate={handleStatusUpdate}
         onPriorityUpdate={handlePriorityUpdate}
         onItemsReorder={handleItemsReorder}
         onRetry={handleRetry}

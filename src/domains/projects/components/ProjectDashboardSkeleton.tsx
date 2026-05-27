@@ -30,7 +30,8 @@ export function ProjectDashboardSkeleton() {
                   <Skeleton className="h-5 w-36 bg-prism-navy/5" />
                   <Skeleton className="mt-2 h-4 w-full bg-prism-navy/5" />
                   <Skeleton className="mt-2 h-4 w-8/12 bg-prism-navy/5" />
-                  <Skeleton className="mt-4 h-7 w-20 rounded-full bg-prism-navy/5" />
+                  <Skeleton className="mt-4 h-4 w-32 bg-prism-navy/5" />
+                  <Skeleton className="mt-3 h-7 w-20 rounded-full bg-prism-navy/5" />
                 </div>
               ))}
             </div>

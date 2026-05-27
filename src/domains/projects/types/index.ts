@@ -74,6 +74,7 @@ export interface CreateProjectWorkItemPayload {
   startDate?: string | null;
   dueDate?: string | null;
   priority?: ProjectWorkItemPriority;
+  status?: ProjectWorkItemStatus;
   assigneeUsernames?: string[];
   labelNames?: string[];
 }

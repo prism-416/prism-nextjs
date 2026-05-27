@@ -13,10 +13,16 @@ type UpdateProjectWorkItemVariables = {
   payload: UpdateProjectWorkItemPayload;
 };
 
-export function useUpdateProjectWorkItem() {
+type UseUpdateProjectWorkItemOptions = {
+  mutationKey?: readonly unknown[];
+  syncResult?: boolean;
+};
+
+export function useUpdateProjectWorkItem({ mutationKey, syncResult = true }: UseUpdateProjectWorkItemOptions = {}) {
   const queryClient = useQueryClient();
 
   return useApiMutation<ProjectWorkItem, Error, UpdateProjectWorkItemVariables>({
+    mutationKey,
     mutationFn: async ({ projectId, itemId, payload }) => {
       const workItem = await updateProjectWorkItem(projectId, itemId, payload);
 
@@ -27,7 +33,9 @@ export function useUpdateProjectWorkItem() {
       return workItem;
     },
     onSuccess: workItem => {
-      syncProjectWorkItemUpdated(queryClient, workItem);
+      if (syncResult) {
+        syncProjectWorkItemUpdated(queryClient, workItem);
+      }
     },
   });
 }

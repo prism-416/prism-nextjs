@@ -6,13 +6,11 @@ import { Plus } from "lucide-react";
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
+import { DatePicker } from "@/atomics/molecules/DatePicker";
+import { ProjectWorkItemPrioritySelector } from "@/domains/projects/components/ProjectWorkItemPrioritySelector";
+import { ProjectWorkItemStatusSelector } from "@/domains/projects/components/ProjectWorkItemStatusSelector";
 import { useCreateProjectWorkItem } from "@/domains/projects/hooks/useCreateProjectWorkItem";
-import type { ProjectWorkItemPriority } from "@/domains/projects/types";
-import {
-  getProjectWorkItemPriorityLabel,
-  PROJECT_WORK_ITEM_PRIORITIES,
-} from "@/domains/projects/utils/work-item-display";
-import { cn } from "@/shared/utils/cn";
+import type { ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 
 type CreateProjectWorkItemFormProps = {
   projectId: string;
@@ -30,6 +28,7 @@ function getInitialFormState() {
     startDate: "",
     dueDate: "",
     priority: "medium" as ProjectWorkItemPriority,
+    status: "todo" as ProjectWorkItemStatus,
   };
 }
 
@@ -77,6 +76,7 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
           startDate: form.startDate || null,
           dueDate: form.dueDate || null,
           priority: form.priority,
+          status: form.status,
         },
       });
       resetForm();
@@ -110,34 +110,6 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
             className="h-10 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor={`${formId}-work-item-priority`}
-            className="text-xs font-medium text-prism-muted"
-          >
-            Priority
-          </label>
-          <select
-            id={`${formId}-work-item-priority`}
-            value={form.priority}
-            onChange={event => updateForm("priority", event.target.value as ProjectWorkItemPriority)}
-            disabled={isPending}
-            className={cn(
-              "h-10 w-full rounded-lg border border-border bg-surface-field px-3 text-sm text-prism-body",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-            )}
-          >
-            {PROJECT_WORK_ITEM_PRIORITIES.map(priority => (
-              <option
-                key={priority}
-                value={priority}
-              >
-                {getProjectWorkItemPriorityLabel(priority)}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       <div className="mt-4 space-y-2">
@@ -161,18 +133,47 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <label
+            htmlFor={`${formId}-work-item-status`}
+            className="text-xs font-medium text-prism-muted"
+          >
+            Status
+          </label>
+          <ProjectWorkItemStatusSelector
+            id={`${formId}-work-item-status`}
+            value={form.status}
+            disabled={isPending}
+            onChange={status => updateForm("status", status)}
+          />
+        </div>
+        <div className="space-y-2">
+          <label
+            htmlFor={`${formId}-work-item-priority`}
+            className="text-xs font-medium text-prism-muted"
+          >
+            Priority
+          </label>
+          <ProjectWorkItemPrioritySelector
+            id={`${formId}-work-item-priority`}
+            value={form.priority}
+            disabled={isPending}
+            onChange={priority => updateForm("priority", priority)}
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label
             htmlFor={`${formId}-work-item-start-date`}
             className="text-xs font-medium text-prism-muted"
           >
             Start date
           </label>
-          <Input
+          <DatePicker
             id={`${formId}-work-item-start-date`}
-            type="date"
             value={form.startDate}
-            onChange={event => updateForm("startDate", event.target.value)}
+            onChange={value => updateForm("startDate", value)}
             disabled={isPending}
-            className="h-10 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
         <div className="space-y-2">
@@ -182,14 +183,12 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
           >
             Due date
           </label>
-          <Input
+          <DatePicker
             id={`${formId}-work-item-due-date`}
-            type="date"
             value={form.dueDate}
-            onChange={event => updateForm("dueDate", event.target.value)}
+            onChange={value => updateForm("dueDate", value)}
             min={form.startDate || undefined}
             disabled={isPending}
-            className="h-10 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
       </div>
