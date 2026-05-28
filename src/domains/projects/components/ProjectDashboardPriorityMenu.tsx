@@ -24,6 +24,8 @@ type ProjectDashboardPriorityMenuProps = {
 const TRIGGER_CLASS_NAME =
   "gap-1.5 cursor-pointer transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60";
 
+const COMPACT_OPTION_CLASS_NAME = "h-6 px-2";
+
 export function ProjectDashboardPriorityMenu({ item, disabled, onPriorityUpdate }: ProjectDashboardPriorityMenuProps) {
   return (
     <DropdownMenu>
@@ -48,15 +50,15 @@ export function ProjectDashboardPriorityMenu({ item, disabled, onPriorityUpdate 
         {PROJECT_WORK_ITEM_PRIORITIES.map(priority => (
           <DropdownMenuItem
             key={priority}
-            className="justify-between gap-2 px-2 py-1.5"
+            className="justify-between gap-2 px-2 py-1"
             onSelect={() => {
               if (priority !== item.priority) onPriorityUpdate(item, priority);
             }}
           >
-            <span className={getProjectWorkItemPriorityBadgeClassName(priority)}>
+            <span className={getProjectWorkItemPriorityBadgeClassName(priority, COMPACT_OPTION_CLASS_NAME)}>
               {getProjectWorkItemPriorityLabel(priority)}
             </span>
-            {priority === item.priority && <Check className="size-4 text-prism-muted" />}
+            {priority === item.priority && <Check className="size-3.5 text-prism-muted" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

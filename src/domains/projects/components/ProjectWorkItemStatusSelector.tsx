@@ -62,16 +62,16 @@ export function ProjectWorkItemStatusSelector({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-40 p-1"
+        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-40 py-1"
       >
         {PROJECT_WORK_ITEM_STATUSES.map(status => (
           <DropdownMenuItem
             key={status}
-            className="justify-between rounded-lg px-3 py-2"
+            className="justify-between gap-2 px-2 py-1"
             onSelect={() => onChange(status)}
           >
             <StatusLabel status={status} />
-            {status === value && <Check className="size-4 text-prism-muted" />}
+            {status === value && <Check className="size-3.5 text-prism-muted" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
