@@ -165,3 +165,5 @@ export interface WorkspaceInvitationPreview {
   status: WorkspaceInvitationStatus;
   requiresSignup: boolean;
 }
+
+export * from "./notification";

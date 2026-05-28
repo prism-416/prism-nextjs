@@ -1,13 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { CircleCheck, EllipsisVertical } from "lucide-react";
+import { CircleCheck } from "lucide-react";
 
 import { Badge } from "@/atomics/atoms/Badge";
 import { Typography } from "@/atomics/atoms/Typography";
+import { ProjectWorkItemCommentActionMenu } from "@/domains/projects/components/ProjectWorkItemCommentActionMenu";
 import { ProjectWorkItemCommentAvatar } from "@/domains/projects/components/ProjectWorkItemCommentAvatar";
 import { ProjectWorkItemCommentEditForm } from "@/domains/projects/components/ProjectWorkItemCommentEditForm";
+import { useDeleteProjectWorkItemComment } from "@/domains/projects/hooks/useDeleteProjectWorkItemComment";
 import type { ProjectParticipant, ProjectWorkItemComment } from "@/domains/projects/types";
+import { renderCommentBodyWithMentions } from "@/domains/projects/utils/mentions";
 import type { CurrentUser } from "@/shared/types/auth";
 import {
   formatCommentDate,
@@ -22,6 +25,7 @@ type ProjectWorkItemCommentRowProps = {
   comment: ProjectWorkItemComment;
   currentUser?: CurrentUser;
   memberByUserId: Map<string, ProjectParticipant>;
+  members: ProjectParticipant[];
   isConsecutive: boolean;
 };
 
@@ -31,22 +35,21 @@ export function ProjectWorkItemCommentRow({
   comment,
   currentUser,
   memberByUserId,
+  members,
   isConsecutive,
 }: ProjectWorkItemCommentRowProps) {
   const [isEditing, setIsEditing] = React.useState(false);
+  const { mutate: deleteComment, isPending: isDeleting } = useDeleteProjectWorkItemComment();
 
   const displayName = getCommentAuthorDisplayName(comment, memberByUserId, currentUser);
   const isCurrentUser = currentUser?.userId === comment.authorUserId;
 
-  const editButton = isCurrentUser && !isEditing && (
-    <button
-      type="button"
-      onClick={() => setIsEditing(true)}
-      className="shrink-0 rounded-lg p-1 text-prism-muted transition-all hover:bg-prism-navy/8 hover:text-prism-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
-      aria-label="Edit comment"
-    >
-      <EllipsisVertical className="size-3.5" />
-    </button>
+  const actionMenu = isCurrentUser && !isEditing && (
+    <ProjectWorkItemCommentActionMenu
+      isDeleting={isDeleting}
+      onEdit={() => setIsEditing(true)}
+      onDelete={() => deleteComment({ projectId, itemId, commentId: comment.commentId })}
+    />
   );
 
   const editForm = (
@@ -54,6 +57,8 @@ export function ProjectWorkItemCommentRow({
       projectId={projectId}
       itemId={itemId}
       comment={comment}
+      members={members}
+      currentUserId={currentUser?.userId}
       onClose={() => setIsEditing(false)}
     />
   );
@@ -61,10 +66,10 @@ export function ProjectWorkItemCommentRow({
   const bodyContent = (
     <div className="flex items-start justify-between gap-2">
       <p className="min-w-0 flex-1 whitespace-pre-wrap break-words text-sm leading-6 text-prism-body">
-        {comment.body}
+        {renderCommentBodyWithMentions(comment.body)}
         {comment.updatedAt && !isEditing && <span className="ml-1 text-xs text-prism-muted/60">· Edited</span>}
       </p>
-      {editButton}
+      {actionMenu}
     </div>
   );
 

@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Link from "next/link";
 
 import { cn } from "@/shared/utils/cn";
-import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
+import { AppHeaderNotifications } from "@/domains/workspaces/components/AppHeaderNotifications";
 import { AppHeaderUserMenu } from "@/domains/workspaces/components/AppHeaderUserMenu";
 import { WorkspacePath } from "@/domains/workspaces/components/WorkspacePath";
 import type { WorkspacePathSegment } from "@/domains/workspaces/types/path";
@@ -53,13 +53,7 @@ export function AppHeader({ pathSegments, actions, className }: AppHeaderProps) 
 
       <div className="flex shrink-0 items-center gap-2">
         {actions}
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Notifications"
-        >
-          <Bell />
-        </Button>
+        <AppHeaderNotifications />
         <AppHeaderUserMenu />
       </div>
     </header>

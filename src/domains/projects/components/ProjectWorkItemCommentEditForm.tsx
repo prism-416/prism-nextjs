@@ -4,9 +4,9 @@ import * as React from "react";
 import { X } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
-import { Textarea } from "@/atomics/atoms/Textarea";
+import { ProjectCommentMentionTextarea } from "@/domains/projects/components/ProjectCommentMentionTextarea";
 import { useUpdateProjectWorkItemComment } from "@/domains/projects/hooks/useUpdateProjectWorkItemComment";
-import type { ProjectWorkItemComment } from "@/domains/projects/types";
+import type { ProjectParticipant, ProjectWorkItemComment } from "@/domains/projects/types";
 
 const COMMENT_BODY_MAX_LENGTH = 2000;
 
@@ -14,6 +14,8 @@ type ProjectWorkItemCommentEditFormProps = {
   projectId: string;
   itemId: string;
   comment: ProjectWorkItemComment;
+  members: ProjectParticipant[];
+  currentUserId?: string;
   onClose: () => void;
 };
 
@@ -21,6 +23,8 @@ export function ProjectWorkItemCommentEditForm({
   projectId,
   itemId,
   comment,
+  members,
+  currentUserId,
   onClose,
 }: ProjectWorkItemCommentEditFormProps) {
   const [editBody, setEditBody] = React.useState(comment.body);
@@ -64,10 +68,12 @@ export function ProjectWorkItemCommentEditForm({
       className="mt-1"
       onSubmit={handleSubmit}
     >
-      <Textarea
+      <ProjectCommentMentionTextarea
         value={editBody}
-        onChange={event => setEditBody(event.target.value)}
+        onValueChange={setEditBody}
         onKeyDown={handleKeyDown}
+        members={members}
+        currentUserId={currentUserId}
         maxLength={COMMENT_BODY_MAX_LENGTH}
         disabled={isUpdating}
         autoFocus

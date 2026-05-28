@@ -44,6 +44,9 @@ export const adapter = async (config: InternalAxiosRequestConfig & { isSsr: bool
   // Add query parameters
   if (config.params) {
     Object.entries(config.params).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        return;
+      }
       if (typeof value === "string") {
         // 노드 서버에서 value가 인코딩 되어있으면, 400 오류 발생으로 decode 처리
         url.searchParams.append(key, String(decodeURIComponent(value)));

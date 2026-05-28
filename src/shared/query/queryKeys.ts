@@ -22,6 +22,8 @@ export const QUERY_KEYS = {
     sprintWorkItems: (id: string, sprintId: string, filters?: object) =>
       [...QUERY_KEYS.workspace.sprintDetail(id, sprintId), "work-items", filters ?? {}] as const,
     invitation: (token: string) => ["workspace", "invitation", token] as const,
+    notifications: () => ["workspace", "notifications"] as const,
+    notificationList: (filters?: object) => [...QUERY_KEYS.workspace.notifications(), "list", filters ?? {}] as const,
   },
   project: {
     all: ["project"] as const,
