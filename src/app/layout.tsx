@@ -99,6 +99,7 @@ export default async function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={`${pretendard.variable}`}
+      data-scroll-behavior="smooth"
     >
       <body className="font-sans antialiased">
         <Provider initData={initData}>{children}</Provider>

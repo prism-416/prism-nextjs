@@ -44,6 +44,14 @@ export async function createProjectWorkItemComment(
   return response?.data;
 }
 
+export async function deleteProjectWorkItemComment(projectId: string, itemId: string, commentId: string) {
+  await commonAxios<null, ApiResponse<null>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}/comments/${encodeURIComponent(commentId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
 export async function updateProjectWorkItemComment(
   projectId: string,
   itemId: string,

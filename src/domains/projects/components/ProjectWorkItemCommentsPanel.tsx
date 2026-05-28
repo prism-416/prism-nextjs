@@ -4,8 +4,8 @@ import * as React from "react";
 import { RefreshCw, SendHorizontal } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
-import { Textarea } from "@/atomics/atoms/Textarea";
 import { Typography } from "@/atomics/atoms/Typography";
+import { ProjectCommentMentionTextarea } from "@/domains/projects/components/ProjectCommentMentionTextarea";
 import { ProjectWorkItemCommentAvatar } from "@/domains/projects/components/ProjectWorkItemCommentAvatar";
 import { ProjectWorkItemCommentRow } from "@/domains/projects/components/ProjectWorkItemCommentRow";
 import { useCreateProjectWorkItemComment } from "@/domains/projects/hooks/useCreateProjectWorkItemComment";
@@ -107,6 +107,7 @@ export function ProjectWorkItemCommentsPanel({
                 comment={comment}
                 currentUser={currentUser}
                 memberByUserId={memberByUserId}
+                members={initialMembers ?? []}
                 isConsecutive={isConsecutive}
               />
             </div>
@@ -140,11 +141,13 @@ export function ProjectWorkItemCommentsPanel({
         <div className="flex gap-2.5">
           <ProjectWorkItemCommentAvatar label={currentUserInitial} />
           <div className="min-w-0 flex-1">
-            <Textarea
+            <ProjectCommentMentionTextarea
               value={body}
-              onChange={event => setBody(event.target.value)}
+              onValueChange={setBody}
               onKeyDown={handleKeyDown}
-              placeholder="Write a comment... (Cmd+Enter to send)"
+              members={initialMembers ?? []}
+              currentUserId={currentUser?.userId}
+              placeholder="Write a comment... (@ mentions supported)"
               maxLength={COMMENT_BODY_MAX_LENGTH}
               disabled={isPending}
               className="min-h-24 resize-y rounded-xl border-border bg-surface-field px-4 py-3 text-sm text-prism-body placeholder:text-prism-muted focus-visible:ring-ring disabled:cursor-default"
