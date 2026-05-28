@@ -42,6 +42,8 @@ const STATUS_TRIGGER_CLASS_NAME = cn(
 const PRIORITY_TRIGGER_CLASS_NAME =
   "gap-1.5 cursor-pointer transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60";
 
+const COMPACT_PRIORITY_OPTION_CLASS_NAME = "h-6 px-2";
+
 function StatusContent({ status }: { status: ProjectWorkItemStatus }) {
   return (
     <span className="inline-flex items-center gap-2">
@@ -76,13 +78,13 @@ export function ProjectWorkItemInlineControls({
           {PROJECT_WORK_ITEM_STATUSES.map(status => (
             <DropdownMenuItem
               key={status}
-              className="justify-between gap-4"
+              className="justify-between gap-2 px-2 py-1"
               onSelect={() => {
                 if (status !== item.status) onStatusUpdate(item, status);
               }}
             >
               <StatusContent status={status} />
-              {status === item.status && <Check className="size-4 text-prism-muted" />}
+              {status === item.status && <Check className="size-3.5 text-prism-muted" />}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -106,15 +108,15 @@ export function ProjectWorkItemInlineControls({
           {PROJECT_WORK_ITEM_PRIORITIES.map(priority => (
             <DropdownMenuItem
               key={priority}
-              className="justify-between gap-4"
+              className="justify-between gap-2 px-2 py-1"
               onSelect={() => {
                 if (priority !== item.priority) onPriorityUpdate(item, priority);
               }}
             >
-              <span className={getProjectWorkItemPriorityBadgeClassName(priority)}>
+              <span className={getProjectWorkItemPriorityBadgeClassName(priority, COMPACT_PRIORITY_OPTION_CLASS_NAME)}>
                 {getProjectWorkItemPriorityLabel(priority)}
               </span>
-              {priority === item.priority && <Check className="size-4 text-prism-muted" />}
+              {priority === item.priority && <Check className="size-3.5 text-prism-muted" />}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

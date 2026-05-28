@@ -23,9 +23,19 @@ type ProjectWorkItemPrioritySelectorProps = {
   onChange: (priority: ProjectWorkItemPriority) => void;
 };
 
+const COMPACT_OPTION_CLASS_NAME = "h-6 px-2";
+
 function PriorityLabel({ priority }: { priority: ProjectWorkItemPriority }) {
   return (
     <span className={getProjectWorkItemPriorityBadgeClassName(priority)}>
+      {getProjectWorkItemPriorityLabel(priority)}
+    </span>
+  );
+}
+
+function CompactPriorityLabel({ priority }: { priority: ProjectWorkItemPriority }) {
+  return (
+    <span className={getProjectWorkItemPriorityBadgeClassName(priority, COMPACT_OPTION_CLASS_NAME)}>
       {getProjectWorkItemPriorityLabel(priority)}
     </span>
   );
@@ -57,16 +67,16 @@ export function ProjectWorkItemPrioritySelector({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-40 p-1"
+        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-40 py-1"
       >
         {PROJECT_WORK_ITEM_PRIORITIES.map(priority => (
           <DropdownMenuItem
             key={priority}
-            className="justify-between rounded-lg px-3 py-2"
+            className="justify-between gap-2 px-2 py-1"
             onSelect={() => onChange(priority)}
           >
-            <PriorityLabel priority={priority} />
-            {priority === value && <Check className="size-4 text-prism-muted" />}
+            <CompactPriorityLabel priority={priority} />
+            {priority === value && <Check className="size-3.5 text-prism-muted" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

@@ -19,6 +19,7 @@ import { CalendarDays, LayoutDashboard, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectDashboardPriorityMenu } from "@/domains/projects/components/ProjectDashboardPriorityMenu";
+import { ProjectDashboardStatusMenu } from "@/domains/projects/components/ProjectDashboardStatusMenu";
 import type {
   ProjectWorkItem,
   ProjectWorkItemPriority,
@@ -46,6 +47,7 @@ type ProjectDashboardPanelProps = {
   isError: boolean;
   updateError: string | null;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
+  onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onItemsReorder: (items: ProjectWorkItem[]) => void;
   onRetry: () => void;
   onCreateWorkItem: () => void;
@@ -62,12 +64,14 @@ type WorkItemCardContentProps = {
   item: ProjectWorkItem;
   isDragOverlay?: boolean;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
+  onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
 };
 
 const WorkItemCardContent = memo(function WorkItemCardContent({
   item,
   isDragOverlay = false,
   onPriorityUpdate,
+  onStatusUpdate,
 }: WorkItemCardContentProps) {
   const visibleLabels = item.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(item.labelNames.length - visibleLabels.length, 0);
@@ -100,7 +104,12 @@ const WorkItemCardContent = memo(function WorkItemCardContent({
         </p>
       )}
 
-      <div className="mt-3">
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <ProjectDashboardStatusMenu
+          item={item}
+          disabled={isDragOverlay}
+          onStatusUpdate={onStatusUpdate}
+        />
         <ProjectDashboardPriorityMenu
           item={item}
           disabled={isDragOverlay}
@@ -141,6 +150,7 @@ const SortableWorkItemCard = memo(function SortableWorkItemCard({
   projectSlug,
   item,
   onPriorityUpdate,
+  onStatusUpdate,
 }: Omit<WorkItemCardContentProps, "isDragOverlay"> & { projectSlug: string }) {
   const router = useRouter();
   const didDragRef = useRef(false);
@@ -213,6 +223,7 @@ const SortableWorkItemCard = memo(function SortableWorkItemCard({
       <WorkItemCardContent
         item={item}
         onPriorityUpdate={onPriorityUpdate}
+        onStatusUpdate={onStatusUpdate}
       />
     </article>
   );
@@ -223,11 +234,13 @@ const DroppableStatusColumn = memo(function DroppableStatusColumn({
   status,
   items,
   onPriorityUpdate,
+  onStatusUpdate,
 }: {
   projectSlug: string;
   status: ProjectWorkItemStatus;
   items: ProjectWorkItem[];
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
+  onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: getProjectWorkItemStatusDropId(status),
@@ -286,6 +299,7 @@ const DroppableStatusColumn = memo(function DroppableStatusColumn({
                 projectSlug={projectSlug}
                 item={item}
                 onPriorityUpdate={onPriorityUpdate}
+                onStatusUpdate={onStatusUpdate}
               />
             ))}
           </div>
@@ -301,6 +315,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
   isError,
   updateError,
   onPriorityUpdate,
+  onStatusUpdate,
   onItemsReorder,
   onRetry,
   onCreateWorkItem,
@@ -448,6 +463,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
                   status={status}
                   items={itemsByStatus[status]}
                   onPriorityUpdate={onPriorityUpdate}
+                  onStatusUpdate={onStatusUpdate}
                 />
               ))}
             </div>
@@ -462,6 +478,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
                     item={activeItem}
                     isDragOverlay
                     onPriorityUpdate={onPriorityUpdate}
+                    onStatusUpdate={onStatusUpdate}
                   />
                 </article>
               )}
