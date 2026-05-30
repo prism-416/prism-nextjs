@@ -4,12 +4,6 @@ export function getWorkspaceMemberDisplayName(member: Pick<WorkspaceMember, "ful
   return member.fullName || member.username;
 }
 
-export function getWorkspaceMemberInitial(member: Pick<WorkspaceMember, "fullName" | "username">) {
-  const displayName = getWorkspaceMemberDisplayName(member);
-
-  return displayName.trim().charAt(0).toUpperCase() || "U";
-}
-
 export function getWorkspaceMemberSortRank(member: Pick<WorkspaceMember, "role" | "userId">, ownerId: string) {
   if (member.userId === ownerId) {
     return 0;

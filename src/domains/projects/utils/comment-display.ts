@@ -22,6 +22,17 @@ export function formatCommentTime(value: string) {
   return `${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}`;
 }
 
+export function isSameCommentDay(a: string, b: string) {
+  const dateA = new Date(a);
+  const dateB = new Date(b);
+  if (Number.isNaN(dateA.getTime()) || Number.isNaN(dateB.getTime())) return false;
+  return (
+    dateA.getFullYear() === dateB.getFullYear() &&
+    dateA.getMonth() === dateB.getMonth() &&
+    dateA.getDate() === dateB.getDate()
+  );
+}
+
 export function getCommentAuthorDisplayName(
   comment: ProjectWorkItemComment,
   memberByUserId: Map<string, ProjectParticipant>,
@@ -32,8 +43,4 @@ export function getCommentAuthorDisplayName(
   }
   const member = memberByUserId.get(comment.authorUserId);
   return member?.fullName || member?.username || `Member ${comment.authorUserId.slice(0, 8)}`;
-}
-
-export function getCommentAuthorInitial(displayName: string) {
-  return (displayName.trim().at(0) || "U").toUpperCase();
 }

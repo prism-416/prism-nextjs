@@ -16,7 +16,10 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { CalendarDays, LayoutDashboard, Plus, RefreshCw } from "lucide-react";
 
+import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { Button } from "@/atomics/atoms/Button";
+import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
+import type { ProjectParticipant } from "@/domains/projects/types";
 import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectDashboardPriorityMenu } from "@/domains/projects/components/ProjectDashboardPriorityMenu";
 import { ProjectDashboardStatusMenu } from "@/domains/projects/components/ProjectDashboardStatusMenu";
@@ -44,6 +47,7 @@ import { cn } from "@/shared/utils/cn";
 type ProjectDashboardPanelProps = {
   projectSlug: string;
   workItems: ProjectWorkItemSearchResult;
+  members?: ProjectParticipant[];
   isError: boolean;
   updateError: string | null;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
@@ -62,6 +66,7 @@ const WORK_ITEM_STATUS_DOT_CLASS_NAMES: Partial<Record<ProjectWorkItemStatus, st
 
 type WorkItemCardContentProps = {
   item: ProjectWorkItem;
+  members?: ProjectParticipant[];
   isDragOverlay?: boolean;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
@@ -69,12 +74,14 @@ type WorkItemCardContentProps = {
 
 const WorkItemCardContent = memo(function WorkItemCardContent({
   item,
+  members = [],
   isDragOverlay = false,
   onPriorityUpdate,
   onStatusUpdate,
 }: WorkItemCardContentProps) {
   const visibleLabels = item.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(item.labelNames.length - visibleLabels.length, 0);
+  const assigneeUsers = resolveAssigneeAvatarUsers(item.assigneeUsernames, members);
 
   return (
     <>
@@ -119,14 +126,13 @@ const WorkItemCardContent = memo(function WorkItemCardContent({
 
       {(item.assigneeUsernames.length > 0 || item.labelNames.length > 0) && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {item.assigneeUsernames.map(username => (
-            <span
-              key={username}
-              className="inline-flex h-6 items-center rounded-full border border-border bg-surface-strong px-2 text-xs text-prism-muted"
-            >
-              @{username}
-            </span>
-          ))}
+          {/* stop propagation so dnd-kit doesn't capture pointer and eat the tooltip */}
+          <span onPointerDown={e => e.stopPropagation()}>
+            <UserAvatarStack
+              users={assigneeUsers}
+              avatarClassName="size-6 text-[10px]"
+            />
+          </span>
           {visibleLabels.map(label => (
             <span
               key={label}
@@ -149,6 +155,7 @@ const WorkItemCardContent = memo(function WorkItemCardContent({
 const SortableWorkItemCard = memo(function SortableWorkItemCard({
   projectSlug,
   item,
+  members,
   onPriorityUpdate,
   onStatusUpdate,
 }: Omit<WorkItemCardContentProps, "isDragOverlay"> & { projectSlug: string }) {
@@ -222,6 +229,7 @@ const SortableWorkItemCard = memo(function SortableWorkItemCard({
     >
       <WorkItemCardContent
         item={item}
+        members={members}
         onPriorityUpdate={onPriorityUpdate}
         onStatusUpdate={onStatusUpdate}
       />
@@ -233,12 +241,14 @@ const DroppableStatusColumn = memo(function DroppableStatusColumn({
   projectSlug,
   status,
   items,
+  members,
   onPriorityUpdate,
   onStatusUpdate,
 }: {
   projectSlug: string;
   status: ProjectWorkItemStatus;
   items: ProjectWorkItem[];
+  members?: ProjectParticipant[];
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
 }) {
@@ -298,6 +308,7 @@ const DroppableStatusColumn = memo(function DroppableStatusColumn({
                 key={item.itemId}
                 projectSlug={projectSlug}
                 item={item}
+                members={members}
                 onPriorityUpdate={onPriorityUpdate}
                 onStatusUpdate={onStatusUpdate}
               />
@@ -312,6 +323,7 @@ const DroppableStatusColumn = memo(function DroppableStatusColumn({
 export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
   projectSlug,
   workItems,
+  members,
   isError,
   updateError,
   onPriorityUpdate,
@@ -462,6 +474,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
                   projectSlug={projectSlug}
                   status={status}
                   items={itemsByStatus[status]}
+                  members={members}
                   onPriorityUpdate={onPriorityUpdate}
                   onStatusUpdate={onStatusUpdate}
                 />
@@ -476,6 +489,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
                 <article className="cursor-grabbing rounded-xl border border-prism-teal-500/40 bg-surface p-3 shadow-[0_24px_56px_rgba(12,71,103,0.24)] ring-1 ring-prism-teal-500/30">
                   <WorkItemCardContent
                     item={activeItem}
+                    members={members}
                     isDragOverlay
                     onPriorityUpdate={onPriorityUpdate}
                     onStatusUpdate={onStatusUpdate}

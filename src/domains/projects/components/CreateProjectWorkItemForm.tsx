@@ -7,13 +7,17 @@ import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { DatePicker } from "@/atomics/molecules/DatePicker";
+import { ProjectWorkItemAssigneeSelector } from "@/domains/projects/components/ProjectWorkItemAssigneeSelector";
 import { ProjectWorkItemPrioritySelector } from "@/domains/projects/components/ProjectWorkItemPrioritySelector";
 import { ProjectWorkItemStatusSelector } from "@/domains/projects/components/ProjectWorkItemStatusSelector";
 import { useCreateProjectWorkItem } from "@/domains/projects/hooks/useCreateProjectWorkItem";
-import type { ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
+import { useProjectParticipants } from "@/domains/projects/hooks/useProjectParticipants";
+import type { ProjectParticipant, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 
 type CreateProjectWorkItemFormProps = {
   projectId: string;
+  workspaceId?: string;
+  initialMembers?: ProjectParticipant[];
   parentId?: string;
   onCreated?: () => void;
 };
@@ -29,14 +33,22 @@ function getInitialFormState() {
     dueDate: "",
     priority: "medium" as ProjectWorkItemPriority,
     status: "todo" as ProjectWorkItemStatus,
+    assigneeUsernames: [] as string[],
   };
 }
 
-export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: CreateProjectWorkItemFormProps) {
+export function CreateProjectWorkItemForm({
+  projectId,
+  workspaceId,
+  initialMembers,
+  parentId,
+  onCreated,
+}: CreateProjectWorkItemFormProps) {
   const formId = React.useId();
   const [form, setForm] = React.useState(getInitialFormState);
   const [formError, setFormError] = React.useState<string | null>(null);
   const { mutateAsync: createWorkItem, isPending } = useCreateProjectWorkItem();
+  const { data: members = [] } = useProjectParticipants(workspaceId, initialMembers);
 
   const updateForm = React.useCallback(<TKey extends keyof typeof form>(key: TKey, value: (typeof form)[TKey]) => {
     setForm(previous => ({
@@ -77,6 +89,7 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
           dueDate: form.dueDate || null,
           priority: form.priority,
           status: form.status,
+          assigneeUsernames: form.assigneeUsernames,
         },
       });
       resetForm();
@@ -160,6 +173,24 @@ export function CreateProjectWorkItemForm({ projectId, parentId, onCreated }: Cr
           />
         </div>
       </div>
+
+      {workspaceId && (
+        <div className="mt-4 space-y-2">
+          <label
+            htmlFor={`${formId}-work-item-assignees`}
+            className="text-xs font-medium text-prism-muted"
+          >
+            Assignees
+          </label>
+          <ProjectWorkItemAssigneeSelector
+            id={`${formId}-work-item-assignees`}
+            members={members}
+            selectedUsernames={form.assigneeUsernames}
+            disabled={isPending}
+            onChange={usernames => updateForm("assigneeUsernames", usernames)}
+          />
+        </div>
+      )}
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">

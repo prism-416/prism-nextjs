@@ -3,12 +3,13 @@
 import { type ComponentType } from "react";
 import { AtSign, Fingerprint, KeyRound, Mail, UserRound } from "lucide-react";
 
+import { UserAvatar } from "@/atomics/atoms/Avatar";
 import { ProfileOAuthPasswordNotice } from "@/domains/profile/components/ProfileOAuthPasswordNotice";
 import { ProfilePasswordForm } from "@/domains/profile/components/ProfilePasswordForm";
 import { getCurrentUser } from "@/shared/api/auth";
 import { QUERY_KEYS, useApiQuery } from "@/shared/query";
 import type { CurrentUser } from "@/shared/types/auth";
-import { getCurrentUserDisplayName, getCurrentUserInitial } from "@/shared/utils/user-display";
+import { getCurrentUserDisplayName } from "@/shared/utils/user-display";
 import { ProfileSkeleton } from "@/domains/profile/components/ProfileSkeleton";
 
 type ProfileClientProps = {
@@ -47,14 +48,15 @@ export function ProfileClient({ initialData }: ProfileClientProps) {
   }
 
   const displayName = getCurrentUserDisplayName(user);
-  const initial = getCurrentUserInitial(user);
 
   return (
     <section className="mx-auto flex w-full max-w-4xl flex-col gap-5">
       <div className="flex flex-col gap-4 rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.05)] sm:flex-row sm:items-center">
-        <div className="grid size-20 shrink-0 place-items-center rounded-full bg-prism-navy text-2xl font-semibold text-primary-foreground">
-          {initial}
-        </div>
+        <UserAvatar
+          name={displayName}
+          seed={user.userId}
+          className="size-20 text-2xl text-primary-foreground"
+        />
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-2xl font-semibold text-prism-heading">{displayName}</h1>
           <p className="mt-1 truncate text-sm text-prism-muted">@{user.username}</p>

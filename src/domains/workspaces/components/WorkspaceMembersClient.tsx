@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { CircleCheck, Crown, UserPlus } from "lucide-react";
 
+import { UserAvatar } from "@/atomics/atoms/Avatar";
 import { Badge } from "@/atomics/atoms/Badge";
 import { Button } from "@/atomics/atoms/Button";
 import { ConfirmDialog } from "@/atomics/organisms/ConfirmDialog";
@@ -15,11 +16,7 @@ import { WorkspaceMembersSkeleton } from "@/domains/workspaces/components/Worksp
 import { useWorkspaceMemberManagement } from "@/domains/workspaces/hooks/useWorkspaceMemberManagement";
 import { useWorkspaceJobs } from "@/domains/workspaces/hooks/useWorkspaceJobs";
 import type { Workspace, WorkspaceJob, WorkspaceMember } from "@/domains/workspaces/types";
-import {
-  getWorkspaceMemberInitial,
-  getWorkspaceMemberDisplayName,
-  getWorkspaceMemberRoleBadgeClassName,
-} from "@/domains/workspaces/utils/member";
+import { getWorkspaceMemberDisplayName, getWorkspaceMemberRoleBadgeClassName } from "@/domains/workspaces/utils/member";
 import { cn } from "@/shared/utils/cn";
 
 type WorkspaceMembersClientProps = {
@@ -140,9 +137,11 @@ export function WorkspaceMembersClient({ workspace, initialData, initialJobs }: 
               >
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-full bg-prism-navy text-sm font-semibold text-primary-foreground">
-                      {getWorkspaceMemberInitial(member)}
-                    </span>
+                    <UserAvatar
+                      name={getWorkspaceMemberDisplayName(member)}
+                      seed={member.userId}
+                      className="size-10 text-sm text-primary-foreground"
+                    />
                     <div className="min-w-0">
                       <Typography
                         variant="title"

@@ -29,6 +29,8 @@ type DatePickerProps = {
   disabled?: boolean;
   onChange: (value: string) => void;
   placeholder?: string;
+  variant?: "field" | "pill";
+  label?: string;
 };
 
 const WEEKDAY_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -49,6 +51,8 @@ export function DatePicker({
   disabled = false,
   onChange,
   placeholder = "Select date",
+  variant = "field",
+  label,
 }: DatePickerProps) {
   const selectedDate = parseDateInputValue(value);
   const minimumDate = parseDateInputValue(min);
@@ -70,6 +74,12 @@ export function DatePicker({
 
   const isTodayDisabled = Boolean(minimumDate && isBefore(today, startOfDay(minimumDate)));
 
+  const pillText = selectedDate
+    ? label
+      ? `${label} ${format(selectedDate, "MMM d")}`
+      : format(selectedDate, "MMM d, yyyy")
+    : (label ?? placeholder);
+
   return (
     <Popover
       open={open}
@@ -82,22 +92,40 @@ export function DatePicker({
       }}
     >
       <PopoverTrigger asChild>
-        <button
-          id={id}
-          type="button"
-          disabled={disabled}
-          className={cn(
-            "flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-border bg-surface-field px-3",
-            "text-sm text-prism-body focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-          )}
-        >
-          <span className={cn("flex items-center gap-2", !selectedDate && "text-prism-muted")}>
-            <CalendarDays className="size-4 shrink-0 text-prism-muted" />
-            {selectedDate ? format(selectedDate, "MMM d, yyyy") : placeholder}
-          </span>
-          <ChevronDown className="size-3.5 shrink-0 text-prism-muted" />
-        </button>
+        {variant === "pill" ? (
+          <button
+            id={id}
+            type="button"
+            disabled={disabled}
+            className={cn(
+              "inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 text-xs font-medium",
+              "transition-colors hover:border-border-strong hover:bg-surface-strong",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "disabled:cursor-not-allowed disabled:opacity-60",
+              selectedDate ? "text-prism-body" : "text-prism-muted",
+            )}
+          >
+            <CalendarDays className="size-3.5 shrink-0 opacity-70" />
+            <span>{pillText}</span>
+          </button>
+        ) : (
+          <button
+            id={id}
+            type="button"
+            disabled={disabled}
+            className={cn(
+              "flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-border bg-surface-field px-3",
+              "text-sm text-prism-body focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+            )}
+          >
+            <span className={cn("flex items-center gap-2", !selectedDate && "text-prism-muted")}>
+              <CalendarDays className="size-4 shrink-0 text-prism-muted" />
+              {selectedDate ? format(selectedDate, "MMM d, yyyy") : placeholder}
+            </span>
+            <ChevronDown className="size-3.5 shrink-0 text-prism-muted" />
+          </button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-[16rem] p-2.5">
         <div className="mb-2 flex items-center justify-between gap-1">
@@ -133,13 +161,13 @@ export function DatePicker({
 
         {showMonthPicker ? (
           <div className="grid grid-cols-3 gap-1 py-1">
-            {MONTH_OPTIONS.map((label, month) => {
+            {MONTH_OPTIONS.map((monthLabel, month) => {
               const monthDate = new Date(visibleMonth.getFullYear(), month, 1);
               const isSelectedMonth = Boolean(selectedDate && isSameMonth(monthDate, selectedDate));
 
               return (
                 <button
-                  key={label}
+                  key={monthLabel}
                   type="button"
                   onClick={() => {
                     setVisibleMonth(monthDate);
@@ -151,7 +179,7 @@ export function DatePicker({
                     isSelectedMonth && "bg-prism-navy text-white hover:bg-prism-navy",
                   )}
                 >
-                  {label}
+                  {monthLabel}
                 </button>
               );
             })}
@@ -159,12 +187,12 @@ export function DatePicker({
         ) : (
           <>
             <div className="grid grid-cols-7">
-              {WEEKDAY_LABELS.map(label => (
+              {WEEKDAY_LABELS.map(weekdayLabel => (
                 <span
-                  key={label}
+                  key={weekdayLabel}
                   className="flex h-7 items-center justify-center text-[0.6875rem] font-medium text-prism-muted"
                 >
-                  {label}
+                  {weekdayLabel}
                 </span>
               ))}
             </div>

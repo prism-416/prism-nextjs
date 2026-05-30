@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { Button } from "@/atomics/atoms/Button";
+import { UserAvatar } from "@/atomics/atoms/Avatar";
 import { Skeleton } from "@/atomics/atoms/Skeleton";
 import {
   DropdownMenu,
@@ -17,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/atomics/molecules/DropdownMenu";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
-import { getCurrentUserDisplayName, getCurrentUserInitial } from "@/shared/utils/user-display";
+import { getCurrentUserDisplayName } from "@/shared/utils/user-display";
 
 export function AppHeaderUserMenu() {
   const router = useRouter();
@@ -48,7 +49,6 @@ export function AppHeaderUserMenu() {
   }
 
   const displayName = currentUser ? getCurrentUserDisplayName(currentUser) : "Account";
-  const initial = currentUser ? getCurrentUserInitial(currentUser) : "U";
 
   return (
     <DropdownMenu>
@@ -60,17 +60,21 @@ export function AppHeaderUserMenu() {
           aria-label={`${displayName} menu`}
           className="size-9 rounded-full p-0 hover:bg-prism-navy/5"
         >
-          <span className="grid size-9 place-items-center rounded-full bg-prism-navy text-sm font-semibold text-primary-foreground">
-            {initial}
-          </span>
+          <UserAvatar
+            name={displayName}
+            seed={currentUser?.userId}
+            className="size-9 text-sm text-primary-foreground"
+          />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="min-w-64">
         <div className="flex items-center gap-3 px-3 py-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-prism-navy text-sm font-semibold text-primary-foreground">
-            {initial}
-          </span>
+          <UserAvatar
+            name={displayName}
+            seed={currentUser?.userId}
+            className="size-10 text-sm text-primary-foreground"
+          />
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold text-prism-heading">{displayName}</div>
             {currentUser?.email ? <div className="truncate text-xs text-prism-muted">{currentUser.email}</div> : null}

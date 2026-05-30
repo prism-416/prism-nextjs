@@ -3,10 +3,10 @@
 import * as React from "react";
 import { CircleCheck } from "lucide-react";
 
+import { UserAvatar } from "@/atomics/atoms/Avatar";
 import { Badge } from "@/atomics/atoms/Badge";
 import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectWorkItemCommentActionMenu } from "@/domains/projects/components/ProjectWorkItemCommentActionMenu";
-import { ProjectWorkItemCommentAvatar } from "@/domains/projects/components/ProjectWorkItemCommentAvatar";
 import { ProjectWorkItemCommentEditForm } from "@/domains/projects/components/ProjectWorkItemCommentEditForm";
 import { useDeleteProjectWorkItemComment } from "@/domains/projects/hooks/useDeleteProjectWorkItemComment";
 import type { ProjectParticipant, ProjectWorkItemComment } from "@/domains/projects/types";
@@ -16,7 +16,6 @@ import {
   formatCommentDate,
   formatCommentTime,
   getCommentAuthorDisplayName,
-  getCommentAuthorInitial,
 } from "@/domains/projects/utils/comment-display";
 
 type ProjectWorkItemCommentRowProps = {
@@ -88,7 +87,11 @@ export function ProjectWorkItemCommentRow({
 
   return (
     <article className="flex gap-2.5">
-      <ProjectWorkItemCommentAvatar label={getCommentAuthorInitial(displayName)} />
+      <UserAvatar
+        name={displayName}
+        seed={comment.authorUserId}
+        className="size-9 text-sm"
+      />
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center gap-2">
           <Typography

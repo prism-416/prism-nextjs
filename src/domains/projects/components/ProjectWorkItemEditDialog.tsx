@@ -7,11 +7,8 @@ import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/atomics/molecules/Dialog";
-import { DatePicker } from "@/atomics/molecules/DatePicker";
-import { ProjectWorkItemPrioritySelector } from "@/domains/projects/components/ProjectWorkItemPrioritySelector";
-import { ProjectWorkItemStatusSelector } from "@/domains/projects/components/ProjectWorkItemStatusSelector";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
-import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
+import type { ProjectWorkItem } from "@/domains/projects/types";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
 
 type ProjectWorkItemEditDialogProps = {
@@ -28,10 +25,6 @@ function getInitialFormState(workItem: ProjectWorkItem) {
   return {
     title: workItem.title,
     description: workItem.description,
-    startDate: workItem.startDate ?? "",
-    dueDate: workItem.dueDate ?? "",
-    priority: workItem.priority,
-    status: workItem.status,
   };
 }
 
@@ -57,13 +50,7 @@ export function ProjectWorkItemEditDialog({ projectId, workItem, open, onOpenCha
 
   const trimmedTitle = form.title.trim();
   const trimmedDescription = form.description.trim();
-  const hasChanges =
-    trimmedTitle !== workItem.title ||
-    trimmedDescription !== workItem.description ||
-    (form.startDate || null) !== workItem.startDate ||
-    (form.dueDate || null) !== workItem.dueDate ||
-    form.priority !== workItem.priority ||
-    form.status !== workItem.status;
+  const hasChanges = trimmedTitle !== workItem.title || trimmedDescription !== workItem.description;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -78,11 +65,6 @@ export function ProjectWorkItemEditDialog({ projectId, workItem, open, onOpenCha
       return;
     }
 
-    if (form.startDate && form.dueDate && form.startDate > form.dueDate) {
-      setFormError("Due date must be on or after start date.");
-      return;
-    }
-
     try {
       await updateWorkItem({
         projectId,
@@ -90,10 +72,6 @@ export function ProjectWorkItemEditDialog({ projectId, workItem, open, onOpenCha
         payload: {
           title: trimmedTitle,
           description: trimmedDescription,
-          startDate: form.startDate || null,
-          dueDate: form.dueDate || null,
-          priority: form.priority,
-          status: form.status,
         },
       });
       onOpenChange(false);
@@ -123,7 +101,7 @@ export function ProjectWorkItemEditDialog({ projectId, workItem, open, onOpenCha
             </span>
             <DialogHeader className="gap-0.5">
               <DialogTitle>Edit work item</DialogTitle>
-              <DialogDescription>Refine the details and workflow state.</DialogDescription>
+              <DialogDescription>Refine the title and description.</DialogDescription>
             </DialogHeader>
           </div>
         </div>
@@ -169,69 +147,6 @@ export function ProjectWorkItemEditDialog({ projectId, workItem, open, onOpenCha
               disabled={isPending}
               className="min-h-20 rounded-lg border-border bg-surface-field focus-visible:ring-2 focus-visible:ring-ring"
             />
-          </div>
-
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label
-                htmlFor={`${formId}-work-item-status`}
-                className="text-xs font-medium text-prism-muted"
-              >
-                Status
-              </label>
-              <ProjectWorkItemStatusSelector
-                id={`${formId}-work-item-status`}
-                value={form.status}
-                disabled={isPending}
-                onChange={status => updateForm("status", status as ProjectWorkItemStatus)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor={`${formId}-work-item-priority`}
-                className="text-xs font-medium text-prism-muted"
-              >
-                Priority
-              </label>
-              <ProjectWorkItemPrioritySelector
-                id={`${formId}-work-item-priority`}
-                value={form.priority}
-                disabled={isPending}
-                onChange={priority => updateForm("priority", priority as ProjectWorkItemPriority)}
-              />
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label
-                htmlFor={`${formId}-work-item-start-date`}
-                className="text-xs font-medium text-prism-muted"
-              >
-                Start date
-              </label>
-              <DatePicker
-                id={`${formId}-work-item-start-date`}
-                value={form.startDate}
-                onChange={value => updateForm("startDate", value)}
-                disabled={isPending}
-              />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor={`${formId}-work-item-due-date`}
-                className="text-xs font-medium text-prism-muted"
-              >
-                Due date
-              </label>
-              <DatePicker
-                id={`${formId}-work-item-due-date`}
-                value={form.dueDate}
-                onChange={value => updateForm("dueDate", value)}
-                min={form.startDate || undefined}
-                disabled={isPending}
-              />
-            </div>
           </div>
 
           {formError && (

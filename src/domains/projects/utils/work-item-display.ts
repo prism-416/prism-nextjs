@@ -48,7 +48,7 @@ export function formatProjectDate(value: string) {
     return "Invalid date";
   }
 
-  return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
+  return `${MONTH_LABELS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
 export function formatProjectDateTime(value: string) {
@@ -79,7 +79,7 @@ function formatProjectCompactDate(value: string) {
     return "Invalid date";
   }
 
-  return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}`;
+  return `${MONTH_LABELS[date.getMonth()]} ${date.getDate()}`;
 }
 
 export function formatProjectScheduleSummary(startDate: string | null, dueDate: string | null) {
