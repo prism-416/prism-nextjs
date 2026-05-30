@@ -19,9 +19,13 @@ export default async function ProjectMyTasksPage({ params }: ProjectMyTasksPageP
       slug={slug}
       section={{ name: "My tasks" }}
     >
-      {({ projectId }) => (
+      {({ projectId, projectSlug, workspaceId }) => (
         <Suspense fallback={<ProjectMyTasksSkeleton />}>
-          <ProjectMyTasksContent projectId={projectId} />
+          <ProjectMyTasksContent
+            projectId={projectId}
+            projectSlug={projectSlug}
+            workspaceId={workspaceId}
+          />
         </Suspense>
       )}
     </ProjectPageShell>

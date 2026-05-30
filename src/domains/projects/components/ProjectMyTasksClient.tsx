@@ -10,15 +10,28 @@ import {
 import { ProjectMyTasksSkeleton } from "@/domains/projects/components/ProjectMyTasksSkeleton";
 import { useProjectMyTasks } from "@/domains/projects/hooks/useProjectMyTasks";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
-import type { ProjectWorkItem, ProjectWorkItemSearchResult, ProjectWorkItemStatus } from "@/domains/projects/types";
+import type {
+  ProjectParticipant,
+  ProjectWorkItem,
+  ProjectWorkItemSearchResult,
+  ProjectWorkItemStatus,
+} from "@/domains/projects/types";
 
 type ProjectMyTasksClientProps = {
   projectId: string;
+  projectSlug: string;
   assigneeUsername?: string;
   initialData?: ProjectWorkItemSearchResult;
+  initialMembers?: ProjectParticipant[];
 };
 
-export function ProjectMyTasksClient({ projectId, assigneeUsername, initialData }: ProjectMyTasksClientProps) {
+export function ProjectMyTasksClient({
+  projectId,
+  projectSlug,
+  assigneeUsername,
+  initialData,
+  initialMembers,
+}: ProjectMyTasksClientProps) {
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<ProjectMyTasksStatusFilter>("all");
   const [priority, setPriority] = React.useState<ProjectMyTasksPriorityFilter>("all");
@@ -39,7 +52,7 @@ export function ProjectMyTasksClient({ projectId, assigneeUsername, initialData 
     filters,
     hasActiveFilters ? undefined : initialData,
   );
-  const { mutateAsync: updateWorkItem, isPending: isUpdatingWorkItem } = useUpdateProjectWorkItem();
+  const { mutateAsync: updateWorkItem } = useUpdateProjectWorkItem();
   const tasks = data?.items ?? [];
 
   const handleStatusUpdate = React.useCallback(
@@ -76,12 +89,13 @@ export function ProjectMyTasksClient({ projectId, assigneeUsername, initialData 
     <ProjectMyTasksPanel
       tasks={tasks}
       total={data?.total ?? 0}
+      projectSlug={projectSlug}
+      members={initialMembers}
       assigneeUsername={assigneeUsername}
       query={query}
       status={status}
       priority={priority}
       isError={isError}
-      isUpdatingStatus={isUpdatingWorkItem}
       updatingTaskId={updatingTaskId}
       statusUpdateError={statusUpdateError}
       onQueryChange={setQuery}

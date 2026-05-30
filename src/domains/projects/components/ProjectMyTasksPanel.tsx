@@ -1,13 +1,21 @@
 import { ListTodo, LoaderCircle, RefreshCw, RotateCcw, Search } from "lucide-react";
-import type * as React from "react";
+import * as React from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Typography } from "@/atomics/atoms/Typography";
+import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
-import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
+import type {
+  ProjectParticipant,
+  ProjectWorkItem,
+  ProjectWorkItemPriority,
+  ProjectWorkItemStatus,
+} from "@/domains/projects/types";
+import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import {
-  formatProjectScheduleDate,
+  formatProjectScheduleSummary,
   getProjectWorkItemPriorityLabel,
   getProjectWorkItemStatusLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
@@ -22,12 +30,13 @@ export type ProjectMyTasksPriorityFilter = ProjectWorkItemPriority | "all";
 type ProjectMyTasksPanelProps = {
   tasks: ProjectWorkItem[];
   total: number;
+  projectSlug: string;
+  members?: ProjectParticipant[];
   assigneeUsername?: string;
   query: string;
   status: ProjectMyTasksStatusFilter;
   priority: ProjectMyTasksPriorityFilter;
   isError: boolean;
-  isUpdatingStatus: boolean;
   updatingTaskId: string | null;
   statusUpdateError: string | null;
   onQueryChange: (value: string) => void;
@@ -75,17 +84,30 @@ function FilterButton({
 
 type TaskRowProps = {
   task: ProjectWorkItem;
+  projectSlug: string;
+  members: ProjectParticipant[];
   isUpdating: boolean;
-  isStatusUpdateDisabled: boolean;
   onStatusUpdate: (task: ProjectWorkItem, value: ProjectWorkItemStatus) => void;
 };
 
-function TaskRow({ task, isUpdating, isStatusUpdateDisabled, onStatusUpdate }: TaskRowProps) {
+function TaskRow({ task, projectSlug, members, isUpdating, onStatusUpdate }: TaskRowProps) {
+  const router = useRouter();
   const visibleLabels = task.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(task.labelNames.length - visibleLabels.length, 0);
+  const assigneeUsers = resolveAssigneeAvatarUsers(task.assigneeUsernames, members);
+  const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(task.itemId)}`;
+  const scheduleSummary = formatProjectScheduleSummary(task.startDate, task.dueDate);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest("button, a, select, input, textarea")) return;
+    router.push(detailHref);
+  };
 
   return (
-    <article className="grid gap-3 border-b border-border/70 px-4 py-4 last:border-b-0 md:grid-cols-[minmax(0,1fr)_8rem_8rem_8rem] md:items-center md:gap-4">
+    <article
+      className="grid cursor-pointer gap-3 border-b border-border/70 px-4 py-4 last:border-b-0 hover:bg-surface-strong/50 md:grid-cols-[minmax(0,1fr)_8rem_8rem_8rem] md:items-center md:gap-4"
+      onClick={handleClick}
+    >
       <div className="min-w-0">
         <Typography
           variant="bodySm"
@@ -103,16 +125,12 @@ function TaskRow({ task, isUpdating, isStatusUpdateDisabled, onStatusUpdate }: T
           {task.description || "No description."}
         </Typography>
 
-        {(task.assigneeUsernames.length > 0 || task.labelNames.length > 0) && (
+        {(assigneeUsers.length > 0 || task.labelNames.length > 0) && (
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            {task.assigneeUsernames.map(username => (
-              <span
-                key={username}
-                className="inline-flex h-6 items-center rounded-full border border-border bg-surface-strong px-2 text-xs text-prism-muted"
-              >
-                @{username}
-              </span>
-            ))}
+            <UserAvatarStack
+              users={assigneeUsers}
+              avatarClassName="size-6 text-[10px]"
+            />
             {visibleLabels.map(label => (
               <span
                 key={label}
@@ -143,7 +161,7 @@ function TaskRow({ task, isUpdating, isStatusUpdateDisabled, onStatusUpdate }: T
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
             )}
             aria-label={`Update ${task.title} status`}
-            disabled={isStatusUpdateDisabled}
+            disabled={isUpdating}
           >
             {PROJECT_WORK_ITEM_STATUSES.map(item => (
               <option
@@ -162,8 +180,8 @@ function TaskRow({ task, isUpdating, isStatusUpdateDisabled, onStatusUpdate }: T
         <ProjectWorkItemPriorityBadge priority={task.priority} />
       </div>
       <div className="text-sm text-prism-muted">
-        <span className="mb-1 block text-xs font-medium md:hidden">Due date</span>
-        {formatProjectScheduleDate(task.dueDate)}
+        <span className="mb-1 block text-xs font-medium md:hidden">Schedule</span>
+        {scheduleSummary || "—"}
       </div>
     </article>
   );
@@ -172,12 +190,13 @@ function TaskRow({ task, isUpdating, isStatusUpdateDisabled, onStatusUpdate }: T
 export function ProjectMyTasksPanel({
   tasks,
   total,
+  projectSlug,
+  members = [],
   assigneeUsername,
   query,
   status,
   priority,
   isError,
-  isUpdatingStatus,
   updatingTaskId,
   statusUpdateError,
   onQueryChange,
@@ -329,14 +348,15 @@ export function ProjectMyTasksPanel({
             <span>Task</span>
             <span>Status</span>
             <span>Priority</span>
-            <span>Due date</span>
+            <span>Schedule</span>
           </div>
           {tasks.map(task => (
             <TaskRow
               key={task.itemId}
               task={task}
+              projectSlug={projectSlug}
+              members={members}
               isUpdating={updatingTaskId === task.itemId}
-              isStatusUpdateDisabled={isUpdatingStatus}
               onStatusUpdate={onStatusUpdate}
             />
           ))}
