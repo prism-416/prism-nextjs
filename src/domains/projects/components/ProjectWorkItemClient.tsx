@@ -13,6 +13,7 @@ import { ProjectWorkItemSkeleton } from "@/domains/projects/components/ProjectWo
 import { useProjectWorkItemComments } from "@/domains/projects/hooks/useProjectWorkItemComments";
 import { useProjectWorkItem } from "@/domains/projects/hooks/useProjectWorkItem";
 import { useProjectWorkItemChildren } from "@/domains/projects/hooks/useProjectWorkItemChildren";
+import { useProjectParticipants } from "@/domains/projects/hooks/useProjectParticipants";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
 import type {
   ProjectParticipant,
@@ -68,6 +69,7 @@ export function ProjectWorkItemClient({
     isError: isCommentsError,
     refetch: refetchComments,
   } = useProjectWorkItemComments(projectId, itemId, undefined, initialComments);
+  const { data: members = [] } = useProjectParticipants(workItem?.workspaceId, initialMembers);
   const { mutate: updateWorkItem } = useUpdateProjectWorkItem({
     mutationKey: PROJECT_MUTATION_KEYS.workItems.update(projectId),
     syncResult: false,
@@ -113,6 +115,44 @@ export function ProjectWorkItemClient({
     [applyOptimisticPatch, projectId, updateWorkItem],
   );
 
+  const handleAssigneesUpdate = React.useCallback(
+    (item: ProjectWorkItem, usernames: string[]) => {
+      setUpdateError(null);
+      const previousUsernames = item.assigneeUsernames;
+      applyOptimisticPatch(item, { assigneeUsernames: usernames });
+
+      updateWorkItem(
+        { projectId, itemId: item.itemId, payload: { assigneeUsernames: usernames } },
+        {
+          onError: error => {
+            applyOptimisticPatch(item, { assigneeUsernames: previousUsernames });
+            setUpdateError(error instanceof Error ? error.message : "Work item could not be updated.");
+          },
+        },
+      );
+    },
+    [applyOptimisticPatch, projectId, updateWorkItem],
+  );
+
+  const handleScheduleUpdate = React.useCallback(
+    (item: ProjectWorkItem, patch: { startDate?: string | null; dueDate?: string | null }) => {
+      setUpdateError(null);
+      const previous = { startDate: item.startDate, dueDate: item.dueDate };
+      applyOptimisticPatch(item, patch);
+
+      updateWorkItem(
+        { projectId, itemId: item.itemId, payload: patch },
+        {
+          onError: error => {
+            applyOptimisticPatch(item, previous);
+            setUpdateError(error instanceof Error ? error.message : "Work item could not be updated.");
+          },
+        },
+      );
+    },
+    [applyOptimisticPatch, projectId, updateWorkItem],
+  );
+
   if (isWorkItemPending && !workItem) {
     return <ProjectWorkItemSkeleton />;
   }
@@ -141,6 +181,7 @@ export function ProjectWorkItemClient({
         workItem={workItem}
         childItems={childItems}
         comments={comments ?? { comments: [], total: 0, limit: 50, offset: 0 }}
+        members={members}
         initialMembers={initialMembers}
         initialCurrentUser={initialCurrentUser}
         isChildrenError={isChildrenError}
@@ -152,6 +193,8 @@ export function ProjectWorkItemClient({
         onPriorityUpdate={(item, priority) => {
           handleUpdate(item, { priority });
         }}
+        onAssigneesUpdate={handleAssigneesUpdate}
+        onScheduleUpdate={handleScheduleUpdate}
         onRetryChildren={() => {
           setUpdateError(null);
           void refetchChildren();
@@ -167,6 +210,8 @@ export function ProjectWorkItemClient({
       <CreateProjectWorkItemDialog
         open={isCreateChildOpen}
         projectId={projectId}
+        workspaceId={workItem.workspaceId}
+        initialMembers={initialMembers}
         parentId={workItem.itemId}
         title="Create child work item"
         description="Add a child under this work item."

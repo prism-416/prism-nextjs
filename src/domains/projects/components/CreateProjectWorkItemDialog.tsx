@@ -2,10 +2,13 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/atomics/molecules/Dialog";
 import { CreateProjectWorkItemForm } from "@/domains/projects/components/CreateProjectWorkItemForm";
+import type { ProjectParticipant } from "@/domains/projects/types";
 
 type CreateProjectWorkItemDialogProps = {
   open: boolean;
   projectId: string;
+  workspaceId?: string;
+  initialMembers?: ProjectParticipant[];
   parentId?: string;
   title?: string;
   description?: string;
@@ -15,6 +18,8 @@ type CreateProjectWorkItemDialogProps = {
 export function CreateProjectWorkItemDialog({
   open,
   projectId,
+  workspaceId,
+  initialMembers,
   parentId,
   title = "Create work item",
   description = "Set the priority and planning details.",
@@ -33,6 +38,8 @@ export function CreateProjectWorkItemDialog({
         <CreateProjectWorkItemForm
           key={open ? "open" : "closed"}
           projectId={projectId}
+          workspaceId={workspaceId}
+          initialMembers={initialMembers}
           parentId={parentId}
           onCreated={() => onOpenChange(false)}
         />

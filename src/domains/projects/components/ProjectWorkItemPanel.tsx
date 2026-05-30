@@ -1,9 +1,14 @@
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
+import { UserAvatarStack } from "@/atomics/atoms/Avatar";
+import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import { ProjectWorkItemActionsMenu } from "@/domains/projects/components/ProjectWorkItemActionsMenu";
+import { ProjectWorkItemAssigneeSelector } from "@/domains/projects/components/ProjectWorkItemAssigneeSelector";
+import { DatePicker } from "@/atomics/molecules/DatePicker";
 import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/ProjectWorkItemCommentsPanel";
 import { ProjectWorkItemInlineControls } from "@/domains/projects/components/ProjectWorkItemInlineControls";
 import type {
@@ -36,6 +41,7 @@ type ProjectWorkItemPanelProps = {
   workItem: ProjectWorkItem;
   childItems: ProjectWorkItem[];
   comments: ProjectWorkItemCommentSearchResult;
+  members: ProjectParticipant[];
   initialMembers?: ProjectParticipant[];
   initialCurrentUser?: CurrentUser;
   isChildrenError: boolean;
@@ -43,6 +49,8 @@ type ProjectWorkItemPanelProps = {
   updateError: string | null;
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
+  onAssigneesUpdate: (item: ProjectWorkItem, usernames: string[]) => void;
+  onScheduleUpdate: (item: ProjectWorkItem, patch: { startDate?: string | null; dueDate?: string | null }) => void;
   onRetryChildren: () => void;
   onRetryComments: () => void;
   onCreateChildWorkItem: () => void;
@@ -53,56 +61,70 @@ type ProjectWorkItemPanelProps = {
 function ChildWorkItemCard({
   projectSlug,
   item,
+  members,
   onStatusUpdate,
   onPriorityUpdate,
 }: {
   projectSlug: string;
   item: ProjectWorkItem;
+  members: ProjectParticipant[];
   onStatusUpdate: (item: ProjectWorkItem, status: ProjectWorkItemStatus) => void;
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
 }) {
+  const router = useRouter();
+  const assigneeUsers = resolveAssigneeAvatarUsers(item.assigneeUsernames, members);
   const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
 
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest("button, a, select, input, textarea")) return;
+    router.push(detailHref);
+  };
+
   return (
-    <article className="rounded-xl border border-border/80 bg-surface p-3 shadow-[0_1px_0_rgba(255,255,255,0.65)_inset]">
-      <Link
-        href={detailHref}
-        className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    <article
+      className="group/card cursor-pointer rounded-xl border border-border/80 bg-surface p-3 shadow-[0_1px_0_rgba(255,255,255,0.65)_inset] transition-[border-color,box-shadow] duration-100"
+      onClick={handleClick}
+    >
+      <Typography
+        variant="bodySm"
+        tone="primary"
+        weight="semibold"
+        className="line-clamp-2 group-hover/card:text-prism-navy"
       >
-        <Typography
-          variant="bodySm"
-          tone="primary"
-          weight="semibold"
-          className="line-clamp-2 hover:text-prism-navy"
-        >
-          {item.title}
-        </Typography>
-      </Link>
+        {item.title}
+      </Typography>
+
       <Typography
         variant="caption"
         tone="muted"
-        className={cn("mt-1 line-clamp-3", !item.description && "italic opacity-70")}
+        className={cn("mt-1.5 line-clamp-3", !item.description && "italic opacity-70")}
       >
         {item.description || "No description."}
       </Typography>
 
-      <p
-        className="mt-2 flex items-center gap-1.5 text-xs font-medium text-prism-muted"
-        aria-hidden={!formatScheduleRange(item.startDate, item.dueDate) || undefined}
-      >
-        <CalendarDays
-          className={cn("size-3.5 shrink-0", !formatScheduleRange(item.startDate, item.dueDate) && "invisible")}
-        />
-        <span className="text-prism-body">{formatScheduleRange(item.startDate, item.dueDate) ?? " "}</span>
-      </p>
+      {(item.startDate || item.dueDate) && (
+        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-prism-muted">
+          <CalendarDays className="size-3.5 shrink-0" />
+          <span>{formatScheduleRange(item.startDate, item.dueDate)}</span>
+        </p>
+      )}
 
-      <div className="mt-3">
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
         <ProjectWorkItemInlineControls
           item={item}
           onStatusUpdate={onStatusUpdate}
           onPriorityUpdate={onPriorityUpdate}
         />
       </div>
+
+      {assigneeUsers.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <UserAvatarStack
+            users={assigneeUsers}
+            avatarClassName="size-6 text-[10px]"
+          />
+        </div>
+      )}
     </article>
   );
 }
@@ -113,6 +135,7 @@ export function ProjectWorkItemPanel({
   workItem,
   childItems,
   comments,
+  members,
   initialMembers,
   initialCurrentUser,
   isChildrenError,
@@ -120,6 +143,8 @@ export function ProjectWorkItemPanel({
   updateError,
   onStatusUpdate,
   onPriorityUpdate,
+  onAssigneesUpdate,
+  onScheduleUpdate,
   onRetryChildren,
   onRetryComments,
   onCreateChildWorkItem,
@@ -171,17 +196,36 @@ export function ProjectWorkItemPanel({
         </div>
 
         <div className="mt-5 flex flex-col gap-3 border-t border-border/70 pt-4">
-          {formatScheduleRange(workItem.startDate, workItem.dueDate) && (
-            <p className="flex items-center gap-1.5 text-xs font-medium text-prism-muted">
-              <CalendarDays className="size-3.5 shrink-0" />
-              <span className="text-prism-body">{formatScheduleRange(workItem.startDate, workItem.dueDate)}</span>
-            </p>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <DatePicker
+              variant="pill"
+              label="Start"
+              value={workItem.startDate ?? ""}
+              onChange={value => onScheduleUpdate(workItem, { startDate: value || null })}
+            />
+            <DatePicker
+              variant="pill"
+              label="Due"
+              value={workItem.dueDate ?? ""}
+              min={workItem.startDate ?? undefined}
+              onChange={value => onScheduleUpdate(workItem, { dueDate: value || null })}
+            />
+          </div>
           <ProjectWorkItemInlineControls
             item={workItem}
             onStatusUpdate={onStatusUpdate}
             onPriorityUpdate={onPriorityUpdate}
           />
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-prism-muted">Assignees</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <ProjectWorkItemAssigneeSelector
+                members={members}
+                selectedUsernames={workItem.assigneeUsernames}
+                onChange={usernames => onAssigneesUpdate(workItem, usernames)}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -251,6 +295,7 @@ export function ProjectWorkItemPanel({
                 key={item.itemId}
                 projectSlug={projectSlug}
                 item={item}
+                members={members}
                 onStatusUpdate={onStatusUpdate}
                 onPriorityUpdate={onPriorityUpdate}
               />

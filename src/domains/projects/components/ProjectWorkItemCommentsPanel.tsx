@@ -3,16 +3,17 @@
 import * as React from "react";
 import { RefreshCw, SendHorizontal } from "lucide-react";
 
+import { UserAvatar } from "@/atomics/atoms/Avatar";
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectCommentMentionTextarea } from "@/domains/projects/components/ProjectCommentMentionTextarea";
-import { ProjectWorkItemCommentAvatar } from "@/domains/projects/components/ProjectWorkItemCommentAvatar";
 import { ProjectWorkItemCommentRow } from "@/domains/projects/components/ProjectWorkItemCommentRow";
 import { useCreateProjectWorkItemComment } from "@/domains/projects/hooks/useCreateProjectWorkItemComment";
 import type { ProjectParticipant, ProjectWorkItemCommentSearchResult } from "@/domains/projects/types";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 import type { CurrentUser } from "@/shared/types/auth";
-import { getCurrentUserInitial } from "@/shared/utils/user-display";
+import { isSameCommentDay } from "@/domains/projects/utils/comment-display";
+import { getCurrentUserDisplayName } from "@/shared/utils/user-display";
 
 type ProjectWorkItemCommentsPanelProps = {
   projectId: string;
@@ -45,7 +46,7 @@ export function ProjectWorkItemCommentsPanel({
     () => new Map((initialMembers ?? []).map(member => [member.userId, member])),
     [initialMembers],
   );
-  const currentUserInitial = currentUser ? getCurrentUserInitial(currentUser) : "U";
+  const currentUserName = currentUser ? getCurrentUserDisplayName(currentUser) : "You";
   const trimmedBody = body.trim();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -94,7 +95,8 @@ export function ProjectWorkItemCommentsPanel({
       <div className="mt-5">
         {comments.comments.map((comment, index) => {
           const prev = comments.comments[index - 1];
-          const isConsecutive = !!prev && prev.authorUserId === comment.authorUserId;
+          const isConsecutive =
+            !!prev && prev.authorUserId === comment.authorUserId && isSameCommentDay(prev.createdAt, comment.createdAt);
 
           return (
             <div
@@ -139,7 +141,11 @@ export function ProjectWorkItemCommentsPanel({
         onSubmit={handleSubmit}
       >
         <div className="flex gap-2.5">
-          <ProjectWorkItemCommentAvatar label={currentUserInitial} />
+          <UserAvatar
+            name={currentUserName}
+            seed={currentUser?.userId}
+            className="size-9 text-sm"
+          />
           <div className="min-w-0 flex-1">
             <ProjectCommentMentionTextarea
               value={body}

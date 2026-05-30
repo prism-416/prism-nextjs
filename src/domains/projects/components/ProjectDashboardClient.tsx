@@ -12,6 +12,7 @@ import { useProjectWorkItems } from "@/domains/projects/hooks/useProjectWorkItem
 import { useReorderProjectWorkItems } from "@/domains/projects/hooks/useReorderProjectWorkItems";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
 import type {
+  ProjectParticipant,
   ProjectWorkItem,
   ProjectWorkItemPriority,
   ProjectWorkItemSearchResult,
@@ -24,6 +25,8 @@ import { QUERY_KEYS } from "@/shared/query";
 type ProjectDashboardClientProps = {
   projectId: string;
   projectSlug: string;
+  workspaceId?: string;
+  initialMembers?: ProjectParticipant[];
   initialData?: ProjectWorkItemSearchResult;
 };
 
@@ -39,7 +42,13 @@ type PendingStatusUpdate = {
   confirmedStatus: ProjectWorkItemStatus | null;
 };
 
-export function ProjectDashboardClient({ projectId, projectSlug, initialData }: ProjectDashboardClientProps) {
+export function ProjectDashboardClient({
+  projectId,
+  projectSlug,
+  workspaceId,
+  initialMembers,
+  initialData,
+}: ProjectDashboardClientProps) {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
@@ -283,6 +292,7 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
       <ProjectDashboardPanel
         projectSlug={projectSlug}
         workItems={data ?? { items: [], total: 0, limit: 50, offset: 0 }}
+        members={initialMembers}
         isError={isError}
         updateError={updateError}
         onPriorityUpdate={handlePriorityUpdate}
@@ -295,6 +305,8 @@ export function ProjectDashboardClient({ projectId, projectSlug, initialData }: 
       <CreateProjectWorkItemDialog
         open={isCreateOpen}
         projectId={projectId}
+        workspaceId={workspaceId}
+        initialMembers={initialMembers}
         onOpenChange={setIsCreateOpen}
       />
     </>

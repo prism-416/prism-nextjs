@@ -11,7 +11,7 @@ import {
   insertMention,
   renderLiveCommentBodyWithMentions,
 } from "@/domains/projects/utils/mentions";
-import { getCommentAuthorInitial } from "@/domains/projects/utils/comment-display";
+import { UserAvatar } from "@/atomics/atoms/Avatar";
 import { cn } from "@/shared/utils/cn";
 
 type ProjectCommentMentionTextareaProps = Omit<
@@ -189,9 +189,11 @@ export function ProjectCommentMentionTextarea({
                 selectCandidate(member);
               }}
             >
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-prism-info-soft text-xs font-semibold text-prism-info">
-                {getCommentAuthorInitial(member.fullName)}
-              </span>
+              <UserAvatar
+                name={member.fullName}
+                seed={member.userId}
+                className="size-8 text-xs"
+              />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium text-prism-heading">{member.fullName}</span>
                 <span className="block truncate text-xs text-prism-muted">@{member.username}</span>
