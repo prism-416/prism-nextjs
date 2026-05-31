@@ -44,6 +44,7 @@ export default async function WorkspaceSprintsPage({ params }: WorkspaceSprintsP
         <WorkspaceSprintsContent
           workspaceId={workspace.workspaceId}
           workspaceSlug={slug}
+          workspaceOwnerId={workspace.ownerId}
         />
       </Suspense>
     </WorkspaceShell>

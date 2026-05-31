@@ -6,10 +6,12 @@ import { WorkspaceSprintSkeleton } from "@/domains/sprints/components/WorkspaceS
 import { useWorkspaceSprint } from "@/domains/sprints/hooks/useWorkspaceSprint";
 import { useWorkspaceSprintWorkItems } from "@/domains/sprints/hooks/useWorkspaceSprintWorkItems";
 import type { Sprint, SprintWorkItemSearchResult } from "@/domains/sprints/types";
+import { useWorkspacePermissions } from "@/domains/workspaces/hooks/useWorkspacePermissions";
 
 type WorkspaceSprintClientProps = {
   workspaceId: string;
   workspaceSlug: string;
+  workspaceOwnerId: string;
   sprintId: string;
   projectSlugsById: Record<string, string>;
   projectNamesById: Record<string, string>;
@@ -20,12 +22,14 @@ type WorkspaceSprintClientProps = {
 export function WorkspaceSprintClient({
   workspaceId,
   workspaceSlug,
+  workspaceOwnerId,
   sprintId,
   projectSlugsById,
   projectNamesById,
   initialSprint,
   initialWorkItems,
 }: WorkspaceSprintClientProps) {
+  const { canManage } = useWorkspacePermissions({ workspaceId, ownerId: workspaceOwnerId });
   const { data: sprint, isPending, isError, refetch } = useWorkspaceSprint(workspaceId, sprintId, initialSprint);
   const {
     data: workItems,
@@ -59,6 +63,7 @@ export function WorkspaceSprintClient({
       workItems={workItems ?? { items: [], total: 0, limit: 50, offset: 0 }}
       projectSlugsById={projectSlugsById}
       projectNamesById={projectNamesById}
+      canManage={canManage}
       isWorkItemsError={isWorkItemsError}
       onRetryWorkItems={() => void refetchWorkItems()}
     />

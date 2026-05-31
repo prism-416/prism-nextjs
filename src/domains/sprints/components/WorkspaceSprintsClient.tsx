@@ -7,10 +7,12 @@ import { WorkspaceSprintsPanel } from "@/domains/sprints/components/WorkspaceSpr
 import { WorkspaceSprintsSkeleton } from "@/domains/sprints/components/WorkspaceSprintsSkeleton";
 import { useWorkspaceSprints } from "@/domains/sprints/hooks/useWorkspaceSprints";
 import type { Sprint } from "@/domains/sprints/types";
+import { useWorkspacePermissions } from "@/domains/workspaces/hooks/useWorkspacePermissions";
 
 type WorkspaceSprintsClientProps = {
   workspaceId: string;
   workspaceSlug: string;
+  workspaceOwnerId: string;
   initialData?: Sprint[];
   defaultStartsAt: string;
   defaultEndsAt: string;
@@ -19,12 +21,14 @@ type WorkspaceSprintsClientProps = {
 export function WorkspaceSprintsClient({
   workspaceId,
   workspaceSlug,
+  workspaceOwnerId,
   initialData,
   defaultStartsAt,
   defaultEndsAt,
 }: WorkspaceSprintsClientProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { data: sprints = [], isPending, isError, refetch } = useWorkspaceSprints(workspaceId, initialData);
+  const { canManage } = useWorkspacePermissions({ workspaceId, ownerId: workspaceOwnerId });
 
   if (isPending && sprints.length === 0) {
     return <WorkspaceSprintsSkeleton />;
@@ -36,25 +40,28 @@ export function WorkspaceSprintsClient({
         workspaceSlug={workspaceSlug}
         sprints={sprints}
         isError={isError}
+        canManage={canManage}
         onRetry={() => void refetch()}
         onCreateSprint={() => setIsCreateOpen(true)}
       />
-      <CreateWorkspaceSprintDialog
-        open={isCreateOpen}
-        workspaceId={workspaceId}
-        defaultStartsAt={defaultStartsAt}
-        defaultEndsAt={defaultEndsAt}
-        nextSprintNumber={
-          Math.max(
-            0,
-            ...sprints.map(s => {
-              const m = s.name.match(/^Sprint #(\d+)$/);
-              return m ? Number(m[1]) : 0;
-            }),
-          ) + 1
-        }
-        onOpenChange={setIsCreateOpen}
-      />
+      {canManage && (
+        <CreateWorkspaceSprintDialog
+          open={isCreateOpen}
+          workspaceId={workspaceId}
+          defaultStartsAt={defaultStartsAt}
+          defaultEndsAt={defaultEndsAt}
+          nextSprintNumber={
+            Math.max(
+              0,
+              ...sprints.map(s => {
+                const m = s.name.match(/^Sprint #(\d+)$/);
+                return m ? Number(m[1]) : 0;
+              }),
+            ) + 1
+          }
+          onOpenChange={setIsCreateOpen}
+        />
+      )}
     </>
   );
 }

@@ -4,7 +4,7 @@ import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMemb
 import type { Workspace } from "@/domains/workspaces/types";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
 
-export function useWorkspacePermissions(workspace: Workspace) {
+export function useWorkspacePermissions(workspace: Pick<Workspace, "workspaceId" | "ownerId">) {
   const { data: currentUser } = useCurrentUser();
   const { data: members } = useWorkspaceMembers(workspace.workspaceId);
   const currentMember = members?.find(member => member.userId === currentUser?.userId);
