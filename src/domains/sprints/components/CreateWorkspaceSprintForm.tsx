@@ -4,17 +4,15 @@ import * as React from "react";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
-import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
+import { DatePicker } from "@/atomics/molecules/DatePicker";
 import { useCreateWorkspaceSprint } from "@/domains/sprints/hooks/useCreateWorkspaceSprint";
-import type { SprintStatus } from "@/domains/sprints/types";
-import { getSprintStatusLabel, SPRINT_STATUSES } from "@/domains/sprints/utils/sprint";
-import { cn } from "@/shared/utils/cn";
 
 type CreateWorkspaceSprintFormProps = {
   workspaceId: string;
   defaultStartsAt: string;
   defaultEndsAt: string;
+  nextSprintNumber: number;
   onCreated: () => void;
 };
 
@@ -24,11 +22,9 @@ function toStartOfDayIsoDate(value: string) {
 
 function getInitialFormState(defaultStartsAt: string, defaultEndsAt: string) {
   return {
-    name: "",
     goal: "",
     startsAt: defaultStartsAt,
     endsAt: defaultEndsAt,
-    status: "planned" as SprintStatus,
   };
 }
 
@@ -36,6 +32,7 @@ export function CreateWorkspaceSprintForm({
   workspaceId,
   defaultStartsAt,
   defaultEndsAt,
+  nextSprintNumber,
   onCreated,
 }: CreateWorkspaceSprintFormProps) {
   const formId = React.useId();
@@ -50,10 +47,9 @@ export function CreateWorkspaceSprintForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const name = form.name.trim();
 
-    if (!name || !form.startsAt || !form.endsAt) {
-      setError("Name, start date, and end date are required.");
+    if (!form.startsAt || !form.endsAt) {
+      setError("Start date and end date are required.");
       return;
     }
 
@@ -66,11 +62,9 @@ export function CreateWorkspaceSprintForm({
       await mutateAsync({
         workspaceId,
         payload: {
-          name,
           goal: form.goal.trim() || undefined,
           startsAt: toStartOfDayIsoDate(form.startsAt),
           endsAt: toStartOfDayIsoDate(form.endsAt),
-          status: form.status,
         },
       });
       onCreated();
@@ -87,20 +81,10 @@ export function CreateWorkspaceSprintForm({
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <label
-            htmlFor={`${formId}-name`}
-            className="text-xs font-medium text-prism-muted"
-          >
-            Name
-          </label>
-          <Input
-            id={`${formId}-name`}
-            value={form.name}
-            onChange={event => updateForm("name", event.target.value)}
-            maxLength={50}
-            placeholder="Sprint 1"
-            disabled={isPending}
-          />
+          <label className="text-xs font-medium text-prism-muted">Name</label>
+          <div className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 text-sm text-prism-muted/60 select-none">
+            Sprint #{nextSprintNumber}
+          </div>
         </div>
         <div className="space-y-2">
           <label
@@ -109,11 +93,11 @@ export function CreateWorkspaceSprintForm({
           >
             Start
           </label>
-          <Input
+          <DatePicker
             id={`${formId}-start`}
-            type="date"
             value={form.startsAt}
-            onChange={event => updateForm("startsAt", event.target.value)}
+            onChange={value => updateForm("startsAt", value)}
+            placeholder="Pick start date"
             disabled={isPending}
           />
         </div>
@@ -124,32 +108,15 @@ export function CreateWorkspaceSprintForm({
           >
             End
           </label>
-          <Input
+          <DatePicker
             id={`${formId}-end`}
-            type="date"
             value={form.endsAt}
-            onChange={event => updateForm("endsAt", event.target.value)}
+            min={form.startsAt}
+            onChange={value => updateForm("endsAt", value)}
+            placeholder="Pick end date"
             disabled={isPending}
           />
         </div>
-        <select
-          value={form.status}
-          onChange={event => updateForm("status", event.target.value as SprintStatus)}
-          disabled={isPending}
-          className={cn(
-            "h-10 rounded-lg border border-border bg-surface-field px-3 text-sm text-prism-body sm:col-span-2",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-        >
-          {SPRINT_STATUSES.map(status => (
-            <option
-              key={status}
-              value={status}
-            >
-              {getSprintStatusLabel(status)}
-            </option>
-          ))}
-        </select>
       </div>
       <div className="mt-4 space-y-2">
         <label
@@ -165,7 +132,7 @@ export function CreateWorkspaceSprintForm({
           placeholder="Sprint goal"
           maxLength={1000}
           disabled={isPending}
-          className="min-h-20"
+          className="min-h-20 bg-surface-field"
         />
       </div>
       {error && <p className="mt-3 text-sm text-prism-danger">{error}</p>}

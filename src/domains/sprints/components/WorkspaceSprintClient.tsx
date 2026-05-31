@@ -12,6 +12,7 @@ type WorkspaceSprintClientProps = {
   workspaceSlug: string;
   sprintId: string;
   projectSlugsById: Record<string, string>;
+  projectNamesById: Record<string, string>;
   initialSprint?: Sprint;
   initialWorkItems?: SprintWorkItemSearchResult;
 };
@@ -21,6 +22,7 @@ export function WorkspaceSprintClient({
   workspaceSlug,
   sprintId,
   projectSlugsById,
+  projectNamesById,
   initialSprint,
   initialWorkItems,
 }: WorkspaceSprintClientProps) {
@@ -56,6 +58,7 @@ export function WorkspaceSprintClient({
       sprint={sprint}
       workItems={workItems ?? { items: [], total: 0, limit: 50, offset: 0 }}
       projectSlugsById={projectSlugsById}
+      projectNamesById={projectNamesById}
       isWorkItemsError={isWorkItemsError}
       onRetryWorkItems={() => void refetchWorkItems()}
     />

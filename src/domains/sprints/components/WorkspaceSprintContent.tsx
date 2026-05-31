@@ -8,6 +8,7 @@ type WorkspaceSprintContentProps = {
   workspaceSlug: string;
   sprintId: string;
   projectSlugsById: Record<string, string>;
+  projectNamesById: Record<string, string>;
 };
 
 export async function WorkspaceSprintContent({
@@ -15,6 +16,7 @@ export async function WorkspaceSprintContent({
   workspaceSlug,
   sprintId,
   projectSlugsById,
+  projectNamesById,
 }: WorkspaceSprintContentProps) {
   const initialSprint = await getWorkspaceSprint(workspaceId, sprintId);
 
@@ -30,6 +32,7 @@ export async function WorkspaceSprintContent({
       workspaceSlug={workspaceSlug}
       sprintId={sprintId}
       projectSlugsById={projectSlugsById}
+      projectNamesById={projectNamesById}
       initialSprint={initialSprint}
       initialWorkItems={initialWorkItems}
     />

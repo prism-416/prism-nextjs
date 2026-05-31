@@ -44,6 +44,15 @@ export function WorkspaceSprintsClient({
         workspaceId={workspaceId}
         defaultStartsAt={defaultStartsAt}
         defaultEndsAt={defaultEndsAt}
+        nextSprintNumber={
+          Math.max(
+            0,
+            ...sprints.map(s => {
+              const m = s.name.match(/^Sprint #(\d+)$/);
+              return m ? Number(m[1]) : 0;
+            }),
+          ) + 1
+        }
         onOpenChange={setIsCreateOpen}
       />
     </>

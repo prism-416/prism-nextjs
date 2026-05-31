@@ -77,3 +77,20 @@ export async function getWorkspaceSprintWorkItems(
 
   return response?.data ?? getEmptySprintWorkItemSearchResult(searchParams);
 }
+
+export async function addWorkspaceSprintWorkItems(workspaceId: string, sprintId: string, itemIds: string[]) {
+  await commonAxios<{ itemIds: string[] }, unknown>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/sprints/${encodeURIComponent(sprintId)}/work-items`,
+    method: "POST",
+    data: { itemIds },
+    version: null,
+  });
+}
+
+export async function removeWorkspaceSprintWorkItem(workspaceId: string, sprintId: string, itemId: string) {
+  await commonAxios<null, unknown>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/sprints/${encodeURIComponent(sprintId)}/work-items/${encodeURIComponent(itemId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
