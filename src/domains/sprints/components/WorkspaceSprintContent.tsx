@@ -6,6 +6,7 @@ import { WorkspaceSprintClient } from "@/domains/sprints/components/WorkspaceSpr
 type WorkspaceSprintContentProps = {
   workspaceId: string;
   workspaceSlug: string;
+  workspaceOwnerId: string;
   sprintId: string;
   projectSlugsById: Record<string, string>;
   projectNamesById: Record<string, string>;
@@ -14,6 +15,7 @@ type WorkspaceSprintContentProps = {
 export async function WorkspaceSprintContent({
   workspaceId,
   workspaceSlug,
+  workspaceOwnerId,
   sprintId,
   projectSlugsById,
   projectNamesById,
@@ -30,6 +32,7 @@ export async function WorkspaceSprintContent({
     <WorkspaceSprintClient
       workspaceId={workspaceId}
       workspaceSlug={workspaceSlug}
+      workspaceOwnerId={workspaceOwnerId}
       sprintId={sprintId}
       projectSlugsById={projectSlugsById}
       projectNamesById={projectNamesById}

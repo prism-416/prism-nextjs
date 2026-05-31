@@ -12,6 +12,7 @@ type WorkspaceSprintsPanelProps = {
   workspaceSlug: string;
   sprints: Sprint[];
   isError: boolean;
+  canManage: boolean;
   onRetry: () => void;
   onCreateSprint: () => void;
 };
@@ -65,6 +66,7 @@ export function WorkspaceSprintsPanel({
   workspaceSlug,
   sprints,
   isError,
+  canManage,
   onRetry,
   onCreateSprint,
 }: WorkspaceSprintsPanelProps) {
@@ -83,7 +85,7 @@ export function WorkspaceSprintsPanel({
           </div>
           <p className="mt-1 text-sm text-prism-muted">Plan iterations across projects in this workspace.</p>
         </div>
-        {!isError && (
+        {!isError && canManage && (
           <Button
             type="button"
             className="h-10 rounded-lg px-4"

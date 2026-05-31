@@ -29,6 +29,7 @@ type WorkspaceSprintPanelProps = {
   workItems: SprintWorkItemSearchResult;
   projectSlugsById: Record<string, string>;
   projectNamesById: Record<string, string>;
+  canManage: boolean;
   isWorkItemsError: boolean;
   onRetryWorkItems: () => void;
 };
@@ -106,6 +107,7 @@ export function WorkspaceSprintPanel({
   workItems,
   projectSlugsById,
   projectNamesById,
+  canManage,
   isWorkItemsError,
   onRetryWorkItems,
 }: WorkspaceSprintPanelProps) {
@@ -136,32 +138,34 @@ export function WorkspaceSprintPanel({
             <h1 className="mt-3 text-2xl font-semibold text-prism-heading">{sprint.name}</h1>
             <p className="mt-2 text-sm text-prism-muted">{sprint.goal || "No goal."}</p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="h-8 w-8 rounded-lg p-0"
+          {canManage && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-8 w-8 rounded-lg p-0"
+                >
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-40"
               >
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-40"
-            >
-              <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-                <Pencil className="size-3.5" />
-                Edit sprint
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => setDeleteDialogOpen(true)}
-                className="text-prism-danger focus:text-prism-danger"
-              >
-                <Trash2 className="size-3.5" />
-                Delete sprint
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
+                  <Pencil className="size-3.5" />
+                  Edit sprint
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setDeleteDialogOpen(true)}
+                  className="text-prism-danger focus:text-prism-danger"
+                >
+                  <Trash2 className="size-3.5" />
+                  Delete sprint
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <SprintMetric
@@ -184,14 +188,16 @@ export function WorkspaceSprintPanel({
             <ListTodo className="size-4 text-prism-muted" />
             <span className="text-sm font-semibold text-prism-heading">Sprint work items ({workItems.total})</span>
           </div>
-          <Button
-            variant="default"
-            className="h-7 gap-1.5 rounded-lg px-2.5 text-xs"
-            onClick={() => setAddDialogOpen(true)}
-          >
-            <Plus className="size-3.5" />
-            Edit items
-          </Button>
+          {canManage && (
+            <Button
+              variant="default"
+              className="h-7 gap-1.5 rounded-lg px-2.5 text-xs"
+              onClick={() => setAddDialogOpen(true)}
+            >
+              <Plus className="size-3.5" />
+              Edit items
+            </Button>
+          )}
         </div>
         {isWorkItemsError && (
           <div className="p-5 text-sm text-prism-danger">
@@ -244,24 +250,28 @@ export function WorkspaceSprintPanel({
             );
           })()}
       </div>
-      <ManageSprintWorkItemsDialog
-        open={addDialogOpen}
-        workspaceId={sprint.workspaceId}
-        workspaceSlug={workspaceSlug}
-        sprintId={sprint.sprintId}
-        onOpenChange={setAddDialogOpen}
-      />
-      <WorkspaceSprintEditDialog
-        sprint={sprint}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-      />
-      <WorkspaceSprintDeleteDialog
-        sprint={sprint}
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onDeleted={() => router.push(`/workspaces/${encodeURIComponent(workspaceSlug)}/sprints`)}
-      />
+      {canManage && (
+        <>
+          <ManageSprintWorkItemsDialog
+            open={addDialogOpen}
+            workspaceId={sprint.workspaceId}
+            workspaceSlug={workspaceSlug}
+            sprintId={sprint.sprintId}
+            onOpenChange={setAddDialogOpen}
+          />
+          <WorkspaceSprintEditDialog
+            sprint={sprint}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+          />
+          <WorkspaceSprintDeleteDialog
+            sprint={sprint}
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+            onDeleted={() => router.push(`/workspaces/${encodeURIComponent(workspaceSlug)}/sprints`)}
+          />
+        </>
+      )}
     </section>
   );
 }

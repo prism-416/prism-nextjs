@@ -51,6 +51,7 @@ export default async function WorkspaceSprintPage({ params }: WorkspaceSprintPag
         <WorkspaceSprintContent
           workspaceId={workspace.workspaceId}
           workspaceSlug={slug}
+          workspaceOwnerId={workspace.ownerId}
           sprintId={sprintId}
           projectSlugsById={projectSlugsById}
           projectNamesById={projectNamesById}

@@ -5,9 +5,14 @@ import { getDefaultSprintDates } from "@/domains/sprints/utils/sprint";
 type WorkspaceSprintsContentProps = {
   workspaceId: string;
   workspaceSlug: string;
+  workspaceOwnerId: string;
 };
 
-export async function WorkspaceSprintsContent({ workspaceId, workspaceSlug }: WorkspaceSprintsContentProps) {
+export async function WorkspaceSprintsContent({
+  workspaceId,
+  workspaceSlug,
+  workspaceOwnerId,
+}: WorkspaceSprintsContentProps) {
   const initialData = await getWorkspaceSprints(workspaceId).catch(() => undefined);
   const { defaultStartsAt, defaultEndsAt } = getDefaultSprintDates();
 
@@ -15,6 +20,7 @@ export async function WorkspaceSprintsContent({ workspaceId, workspaceSlug }: Wo
     <WorkspaceSprintsClient
       workspaceId={workspaceId}
       workspaceSlug={workspaceSlug}
+      workspaceOwnerId={workspaceOwnerId}
       initialData={initialData}
       defaultStartsAt={defaultStartsAt}
       defaultEndsAt={defaultEndsAt}
