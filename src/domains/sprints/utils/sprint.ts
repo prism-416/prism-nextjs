@@ -9,13 +9,12 @@ import type {
   SprintWorkItemStatus,
 } from "@/domains/sprints/types";
 
-export const SPRINT_STATUSES: SprintStatus[] = ["planned", "active", "closed", "cancelled"];
+export const SPRINT_STATUSES: SprintStatus[] = ["planned", "active", "closed"];
 
 const SPRINT_STATUS_LABELS: Record<SprintStatus, string> = {
   planned: "Planned",
   active: "Active",
   closed: "Closed",
-  cancelled: "Cancelled",
 };
 
 const WORK_ITEM_STATUS_LABELS: Record<SprintWorkItemStatus, string> = {
@@ -51,7 +50,7 @@ function formatDateInputValue(date: Date) {
 
 export function getDefaultSprintDates(referenceDate = new Date()) {
   const endDate = new Date(referenceDate);
-  endDate.setUTCDate(endDate.getUTCDate() + 13);
+  endDate.setUTCDate(endDate.getUTCDate() + 14);
 
   return {
     defaultStartsAt: formatDateInputValue(referenceDate),
@@ -79,6 +78,22 @@ export function formatSprintDate(value: string) {
   }
 
   return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
+}
+
+function formatSprintCompactDate(value: string) {
+  const date = parseDate(value);
+
+  if (!date) return "Invalid date";
+
+  return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}`;
+}
+
+export function formatSprintScheduleSummary(startDate: string | null, dueDate: string | null) {
+  if (startDate && dueDate) return `${formatSprintCompactDate(startDate)} - ${formatSprintCompactDate(dueDate)}`;
+  if (startDate) return `Starts ${formatSprintCompactDate(startDate)}`;
+  if (dueDate) return `Due ${formatSprintCompactDate(dueDate)}`;
+
+  return null;
 }
 
 export function formatSprintRange(sprint: Pick<Sprint, "startsAt" | "endsAt">) {

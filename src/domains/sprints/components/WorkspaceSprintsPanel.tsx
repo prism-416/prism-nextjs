@@ -18,40 +18,45 @@ type WorkspaceSprintsPanelProps = {
 
 const STATUS_DOT_CLASS_NAMES: Record<SprintStatus, string> = {
   planned: "bg-prism-muted",
-  active: "bg-prism-info",
-  closed: "bg-prism-success",
-  cancelled: "bg-prism-danger",
+  active: "bg-prism-success",
+  closed: "bg-prism-info",
 };
 
-function SprintRow({ workspaceSlug, sprint }: { workspaceSlug: string; sprint: Sprint }) {
+function SprintCard({ workspaceSlug, sprint }: { workspaceSlug: string; sprint: Sprint }) {
   const href = `/workspaces/${encodeURIComponent(workspaceSlug)}/sprints/${encodeURIComponent(sprint.sprintId)}`;
 
   return (
     <Link
       href={href}
-      className="block p-4 transition-colors hover:bg-prism-navy/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={cn(
+        "group block rounded-2xl border border-border/80 bg-surface p-4",
+        "shadow-[0_2px_8px_rgba(3,23,34,0.06)] transition-all",
+        "hover:border-border-strong/60 hover:shadow-[0_4px_16px_rgba(3,23,34,0.10)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+      )}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <Typography
-            variant="bodySm"
-            tone="primary"
-            weight="semibold"
-            className="truncate"
-          >
-            {sprint.name}
-          </Typography>
-          <Typography
-            variant="caption"
-            tone="muted"
-            className={cn("mt-1 line-clamp-2", !sprint.goal && "italic opacity-70")}
-          >
-            {sprint.goal || "No goal."}
-          </Typography>
-        </div>
+        <Typography
+          variant="bodySm"
+          tone="primary"
+          weight="semibold"
+          className="truncate"
+        >
+          {sprint.name}
+        </Typography>
         <SprintStatusBadge status={sprint.status} />
       </div>
-      <p className="mt-4 truncate text-xs text-prism-muted">{formatSprintRange(sprint)}</p>
+      <Typography
+        variant="caption"
+        tone="muted"
+        className={cn("mt-1.5 line-clamp-2", !sprint.goal && "italic opacity-60")}
+      >
+        {sprint.goal || "No goal."}
+      </Typography>
+      <div className="mt-4 flex items-center gap-1.5 text-xs text-prism-muted">
+        <CalendarRange className="size-3 shrink-0" />
+        <span className="truncate">{formatSprintRange(sprint)}</span>
+      </div>
     </Link>
   );
 }
@@ -65,7 +70,7 @@ export function WorkspaceSprintsPanel({
 }: WorkspaceSprintsPanelProps) {
   const sprintsByStatus = SPRINT_STATUSES.reduce<Record<SprintStatus, Sprint[]>>(
     (result, status) => ({ ...result, [status]: sprints.filter(sprint => sprint.status === status) }),
-    { planned: [], active: [], closed: [], cancelled: [] },
+    { planned: [], active: [], closed: [] },
   );
 
   return (
@@ -102,32 +107,35 @@ export function WorkspaceSprintsPanel({
           </Button>
         </div>
       )}
-      {!isError && sprints.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border-strong/60 bg-surface px-6 py-10 text-center text-sm text-prism-muted">
-          No sprints yet. Create one to plan workspace work.
-        </div>
-      )}
-      {!isError && sprints.length > 0 && (
-        <div className="grid gap-4 lg:grid-cols-4">
+      {!isError && (
+        <div className="grid gap-4 lg:grid-cols-3">
           {SPRINT_STATUSES.map(status => (
             <section
               key={status}
-              className="overflow-hidden rounded-2xl border border-border/80 bg-surface"
+              className="rounded-2xl border border-border/80 bg-surface-strong"
             >
-              <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-surface-strong px-4 py-3">
+              <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-3">
                 <span className="flex items-center gap-2 text-sm font-semibold text-prism-heading">
                   <span className={cn("size-2 rounded-full", STATUS_DOT_CLASS_NAMES[status])} />
                   {getSprintStatusLabel(status)}
                 </span>
                 <span className="text-xs text-prism-muted">{sprintsByStatus[status].length}</span>
               </div>
-              {sprintsByStatus[status].map(sprint => (
-                <SprintRow
-                  key={sprint.sprintId}
-                  workspaceSlug={workspaceSlug}
-                  sprint={sprint}
-                />
-              ))}
+              <div className="flex flex-col gap-3 p-3">
+                {sprintsByStatus[status].length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-border/60 px-4 py-6 text-center text-xs text-prism-muted/70">
+                    No sprints
+                  </p>
+                ) : (
+                  sprintsByStatus[status].map(sprint => (
+                    <SprintCard
+                      key={sprint.sprintId}
+                      workspaceSlug={workspaceSlug}
+                      sprint={sprint}
+                    />
+                  ))
+                )}
+              </div>
             </section>
           ))}
         </div>

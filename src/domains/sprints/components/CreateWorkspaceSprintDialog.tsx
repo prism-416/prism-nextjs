@@ -8,6 +8,7 @@ type CreateWorkspaceSprintDialogProps = {
   workspaceId: string;
   defaultStartsAt: string;
   defaultEndsAt: string;
+  nextSprintNumber: number;
   onOpenChange: (open: boolean) => void;
 };
 
@@ -16,6 +17,7 @@ export function CreateWorkspaceSprintDialog({
   workspaceId,
   defaultStartsAt,
   defaultEndsAt,
+  nextSprintNumber,
   onOpenChange,
 }: CreateWorkspaceSprintDialogProps) {
   return (
@@ -33,6 +35,7 @@ export function CreateWorkspaceSprintDialog({
           workspaceId={workspaceId}
           defaultStartsAt={defaultStartsAt}
           defaultEndsAt={defaultEndsAt}
+          nextSprintNumber={nextSprintNumber}
           onCreated={() => onOpenChange(false)}
         />
       </DialogContent>

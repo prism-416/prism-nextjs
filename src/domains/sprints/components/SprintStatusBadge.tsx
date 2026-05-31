@@ -10,7 +10,6 @@ const STATUS_CLASS_NAMES: Record<SprintStatus, string> = {
   planned: "border-border bg-surface-strong text-prism-muted",
   active: "border-prism-teal-500/30 bg-prism-teal-500/10 text-prism-navy",
   closed: "border-prism-glow-sky/35 bg-prism-glow-sky/10 text-prism-navy",
-  cancelled: "border-prism-danger-soft bg-prism-danger-soft/20 text-prism-danger",
 };
 
 export function SprintStatusBadge({ status }: SprintStatusBadgeProps) {

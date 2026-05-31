@@ -1,4 +1,4 @@
-export type SprintStatus = "planned" | "active" | "closed" | "cancelled";
+export type SprintStatus = "planned" | "active" | "closed";
 
 export interface Sprint {
   sprintId: string;
@@ -12,11 +12,10 @@ export interface Sprint {
 }
 
 export interface CreateSprintPayload {
-  name: string;
+  name?: string;
   goal?: string;
   startsAt: string;
   endsAt: string;
-  status?: SprintStatus;
 }
 
 export type UpdateSprintPayload = Partial<CreateSprintPayload>;

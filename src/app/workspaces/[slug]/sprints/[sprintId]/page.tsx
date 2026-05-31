@@ -24,6 +24,7 @@ export default async function WorkspaceSprintPage({ params }: WorkspaceSprintPag
   }
 
   const projectSlugsById = Object.fromEntries(projects.map(project => [project.projectId, project.slug]));
+  const projectNamesById = Object.fromEntries(projects.map(project => [project.projectId, project.name]));
 
   return (
     <WorkspaceShell
@@ -52,6 +53,7 @@ export default async function WorkspaceSprintPage({ params }: WorkspaceSprintPag
           workspaceSlug={slug}
           sprintId={sprintId}
           projectSlugsById={projectSlugsById}
+          projectNamesById={projectNamesById}
         />
       </Suspense>
     </WorkspaceShell>
