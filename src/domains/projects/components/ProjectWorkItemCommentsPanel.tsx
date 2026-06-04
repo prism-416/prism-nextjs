@@ -70,12 +70,13 @@ export function ProjectWorkItemCommentsPanel({
 
   return (
     <section className="rounded-2xl border border-border/80 bg-surface p-5 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.04)]">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 border-b border-border/70 pb-4">
         <Typography
           variant="bodySm"
           tone="primary"
           weight="semibold"
-          className="text-base"
+          fontSize="lg"
+          lineHeight="7"
         >
           Comments ({comments.total})
         </Typography>
@@ -92,7 +93,7 @@ export function ProjectWorkItemCommentsPanel({
         )}
       </div>
 
-      <div className="mt-5">
+      <div className="mt-4">
         {comments.comments.map((comment, index) => {
           const prev = comments.comments[index - 1];
           const isConsecutive =
