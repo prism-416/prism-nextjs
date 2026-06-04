@@ -73,6 +73,7 @@ function ChildWorkItemCard({
 }) {
   const router = useRouter();
   const assigneeUsers = resolveAssigneeAvatarUsers(item.assigneeUsernames, members);
+  const scheduleSummary = formatScheduleRange(item.startDate, item.dueDate);
   const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -85,31 +86,37 @@ function ChildWorkItemCard({
       className="group/card cursor-pointer rounded-xl border border-border/80 bg-surface p-3 shadow-[0_1px_0_rgba(255,255,255,0.65)_inset] transition-[border-color,box-shadow] duration-100"
       onClick={handleClick}
     >
-      <Typography
-        variant="bodySm"
-        tone="primary"
-        weight="semibold"
-        className="line-clamp-2 group-hover/card:text-prism-navy"
-      >
-        {item.title}
-      </Typography>
+      <div className="min-w-0">
+        <Typography
+          variant="bodySm"
+          tone="primary"
+          weight="semibold"
+          className="line-clamp-2 group-hover/card:text-prism-navy"
+        >
+          {item.title}
+        </Typography>
 
-      <Typography
-        variant="caption"
-        tone="muted"
-        className={cn("mt-1.5 line-clamp-3", !item.description && "italic opacity-70")}
-      >
-        {item.description || "No description."}
-      </Typography>
+        <Typography
+          variant="caption"
+          tone="muted"
+          className={cn("mt-1.5 min-h-5 line-clamp-1", !item.description && "italic opacity-70")}
+        >
+          {item.description || "No description."}
+        </Typography>
 
-      {(item.startDate || item.dueDate) && (
-        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-prism-muted">
+        <p
+          aria-hidden={!scheduleSummary}
+          className={cn(
+            "mt-2 flex h-4 items-center gap-1.5 text-xs font-medium text-prism-muted",
+            !scheduleSummary && "invisible",
+          )}
+        >
           <CalendarDays className="size-3.5 shrink-0" />
-          <span>{formatScheduleRange(item.startDate, item.dueDate)}</span>
+          <span>{scheduleSummary ?? "No date"}</span>
         </p>
-      )}
+      </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <ProjectWorkItemInlineControls
           item={item}
           onStatusUpdate={onStatusUpdate}
@@ -118,7 +125,7 @@ function ChildWorkItemCard({
       </div>
 
       {assigneeUsers.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
           <UserAvatarStack
             users={assigneeUsers}
             avatarClassName="size-6 text-[10px]"
@@ -241,7 +248,8 @@ export function ProjectWorkItemPanel({
             variant="bodySm"
             tone="primary"
             weight="semibold"
-            className="text-base"
+            fontSize="lg"
+            lineHeight="7"
           >
             Child work items ({childItems.length})
           </Typography>
@@ -256,7 +264,7 @@ export function ProjectWorkItemPanel({
         </div>
 
         {isChildrenError && (
-          <div className="mt-5 text-sm text-prism-danger">
+          <div className="mt-4 text-sm text-prism-danger">
             <p>Child work items could not be loaded.</p>
             <Button
               className="mt-3 h-9 rounded-lg border-prism-danger-soft bg-surface px-4 text-prism-danger hover:bg-prism-danger-soft/40"
@@ -270,7 +278,7 @@ export function ProjectWorkItemPanel({
         )}
 
         {!isChildrenError && childItems.length === 0 && (
-          <div className="mt-5 rounded-xl border border-dashed border-border bg-surface-strong px-4 py-6 text-center">
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-surface-strong px-4 py-6 text-center">
             <Typography
               variant="bodySm"
               tone="primary"
@@ -289,7 +297,7 @@ export function ProjectWorkItemPanel({
         )}
 
         {!isChildrenError && childItems.length > 0 && (
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {childItems.map(item => (
               <ChildWorkItemCard
                 key={item.itemId}
