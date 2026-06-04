@@ -18,20 +18,24 @@ type WorkspaceLeaveDialogProps = {
   workspaceName: string;
   workspaceSlug?: string;
   isOwner: boolean;
+  isOnlyMemberOwner?: boolean;
   open: boolean;
   isPending: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
+  onDeleteInstead?: () => void;
 };
 
 export function WorkspaceLeaveDialog({
   workspaceName,
   workspaceSlug,
   isOwner,
+  isOnlyMemberOwner = false,
   open,
   isPending,
   onOpenChange,
   onConfirm,
+  onDeleteInstead,
 }: WorkspaceLeaveDialogProps) {
   return (
     <Dialog
@@ -44,13 +48,41 @@ export function WorkspaceLeaveDialog({
         <DialogHeader>
           <DialogTitle>Leave workspace</DialogTitle>
           <DialogDescription>
-            {isOwner
-              ? "You are the owner of this workspace."
-              : "You will lose access to this workspace and all its projects."}
+            {isOnlyMemberOwner
+              ? "You are the only member of this workspace."
+              : isOwner
+                ? "You are the owner of this workspace."
+                : "You will lose access to this workspace and all its projects."}
           </DialogDescription>
         </DialogHeader>
 
-        {isOwner ? (
+        {isOnlyMemberOwner ? (
+          <div className="mt-2 rounded-xl border border-prism-danger-soft bg-prism-danger-soft/20 px-4 py-3">
+            <Typography
+              variant="bodySm"
+              tone="primary"
+              className="font-medium"
+            >
+              Delete workspace instead
+            </Typography>
+            <Typography
+              variant="caption"
+              tone="muted"
+              className="mt-1 block"
+            >
+              Since there are no other members, leaving this workspace means deleting it.
+            </Typography>
+            <Button
+              type="button"
+              size="sm"
+              className="mt-2 h-8 gap-1.5 rounded-lg bg-prism-danger px-2.5 text-xs text-white hover:bg-prism-danger/90"
+              onClick={onDeleteInstead}
+            >
+              Go to delete workspace
+              <ArrowRight className="size-3.5" />
+            </Button>
+          </div>
+        ) : isOwner ? (
           <div className="mt-2 rounded-xl border border-border/80 bg-surface-strong px-4 py-3">
             <Typography
               variant="bodySm"
