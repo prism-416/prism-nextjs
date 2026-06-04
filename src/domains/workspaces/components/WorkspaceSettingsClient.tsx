@@ -10,6 +10,7 @@ import { WorkspaceSettingsCard } from "@/domains/workspaces/components/Workspace
 import { WorkspaceDeleteDialog } from "@/domains/workspaces/components/list/WorkspaceDeleteDialog";
 import { WorkspaceEditDialog } from "@/domains/workspaces/components/list/WorkspaceEditDialog";
 import { useRemoveWorkspaceMember } from "@/domains/workspaces/hooks/useRemoveWorkspaceMember";
+import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
 import { useWorkspacePermissions } from "@/domains/workspaces/hooks/useWorkspacePermissions";
 import type { Workspace } from "@/domains/workspaces/types";
 import { useCurrentUser } from "@/shared/hooks/useCurrentUser";
@@ -25,7 +26,10 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const { canManage, isOwner } = useWorkspacePermissions(workspace);
   const { data: currentUser } = useCurrentUser();
+  const { data: members } = useWorkspaceMembers(workspace.workspaceId);
   const removeMember = useRemoveWorkspaceMember();
+  const knownMemberCount = members?.length ?? workspace.memberCount;
+  const isOnlyMemberOwner = isOwner && knownMemberCount === 1;
 
   return (
     <>
@@ -113,6 +117,7 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
         workspaceName={workspace.name}
         workspaceSlug={workspace.slug}
         isOwner={isOwner}
+        isOnlyMemberOwner={isOnlyMemberOwner}
         open={isLeaveOpen}
         isPending={removeMember.isPending}
         onOpenChange={setIsLeaveOpen}
@@ -124,6 +129,10 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
             removeWorkspaceFromList: true,
           });
           router.push("/workspaces");
+        }}
+        onDeleteInstead={() => {
+          setIsLeaveOpen(false);
+          setIsDeleteOpen(true);
         }}
       />
     </>
