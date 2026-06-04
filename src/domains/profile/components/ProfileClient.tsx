@@ -1,9 +1,10 @@
 "use client";
 
-import { type ComponentType } from "react";
-import { AtSign, Fingerprint, KeyRound, Mail, UserRound } from "lucide-react";
+import { AtSign, KeyRound, Mail } from "lucide-react";
 
 import { UserAvatar } from "@/atomics/atoms/Avatar";
+import { ProfileField } from "@/domains/profile/components/ProfileField";
+import { ProfileNameField } from "@/domains/profile/components/ProfileNameField";
 import { ProfileOAuthPasswordNotice } from "@/domains/profile/components/ProfileOAuthPasswordNotice";
 import { ProfilePasswordForm } from "@/domains/profile/components/ProfilePasswordForm";
 import { getCurrentUser } from "@/shared/api/auth";
@@ -15,24 +16,6 @@ import { ProfileSkeleton } from "@/domains/profile/components/ProfileSkeleton";
 type ProfileClientProps = {
   initialData?: CurrentUser;
 };
-
-type ProfileFieldProps = {
-  icon: ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-};
-
-function ProfileField({ icon: Icon, label, value }: ProfileFieldProps) {
-  return (
-    <div className="rounded-2xl border border-border/80 bg-surface p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-prism-muted">
-        <Icon className="size-4" />
-        {label}
-      </div>
-      <div className="mt-3 break-words text-sm font-medium text-prism-heading">{value}</div>
-    </div>
-  );
-}
 
 export function ProfileClient({ initialData }: ProfileClientProps) {
   const { data: user, isPending } = useApiQuery<CurrentUser | undefined>({
@@ -64,11 +47,7 @@ export function ProfileClient({ initialData }: ProfileClientProps) {
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
-        <ProfileField
-          icon={UserRound}
-          label="Name"
-          value={user.fullName}
-        />
+        <ProfileNameField user={user} />
         <ProfileField
           icon={AtSign}
           label="Username"
@@ -78,11 +57,6 @@ export function ProfileClient({ initialData }: ProfileClientProps) {
           icon={Mail}
           label="Email"
           value={user.email}
-        />
-        <ProfileField
-          icon={Fingerprint}
-          label="User ID"
-          value={user.userId}
         />
         <ProfileField
           icon={KeyRound}

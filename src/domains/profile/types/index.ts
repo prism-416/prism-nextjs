@@ -6,3 +6,7 @@ export type ChangePasswordPayload = {
 export type ChangePasswordResponse = {
   changed: boolean;
 };
+
+export type UpdateProfilePayload = {
+  fullName: string;
+};
