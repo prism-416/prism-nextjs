@@ -224,7 +224,7 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
           >
-            <div className="grid min-w-[68rem] items-stretch gap-4 lg:min-w-0 lg:grid-cols-4">
+            <div className="grid items-stretch gap-4 lg:grid-cols-4">
               {PROJECT_WORK_ITEM_STATUSES.map(status => (
                 <DroppableStatusColumn
                   key={status}
