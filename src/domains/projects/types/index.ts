@@ -128,3 +128,60 @@ export interface CreateProjectWorkItemCommentPayload {
 export interface UpdateProjectWorkItemCommentPayload {
   body: string;
 }
+
+export type AgentRunStatus = "queued" | "running" | "waiting" | "completed" | "failed" | "cancelled";
+
+export type AgentRunTriggerType = "manual" | "event" | "scheduled" | "webhook" | "recursive";
+
+export interface AgentRun {
+  runId: string;
+  workspaceId: string;
+  triggeredByUserId: string | null;
+  workItemId: string | null;
+  parentRunId: string | null;
+  agentType: string;
+  triggerType: AgentRunTriggerType;
+  status: AgentRunStatus;
+  objective: string;
+  systemPromptVersion: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export interface AgentRunSearchParams {
+  status?: AgentRunStatus;
+  agentType?: string;
+  workItemId?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface AgentRunSearchResult {
+  items: AgentRun[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export type FeatureProvisioningRequestStatus = "pending" | "queued" | "dispatch_failed";
+
+export interface FeatureProvisioningRequest {
+  requestId: string;
+  workspaceId: string;
+  projectId: string;
+  requestedByUserId: string | null;
+  status: FeatureProvisioningRequestStatus;
+  payloadObjectName: string;
+  payloadVersionId: string | null;
+  queueMessageId: string | null;
+  errorMessage: string | null;
+  dispatchedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFeatureProvisioningRequestPayload {
+  projectId: string;
+  featureSpecification: string;
+}

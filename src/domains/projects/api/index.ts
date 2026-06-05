@@ -2,6 +2,11 @@ import { commonAxios } from "@/shared/http/common-axios";
 import type { ApiResponse } from "@/shared/types/api";
 
 import type {
+  AgentRun,
+  AgentRunSearchParams,
+  AgentRunSearchResult,
+  AgentRunStatus,
+  CreateFeatureProvisioningRequestPayload,
   CreateProjectPayload,
   Project,
   ProjectParticipant,
@@ -11,12 +16,29 @@ import type {
   ProjectWorkItemSearchResult,
   ReorderProjectWorkItemsPayload,
   CreateProjectWorkItemPayload,
+  FeatureProvisioningRequest,
   UpdateProjectPayload,
   UpdateProjectWorkItemPayload,
 } from "../types";
 import { getDefinedProjectWorkItemSearchParams, getEmptyProjectWorkItemSearchResult } from "../utils/work-item";
 
 export * from "./comments";
+
+const CURRENT_AGENT_RUN_STATUSES: AgentRunStatus[] = ["queued", "running", "waiting"];
+const CURRENT_AGENT_RUN_LIMIT = 50;
+
+function getEmptyAgentRunSearchResult(limit = CURRENT_AGENT_RUN_LIMIT): AgentRunSearchResult {
+  return {
+    items: [],
+    total: 0,
+    limit,
+    offset: 0,
+  };
+}
+
+function sortAgentRunsByRecency(a: AgentRun, b: AgentRun) {
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
 
 export async function getProjectsByWorkspaceId(workspaceId: string) {
   const response = await commonAxios<{ workspaceId: string }, ApiResponse<ProjectSummary[]>>({
@@ -172,4 +194,54 @@ export async function getProjectWorkItemChildren(projectId: string, itemId: stri
   });
 
   return response?.data ?? [];
+}
+
+export async function getWorkspaceAgentRuns(workspaceId: string, params?: AgentRunSearchParams) {
+  const response = await commonAxios<AgentRunSearchParams | null, ApiResponse<AgentRunSearchResult>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/agent-runs`,
+    method: "GET",
+    data: params ?? null,
+    version: null,
+  });
+
+  return response?.data ?? getEmptyAgentRunSearchResult(params?.limit);
+}
+
+export async function getCurrentWorkspaceAgentRuns(workspaceId: string) {
+  const results = await Promise.all(
+    CURRENT_AGENT_RUN_STATUSES.map(status =>
+      getWorkspaceAgentRuns(workspaceId, {
+        status,
+        limit: CURRENT_AGENT_RUN_LIMIT,
+        offset: 0,
+      }),
+    ),
+  );
+  const runsById = new Map<string, AgentRun>();
+
+  for (const result of results) {
+    for (const run of result.items) {
+      runsById.set(run.runId, run);
+    }
+  }
+
+  const items = Array.from(runsById.values()).sort(sortAgentRunsByRecency);
+
+  return {
+    items,
+    total: items.length,
+    limit: CURRENT_AGENT_RUN_LIMIT,
+    offset: 0,
+  } satisfies AgentRunSearchResult;
+}
+
+export async function requestFeatureProvisioning(workspaceId: string, body: CreateFeatureProvisioningRequestPayload) {
+  const response = await commonAxios<CreateFeatureProvisioningRequestPayload, ApiResponse<FeatureProvisioningRequest>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/provision`,
+    method: "POST",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
 }

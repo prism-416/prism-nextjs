@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  Bot,
   Files,
   FolderKanban,
   LayoutDashboard,
@@ -135,6 +136,7 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
         exact: true,
         activePathPrefixes: [`${projectHref}/work-items`],
       },
+      { label: "Agent", href: `${projectHref}/agent`, icon: Bot, exact: true },
       { label: "Documents", href: `${projectHref}/documents`, icon: Files, exact: true },
       { label: "My tasks", href: `${projectHref}/my-tasks`, icon: ListTodo, exact: true },
     ],
