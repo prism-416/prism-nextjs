@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { Check } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -38,7 +38,6 @@ export function ProjectDashboardPriorityMenu({ item, disabled, onPriorityUpdate 
           aria-label={`Change ${item.title} priority`}
         >
           {getProjectWorkItemPriorityLabel(item.priority)}
-          <ChevronDown className="size-3 opacity-60" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

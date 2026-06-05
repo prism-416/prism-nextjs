@@ -19,6 +19,7 @@ type ProjectWorkItemAssigneeSelectorProps = {
   selectedUsernames: string[];
   disabled?: boolean;
   maxVisible?: number;
+  showAddButtonWhenSelected?: boolean;
   onChange: (usernames: string[]) => void;
 };
 
@@ -28,27 +29,66 @@ export function ProjectWorkItemAssigneeSelector({
   selectedUsernames,
   disabled = false,
   maxVisible = 4,
+  showAddButtonWhenSelected = true,
   onChange,
 }: ProjectWorkItemAssigneeSelectorProps) {
+  const [localUsernames, setLocalUsernames] = React.useState(selectedUsernames);
+
+  // Keep refs always pointing at the latest values for use in effects/cleanup
+  const onChangeRef = React.useRef(onChange);
+  const localUsernamesRef = React.useRef(localUsernames);
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+    localUsernamesRef.current = localUsernames;
+  });
+
+  // Sync from parent when selectedUsernames changes externally (e.g. API rollback)
+  React.useEffect(() => {
+    setLocalUsernames(selectedUsernames);
+  }, [selectedUsernames]);
+
+  // If the editor unmounts while the dropdown is still open (user clicked outside
+  // the card), commit whatever selections were in progress.
+  React.useEffect(() => {
+    return () => {
+      onChangeRef.current(localUsernamesRef.current);
+    };
+  }, []);
+
   const selectedSet = React.useMemo(
-    () => new Set(selectedUsernames.map(username => username.toLowerCase())),
-    [selectedUsernames],
+    () => new Set(localUsernames.map(username => username.toLowerCase())),
+    [localUsernames],
   );
-  const selectedMembers = members.filter(member => selectedSet.has(member.username.toLowerCase()));
+  const memberByUsername = React.useMemo(
+    () => new Map(members.map(member => [member.username.toLowerCase(), member])),
+    [members],
+  );
+  const selectedMembers = localUsernames
+    .map(username => memberByUsername.get(username.toLowerCase()))
+    .filter((m): m is ProjectParticipant => m !== undefined);
   const visibleMembers = selectedMembers.slice(0, maxVisible);
   const overflowCount = selectedMembers.length - visibleMembers.length;
+  const showAddButton = showAddButtonWhenSelected || selectedMembers.length === 0;
 
   const toggle = (username: string) => {
     const key = username.toLowerCase();
-    if (selectedSet.has(key)) {
-      onChange(selectedUsernames.filter(current => current.toLowerCase() !== key));
-    } else {
-      onChange([...selectedUsernames, username]);
+    const nextUsernames = selectedSet.has(key)
+      ? localUsernames.filter(current => current.toLowerCase() !== key)
+      : [...localUsernames, username];
+    setLocalUsernames(nextUsernames);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onChange(localUsernamesRef.current);
     }
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      modal={false}
+      onOpenChange={handleOpenChange}
+    >
       <DropdownMenuTrigger asChild>
         <button
           id={id}
@@ -79,15 +119,27 @@ export function ProjectWorkItemAssigneeSelector({
               )}
             </span>
           )}
-          <span
-            className={cn(
-              "grid size-7 shrink-0 place-items-center rounded-full border border-dashed border-border text-prism-muted",
-              "transition-colors hover:border-border-strong hover:text-prism-body",
-              selectedMembers.length > 0 ? "ml-1.5" : "",
-            )}
-          >
-            <Plus className="size-3.5" />
-          </span>
+          {showAddButton &&
+            (selectedMembers.length > 0 ? (
+              <span
+                className={cn(
+                  "ml-1.5 grid size-7 shrink-0 place-items-center rounded-full border border-dashed border-border text-prism-muted",
+                  "transition-colors hover:border-border-strong hover:text-prism-body",
+                )}
+              >
+                <Plus className="size-3.5" />
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  "inline-flex h-7 shrink-0 items-center gap-1 rounded-full border border-dashed border-border px-2.5 text-xs text-prism-muted",
+                  "transition-colors hover:border-border-strong hover:text-prism-body",
+                )}
+              >
+                <Plus className="size-3" />
+                <span>Assignee</span>
+              </span>
+            ))}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

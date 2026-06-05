@@ -27,6 +27,15 @@ export function getProjectWorkItemsByStatus(items: ProjectWorkItem[]) {
     result[item.status].push(item);
   }
 
+  // Sort within each column to match DB order (sort_order ASC, created_at DESC),
+  // so the display is stable regardless of the global cache array order.
+  for (const status of PROJECT_WORK_ITEM_STATUSES) {
+    result[status].sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+      return b.createdAt.localeCompare(a.createdAt);
+    });
+  }
+
   return result;
 }
 

@@ -19,20 +19,21 @@ type CreateProjectWorkItemFormProps = {
   workspaceId?: string;
   initialMembers?: ProjectParticipant[];
   parentId?: string;
+  initialStatus?: ProjectWorkItemStatus;
   onCreated?: () => void;
 };
 
 const WORK_ITEM_NAME_MAX_LENGTH = 100;
 const WORK_ITEM_DESCRIPTION_MAX_LENGTH = 800;
 
-function getInitialFormState() {
+function getInitialFormState(initialStatus: ProjectWorkItemStatus = "todo") {
   return {
     title: "",
     description: "",
     startDate: "",
     dueDate: "",
     priority: "medium" as ProjectWorkItemPriority,
-    status: "todo" as ProjectWorkItemStatus,
+    status: initialStatus,
     assigneeUsernames: [] as string[],
   };
 }
@@ -42,10 +43,11 @@ export function CreateProjectWorkItemForm({
   workspaceId,
   initialMembers,
   parentId,
+  initialStatus = "todo",
   onCreated,
 }: CreateProjectWorkItemFormProps) {
   const formId = React.useId();
-  const [form, setForm] = React.useState(getInitialFormState);
+  const [form, setForm] = React.useState(() => getInitialFormState(initialStatus));
   const [formError, setFormError] = React.useState<string | null>(null);
   const { mutateAsync: createWorkItem, isPending } = useCreateProjectWorkItem();
   const { data: members = [] } = useProjectParticipants(workspaceId, initialMembers);
@@ -59,9 +61,9 @@ export function CreateProjectWorkItemForm({
   }, []);
 
   const resetForm = React.useCallback(() => {
-    setForm(getInitialFormState());
+    setForm(getInitialFormState(initialStatus));
     setFormError(null);
-  }, []);
+  }, [initialStatus]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -146,6 +148,38 @@ export function CreateProjectWorkItemForm({
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <label
+            htmlFor={`${formId}-work-item-start-date`}
+            className="text-xs font-medium text-prism-muted"
+          >
+            Start date
+          </label>
+          <DatePicker
+            id={`${formId}-work-item-start-date`}
+            value={form.startDate}
+            onChange={value => updateForm("startDate", value)}
+            disabled={isPending}
+          />
+        </div>
+        <div className="space-y-2">
+          <label
+            htmlFor={`${formId}-work-item-due-date`}
+            className="text-xs font-medium text-prism-muted"
+          >
+            Due date
+          </label>
+          <DatePicker
+            id={`${formId}-work-item-due-date`}
+            value={form.dueDate}
+            onChange={value => updateForm("dueDate", value)}
+            min={form.startDate || undefined}
+            disabled={isPending}
+          />
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label
             htmlFor={`${formId}-work-item-status`}
             className="text-xs font-medium text-prism-muted"
           >
@@ -191,38 +225,6 @@ export function CreateProjectWorkItemForm({
           />
         </div>
       )}
-
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <label
-            htmlFor={`${formId}-work-item-start-date`}
-            className="text-xs font-medium text-prism-muted"
-          >
-            Start date
-          </label>
-          <DatePicker
-            id={`${formId}-work-item-start-date`}
-            value={form.startDate}
-            onChange={value => updateForm("startDate", value)}
-            disabled={isPending}
-          />
-        </div>
-        <div className="space-y-2">
-          <label
-            htmlFor={`${formId}-work-item-due-date`}
-            className="text-xs font-medium text-prism-muted"
-          >
-            Due date
-          </label>
-          <DatePicker
-            id={`${formId}-work-item-due-date`}
-            value={form.dueDate}
-            onChange={value => updateForm("dueDate", value)}
-            min={form.startDate || undefined}
-            disabled={isPending}
-          />
-        </div>
-      </div>
 
       {formError && (
         <div className="mt-3 rounded-xl border border-prism-danger-soft bg-surface px-4 py-3 text-sm text-prism-danger">

@@ -20,7 +20,13 @@ export function useDeleteProjectWorkItem() {
     },
     onSuccess: (_, { projectId, itemId }) => {
       syncProjectWorkItemDeleted(queryClient, { projectId, itemId });
-      queryClient.removeQueries({ queryKey: QUERY_KEYS.project.workItemDetail(projectId, itemId) });
+      // `exact: true` so we only drop the detail query itself and leave the
+      // children sub-query untouched — removing it would make the still-mounted
+      // delete dialog refetch children for the now-deleted item (404).
+      queryClient.removeQueries({
+        queryKey: QUERY_KEYS.project.workItemDetail(projectId, itemId),
+        exact: true,
+      });
     },
   });
 }
