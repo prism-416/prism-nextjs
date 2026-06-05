@@ -3,15 +3,14 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa";
 
-import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
-import { AUTH_SOCIAL_GOOGLE_OAUTH_BUTTON_CLASSNAME, AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import type { GoogleCredentialResponse } from "@/domains/auth/types";
 import { getGoogleAccountsIdApi, loadGoogleIdentityScript } from "@/domains/auth/utils/google-identity";
 import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
+import { cn } from "@/shared/utils/cn";
 
 export function GoogleSignInButton() {
   const { setSession } = useAuth();
@@ -19,6 +18,7 @@ export function GoogleSignInButton() {
   const buttonRef = useRef<HTMLDivElement | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleReady, setIsGoogleReady] = useState(false);
 
   const handleCredentialResponse = useEffectEvent(async (response: GoogleCredentialResponse) => {
     if (!response.credential) {
@@ -57,6 +57,8 @@ export function GoogleSignInButton() {
     let isMounted = true;
 
     async function initializeGoogleButton() {
+      setIsGoogleReady(false);
+
       if (!clientId) {
         setErrorMessage("Google sign-in is unavailable.");
         return;
@@ -87,14 +89,19 @@ export function GoogleSignInButton() {
           context: "signin",
           ux_mode: "popup",
         });
+        // Do not pass `width` — GIS has regressed on numeric widths and may fail to render.
         googleAccountsId.renderButton(buttonRef.current, {
           theme: "outline",
           size: "large",
           shape: "pill",
           text: "continue_with",
           logo_alignment: "left",
-          width: buttonRef.current.clientWidth || 320,
         });
+
+        if (isMounted) {
+          setIsGoogleReady(true);
+          setErrorMessage(null);
+        }
       } catch {
         if (isMounted) {
           setErrorMessage("Failed to load Google sign-in.");
@@ -106,29 +113,31 @@ export function GoogleSignInButton() {
 
     return () => {
       isMounted = false;
+      getGoogleAccountsIdApi()?.cancel?.();
     };
   }, [clientId]);
 
   return (
     <div className="space-y-2">
-      <div className="group relative">
-        <Button
-          type="button"
-          variant="outline"
-          className={AUTH_SOCIAL_GOOGLE_OAUTH_BUTTON_CLASSNAME}
-          disabled={isSubmitting || !clientId}
-        >
-          <FaGoogle className="size-4" />
-          {AUTH_SOCIAL_LABELS.google}
-        </Button>
+      <div
+        ref={buttonRef}
+        className={cn(
+          "flex min-h-11 w-full items-center [&>div]:w-full",
+          (isSubmitting || !isGoogleReady) && "pointer-events-none opacity-60",
+        )}
+        aria-busy={isSubmitting}
+      />
 
-        <div
-          ref={buttonRef}
-          className="absolute inset-0 overflow-hidden rounded-xl opacity-0"
-          aria-busy={isSubmitting}
-          aria-hidden="true"
-        />
-      </div>
+      {!isGoogleReady && !errorMessage ? (
+        <Typography
+          variant="caption"
+          tone="inherit"
+          className="flex items-center gap-2 text-prism-body/70"
+        >
+          <FaGoogle className="size-3.5" />
+          Loading Google sign-in…
+        </Typography>
+      ) : null}
 
       {errorMessage ? (
         <Typography
