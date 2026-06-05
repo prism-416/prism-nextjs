@@ -3,10 +3,12 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { FaGoogle } from "react-icons/fa";
 
+import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { useOAuth } from "@/app/_providers/OAuthProvider";
 import { signInWithGoogle } from "@/domains/auth/api";
+import { AUTH_SOCIAL_GOOGLE_OAUTH_BUTTON_CLASSNAME, AUTH_SOCIAL_LABELS } from "@/domains/auth/constants/content";
 import type { GoogleCredentialResponse } from "@/domains/auth/types";
 import { getGoogleAccountsIdApi, loadGoogleIdentityScript } from "@/domains/auth/utils/google-identity";
 import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
@@ -117,27 +119,38 @@ export function GoogleSignInButton() {
     };
   }, [clientId]);
 
+  function handleDecorativeButtonClick() {
+    if (isSubmitting || !clientId || isGoogleReady) {
+      return;
+    }
+
+    setErrorMessage("Google sign-in is still loading. Try again in a moment.");
+  }
+
   return (
     <div className="space-y-2">
-      <div
-        ref={buttonRef}
-        className={cn(
-          "flex min-h-11 w-full items-center [&>div]:w-full",
-          (isSubmitting || !isGoogleReady) && "pointer-events-none opacity-60",
-        )}
-        aria-busy={isSubmitting}
-      />
-
-      {!isGoogleReady && !errorMessage ? (
-        <Typography
-          variant="caption"
-          tone="inherit"
-          className="flex items-center gap-2 text-prism-body/70"
+      <div className="group relative">
+        <Button
+          type="button"
+          variant="outline"
+          className={cn(AUTH_SOCIAL_GOOGLE_OAUTH_BUTTON_CLASSNAME, isGoogleReady && "pointer-events-none")}
+          disabled={isSubmitting || !clientId}
+          onClick={handleDecorativeButtonClick}
         >
-          <FaGoogle className="size-3.5" />
-          Loading Google sign-in…
-        </Typography>
-      ) : null}
+          <FaGoogle className="size-4" />
+          {isSubmitting ? "Signing in…" : AUTH_SOCIAL_LABELS.google}
+        </Button>
+
+        <div
+          ref={buttonRef}
+          className={cn(
+            "absolute inset-0 z-10 overflow-hidden rounded-xl [&>div]:h-full [&>div]:w-full",
+            isGoogleReady ? "cursor-pointer opacity-[0.01]" : "pointer-events-none opacity-0",
+          )}
+          aria-busy={isSubmitting}
+          aria-hidden="true"
+        />
+      </div>
 
       {errorMessage ? (
         <Typography
