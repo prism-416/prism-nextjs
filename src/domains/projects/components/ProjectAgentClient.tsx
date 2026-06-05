@@ -1,25 +1,57 @@
 "use client";
 
 import * as React from "react";
-import { AlertCircle, Bot, Check, Clock3, Loader2, RefreshCw, Send, Sparkles } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertCircle,
+  Bot,
+  Check,
+  CheckCircle2,
+  Circle,
+  CircleDashed,
+  CircleSlash,
+  Clock3,
+  GitBranch,
+  Loader2,
+  Network,
+  RefreshCw,
+  Send,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Label } from "@/atomics/atoms/Label";
+import { Skeleton } from "@/atomics/atoms/Skeleton";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectAgentSkeleton } from "@/domains/projects/components/ProjectAgentSkeleton";
+import { useAgentRunSteps } from "@/domains/projects/hooks/useAgentRunSteps";
 import { useCurrentWorkspaceAgentRuns } from "@/domains/projects/hooks/useCurrentWorkspaceAgentRuns";
 import { useRequestFeatureProvisioning } from "@/domains/projects/hooks/useRequestFeatureProvisioning";
-import type { AgentRun, AgentRunSearchResult, AgentRunStatus } from "@/domains/projects/types";
-import { getAgentRunStatusLabel, getFeatureProvisioningStatusLabel } from "@/domains/projects/utils/agent-display";
+import type {
+  AgentRun,
+  AgentRunSearchResult,
+  AgentRunStatus,
+  AgentRunStepsByRunId,
+  AgentStep,
+  AgentStepStatus,
+} from "@/domains/projects/types";
+import {
+  getAgentRunStatusLabel,
+  getAgentStepStatusLabel,
+  getAgentStepTypeLabel,
+  getFeatureProvisioningStatusLabel,
+} from "@/domains/projects/utils/agent-display";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
 import { formatProjectDateTime } from "@/domains/projects/utils/work-item-display";
+import { QUERY_KEYS } from "@/shared/query";
 import { cn } from "@/shared/utils/cn";
 
 type ProjectAgentClientProps = {
   projectId: string;
   workspaceId: string;
   initialData?: AgentRunSearchResult;
+  initialStepsByRunId?: AgentRunStepsByRunId;
 };
 
 type RequestFeedback = {
@@ -28,8 +60,11 @@ type RequestFeedback = {
   detail?: string;
 };
 
+type StatusIcon = React.ComponentType<{ className?: string }>;
+
 const FEATURE_SPECIFICATION_MAX_LENGTH = 20000;
 const EMPTY_AGENT_RUNS: AgentRun[] = [];
+const EMPTY_AGENT_STEPS: AgentStep[] = [];
 
 const RUN_STATUS_CLASS_NAMES: Record<AgentRunStatus, string> = {
   queued: "border-prism-glow-sky/35 bg-prism-glow-sky/10 text-prism-navy",
@@ -40,8 +75,56 @@ const RUN_STATUS_CLASS_NAMES: Record<AgentRunStatus, string> = {
   cancelled: "border-border bg-surface-strong text-prism-muted",
 };
 
+const STEP_STATUS_CLASS_NAMES: Record<AgentStepStatus, string> = {
+  pending: "border-border bg-surface-strong text-prism-muted",
+  running: "border-prism-teal-500/25 bg-prism-teal-500/10 text-prism-navy",
+  completed: "border-prism-success/25 bg-prism-success-soft/70 text-prism-success",
+  failed: "border-prism-danger-soft bg-prism-danger-soft/20 text-prism-danger",
+  skipped: "border-border bg-surface-strong text-prism-muted",
+};
+
+const STEP_STATUS_ICON_CLASS_NAMES: Record<AgentStepStatus, string> = {
+  pending: "border-border bg-surface text-prism-muted",
+  running: "border-prism-teal-500/30 bg-prism-teal-500/10 text-prism-teal-500",
+  completed: "border-prism-success/30 bg-prism-success-soft text-prism-success",
+  failed: "border-prism-danger-soft bg-prism-danger-soft/25 text-prism-danger",
+  skipped: "border-border bg-surface-strong text-prism-muted",
+};
+
+const STEP_STATUS_ICONS: Record<AgentStepStatus, StatusIcon> = {
+  pending: Circle,
+  running: Loader2,
+  completed: CheckCircle2,
+  failed: AlertCircle,
+  skipped: CircleSlash,
+};
+
 function formatNullableDateTime(value: string | null) {
   return value ? formatProjectDateTime(value) : "Not started";
+}
+
+function sortAgentStepsByOrder(a: AgentStep, b: AgentStep) {
+  if (a.stepOrder !== b.stepOrder) {
+    return a.stepOrder - b.stepOrder;
+  }
+
+  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+}
+
+function getStepTimestamp(step: AgentStep) {
+  if (step.completedAt) {
+    return formatProjectDateTime(step.completedAt);
+  }
+
+  if (step.startedAt) {
+    return formatProjectDateTime(step.startedAt);
+  }
+
+  return formatProjectDateTime(step.createdAt);
+}
+
+function getStepSummary(step: AgentStep) {
+  return step.errorMessage ?? step.outputSummary ?? step.inputSummary;
 }
 
 function AgentRunStatusBadge({ status }: { status: AgentRunStatus }) {
@@ -57,9 +140,228 @@ function AgentRunStatusBadge({ status }: { status: AgentRunStatus }) {
   );
 }
 
-function AgentRunCard({ run }: { run: AgentRun }) {
+function AgentStepStatusBadge({ status }: { status: AgentStepStatus }) {
   return (
-    <article className="rounded-xl border border-border/80 bg-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset]">
+    <span
+      className={cn(
+        "inline-flex h-6 items-center rounded-full border px-2 text-[11px] font-medium",
+        STEP_STATUS_CLASS_NAMES[status],
+      )}
+    >
+      {getAgentStepStatusLabel(status)}
+    </span>
+  );
+}
+
+function AgentRunStepDagSkeleton() {
+  return (
+    <div className="mt-4 rounded-lg border border-border bg-surface-field-soft p-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="grid grid-cols-[2rem_minmax(0,1fr)] gap-3 py-2"
+        >
+          <Skeleton className="size-8 rounded-full bg-prism-navy/5" />
+          <div>
+            <Skeleton className="h-4 w-56 max-w-full bg-prism-navy/5" />
+            <Skeleton className="mt-2 h-3 w-40 max-w-full bg-prism-navy/5" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AgentRunRootNode({ run, isLast }: { run: AgentRun; isLast: boolean }) {
+  return (
+    <li className="relative grid grid-cols-[2rem_minmax(0,1fr)] gap-3 px-3 py-3">
+      {!isLast ? (
+        <span
+          aria-hidden="true"
+          className="absolute bottom-[-1px] left-7 top-9 w-px bg-border-strong/50"
+        />
+      ) : null}
+      <span className="relative z-10 inline-flex size-8 items-center justify-center rounded-full border border-prism-glow-sky/35 bg-prism-glow-sky/10 text-prism-navy">
+        <GitBranch className="size-4" />
+      </span>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <Typography
+            variant="bodySm"
+            tone="primary"
+            weight="semibold"
+            className="min-w-0 truncate"
+          >
+            {run.agentType}
+          </Typography>
+          <AgentRunStatusBadge status={run.status} />
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-prism-muted">
+          <span>{run.triggerType}</span>
+          <span>{formatProjectDateTime(run.createdAt)}</span>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function AgentStepDagNode({ step, isLast }: { step: AgentStep; isLast: boolean }) {
+  const Icon = STEP_STATUS_ICONS[step.status];
+  const summary = getStepSummary(step);
+
+  return (
+    <li className="relative grid grid-cols-[2rem_minmax(0,1fr)] gap-3 px-3 py-3">
+      {!isLast ? (
+        <span
+          aria-hidden="true"
+          className="absolute bottom-[-1px] left-7 top-9 w-px bg-border-strong/50"
+        />
+      ) : null}
+      <span
+        className={cn(
+          "relative z-10 inline-flex size-8 items-center justify-center rounded-full border",
+          STEP_STATUS_ICON_CLASS_NAMES[step.status],
+        )}
+      >
+        <Icon className={cn("size-4", step.status === "running" && "animate-spin")} />
+      </span>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <Typography
+            variant="bodySm"
+            tone="primary"
+            weight="semibold"
+            className="min-w-0 truncate"
+          >
+            {step.title}
+          </Typography>
+          <AgentStepStatusBadge status={step.status} />
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-prism-muted">
+          <span>Step {step.stepOrder + 1}</span>
+          <span>{getAgentStepTypeLabel(step.stepType)}</span>
+          <span>{getStepTimestamp(step)}</span>
+        </div>
+        {summary ? <p className="mt-2 line-clamp-2 text-sm leading-5 text-prism-body">{summary}</p> : null}
+        {step.inputObjectName || step.outputObjectName ? (
+          <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] text-prism-muted">
+            {step.inputObjectName ? (
+              <span className="max-w-full truncate rounded-md border border-border bg-surface px-1.5 py-0.5">
+                Input: {step.inputObjectName}
+              </span>
+            ) : null}
+            {step.outputObjectName ? (
+              <span className="max-w-full truncate rounded-md border border-border bg-surface px-1.5 py-0.5">
+                Output: {step.outputObjectName}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
+function AgentRunStepDag({
+  workspaceId,
+  run,
+  initialSteps,
+}: {
+  workspaceId: string;
+  run: AgentRun;
+  initialSteps?: AgentStep[];
+}) {
+  const { data, isPending, isFetching, isError, refetch } = useAgentRunSteps(workspaceId, run.runId, initialSteps);
+  const steps = React.useMemo(() => [...(data ?? EMPTY_AGENT_STEPS)].sort(sortAgentStepsByOrder), [data]);
+
+  if (isPending && !initialSteps) {
+    return <AgentRunStepDagSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <div className="mt-4 rounded-lg border border-prism-danger-soft bg-surface px-4 py-3 text-sm text-prism-danger">
+        <p>Agent steps could not be loaded.</p>
+        <Button
+          type="button"
+          className="mt-3 h-9 rounded-lg border-prism-danger-soft bg-surface px-4 text-prism-danger hover:bg-prism-danger-soft/40"
+          variant="outline"
+          onClick={() => {
+            void refetch();
+          }}
+        >
+          <RefreshCw className="size-4" />
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (steps.length === 0) {
+    return (
+      <div className="mt-4 rounded-lg border border-dashed border-border-strong/60 bg-surface-field-soft px-4 py-5 text-center">
+        <CircleDashed className="mx-auto size-5 text-prism-muted" />
+        <Typography
+          variant="bodySm"
+          tone="primary"
+          weight="semibold"
+          className="mt-3"
+        >
+          Waiting for the agent plan
+        </Typography>
+        <Typography
+          variant="caption"
+          tone="muted"
+          className="mx-auto mt-1 max-w-72"
+        >
+          Steps will appear as soon as this run publishes its execution plan.
+        </Typography>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-lg border border-border bg-surface-field-soft">
+      <div className="flex items-center justify-between gap-3 border-b border-border/70 px-3 py-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-prism-muted">
+          <Network className="size-3.5" />
+          Execution graph
+        </div>
+        {isFetching ? (
+          <span className="inline-flex items-center gap-1 text-xs text-prism-muted">
+            <Loader2 className="size-3.5 animate-spin" />
+            Syncing
+          </span>
+        ) : null}
+      </div>
+      <ol className="divide-y divide-border/60">
+        <AgentRunRootNode
+          run={run}
+          isLast={steps.length === 0}
+        />
+        {steps.map((step, index) => (
+          <AgentStepDagNode
+            key={step.stepId}
+            step={step}
+            isLast={index === steps.length - 1}
+          />
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function AgentRunDagCard({
+  workspaceId,
+  run,
+  initialSteps,
+}: {
+  workspaceId: string;
+  run: AgentRun;
+  initialSteps?: AgentStep[];
+}) {
+  return (
+    <article className="rounded-lg border border-border/80 bg-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset]">
       <div className="flex flex-wrap items-center gap-2">
         <AgentRunStatusBadge status={run.status} />
         <span className="inline-flex min-h-7 items-center rounded-full border border-border bg-surface-strong px-2.5 text-xs font-medium text-prism-muted">
@@ -76,30 +378,47 @@ function AgentRunCard({ run }: { run: AgentRun }) {
         {run.objective}
       </Typography>
 
-      <dl className="mt-4 grid gap-2 text-xs text-prism-muted">
-        <div className="flex items-center justify-between gap-3">
+      <dl className="mt-4 grid gap-2 text-xs text-prism-muted sm:grid-cols-3">
+        <div className="min-w-0">
           <dt className="flex items-center gap-1.5">
             <Clock3 className="size-3.5" />
             Created
           </dt>
-          <dd className="text-right text-prism-body">{formatProjectDateTime(run.createdAt)}</dd>
+          <dd className="mt-1 truncate text-prism-body">{formatProjectDateTime(run.createdAt)}</dd>
         </div>
-        <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <dt>Started</dt>
-          <dd className="text-right text-prism-body">{formatNullableDateTime(run.startedAt)}</dd>
+          <dd className="mt-1 truncate text-prism-body">{formatNullableDateTime(run.startedAt)}</dd>
         </div>
         {run.workItemId ? (
-          <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
             <dt>Work item</dt>
-            <dd className="max-w-40 truncate text-right font-mono text-prism-body">{run.workItemId}</dd>
+            <dd className="mt-1 truncate font-mono text-prism-body">{run.workItemId}</dd>
           </div>
-        ) : null}
+        ) : (
+          <div className="min-w-0">
+            <dt>Trigger</dt>
+            <dd className="mt-1 truncate text-prism-body">{run.triggerType}</dd>
+          </div>
+        )}
       </dl>
+
+      <AgentRunStepDag
+        workspaceId={workspaceId}
+        run={run}
+        initialSteps={initialSteps}
+      />
     </article>
   );
 }
 
-export function ProjectAgentClient({ projectId, workspaceId, initialData }: ProjectAgentClientProps) {
+export function ProjectAgentClient({
+  projectId,
+  workspaceId,
+  initialData,
+  initialStepsByRunId = {},
+}: ProjectAgentClientProps) {
+  const queryClient = useQueryClient();
   const [featureSpecification, setFeatureSpecification] = React.useState("");
   const [fieldError, setFieldError] = React.useState<string | null>(null);
   const [requestFeedback, setRequestFeedback] = React.useState<RequestFeedback | null>(null);
@@ -117,6 +436,16 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
   const isSpecificationTooLong = specificationLength > FEATURE_SPECIFICATION_MAX_LENGTH;
   const canSubmit =
     trimmedSpecification.length > 0 && !isSpecificationTooLong && !requestProvisioning.isPending && !isRunsPending;
+
+  function refreshAgentOverview() {
+    void refetch();
+
+    for (const run of runs) {
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.project.agentRunSteps(workspaceId, run.runId),
+      });
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -159,7 +488,7 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
         message: `Provisioning request ${statusLabel.toLowerCase()}.`,
         detail: `Request ${request.requestId}`,
       });
-      void refetch();
+      refreshAgentOverview();
     } catch (error) {
       setRequestFeedback({
         tone: "error",
@@ -173,7 +502,7 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
   }
 
   return (
-    <section className="mx-auto grid w-full max-w-6xl gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
+    <section className="mx-auto grid w-full max-w-7xl gap-5 xl:grid-cols-[minmax(20rem,0.9fr)_minmax(0,1.25fr)]">
       <div className="flex flex-col gap-5">
         <div>
           <div className="flex items-center gap-2">
@@ -199,7 +528,7 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
           <div
             role={requestFeedback.tone === "error" ? "alert" : "status"}
             className={cn(
-              "rounded-xl border px-4 py-3 text-sm",
+              "rounded-lg border px-4 py-3 text-sm",
               requestFeedback.tone === "error"
                 ? "border-prism-danger-soft bg-prism-danger-soft/20 text-prism-danger"
                 : "border-prism-teal-500/25 bg-prism-teal-500/10 text-prism-navy",
@@ -220,7 +549,7 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
         ) : null}
 
         <form
-          className="rounded-xl border border-border/80 bg-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.04)]"
+          className="rounded-lg border border-border/80 bg-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.04)]"
           onSubmit={event => {
             void handleSubmit(event);
           }}
@@ -296,7 +625,7 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
         </form>
       </div>
 
-      <aside className="flex flex-col gap-3">
+      <aside className="flex min-w-0 flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <Typography
@@ -304,22 +633,20 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
               tone="primary"
               className="text-base tracking-normal md:text-base"
             >
-              Current jobs
+              Realtime job DAG
             </Typography>
             <Typography
               variant="caption"
               tone="muted"
             >
-              Active workspace agent runs
+              Active agent runs and steps
             </Typography>
           </div>
           <Button
             type="button"
             variant="outline"
             className="h-9 rounded-lg border-border bg-surface px-3 text-prism-body"
-            onClick={() => {
-              void refetch();
-            }}
+            onClick={refreshAgentOverview}
             disabled={isRunsFetching}
           >
             <RefreshCw className={cn("size-4", isRunsFetching && "animate-spin")} />
@@ -328,15 +655,13 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
         </div>
 
         {isRunsError ? (
-          <div className="rounded-xl border border-prism-danger-soft bg-surface px-4 py-3 text-sm text-prism-danger">
+          <div className="rounded-lg border border-prism-danger-soft bg-surface px-4 py-3 text-sm text-prism-danger">
             <p>Agent jobs could not be loaded.</p>
             <Button
               type="button"
               className="mt-3 h-9 rounded-lg border-prism-danger-soft bg-surface px-4 text-prism-danger hover:bg-prism-danger-soft/40"
               variant="outline"
-              onClick={() => {
-                void refetch();
-              }}
+              onClick={refreshAgentOverview}
             >
               <RefreshCw className="size-4" />
               Retry
@@ -345,7 +670,7 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
         ) : null}
 
         {!isRunsError && runs.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border-strong/60 bg-surface px-5 py-8 text-center">
+          <div className="rounded-lg border border-dashed border-border-strong/60 bg-surface px-5 py-8 text-center">
             <Bot className="mx-auto size-5 text-prism-muted" />
             <Typography
               variant="bodySm"
@@ -368,9 +693,11 @@ export function ProjectAgentClient({ projectId, workspaceId, initialData }: Proj
         {!isRunsError && runs.length > 0 ? (
           <div className="grid gap-3">
             {runs.map(run => (
-              <AgentRunCard
+              <AgentRunDagCard
                 key={run.runId}
+                workspaceId={workspaceId}
                 run={run}
+                initialSteps={initialStepsByRunId[run.runId]}
               />
             ))}
           </div>

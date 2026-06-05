@@ -1,4 +1,4 @@
-import type { AgentRunStatus, FeatureProvisioningRequestStatus } from "@/domains/projects/types";
+import type { AgentRunStatus, AgentStepStatus, FeatureProvisioningRequestStatus } from "@/domains/projects/types";
 
 const AGENT_RUN_STATUS_LABELS: Record<AgentRunStatus, string> = {
   queued: "Queued",
@@ -13,6 +13,14 @@ const FEATURE_PROVISIONING_STATUS_LABELS: Record<FeatureProvisioningRequestStatu
   pending: "Pending",
   queued: "Queued",
   dispatch_failed: "Dispatch failed",
+};
+
+const AGENT_STEP_STATUS_LABELS: Record<AgentStepStatus, string> = {
+  pending: "Pending",
+  running: "Running",
+  completed: "Completed",
+  failed: "Failed",
+  skipped: "Skipped",
 };
 
 function formatUnknownStatus(status: string | null | undefined, fallback: string) {
@@ -38,4 +46,12 @@ export function getFeatureProvisioningStatusLabel(
     FEATURE_PROVISIONING_STATUS_LABELS[status as FeatureProvisioningRequestStatus] ??
     formatUnknownStatus(status, "Submitted")
   );
+}
+
+export function getAgentStepStatusLabel(status: AgentStepStatus | string | null | undefined) {
+  return AGENT_STEP_STATUS_LABELS[status as AgentStepStatus] ?? formatUnknownStatus(status, "Unknown");
+}
+
+export function getAgentStepTypeLabel(stepType: string | null | undefined) {
+  return formatUnknownStatus(stepType, "Step");
 }

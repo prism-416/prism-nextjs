@@ -46,7 +46,9 @@ export const QUERY_KEYS = {
       [...QUERY_KEYS.project.workItemDetail(projectId, itemId), "comments"] as const,
     workItemCommentList: (projectId: string, itemId: string, filters?: object) =>
       [...QUERY_KEYS.project.workItemComments(projectId, itemId), "list", filters ?? {}] as const,
-    currentAgentRuns: (workspaceId: string) =>
-      [...QUERY_KEYS.project.all, "agent-runs", "current", workspaceId] as const,
+    agentRuns: (workspaceId: string) => [...QUERY_KEYS.project.all, "agent-runs", workspaceId] as const,
+    currentAgentRuns: (workspaceId: string) => [...QUERY_KEYS.project.agentRuns(workspaceId), "current"] as const,
+    agentRunSteps: (workspaceId: string, runId: string) =>
+      [...QUERY_KEYS.project.agentRuns(workspaceId), "detail", runId, "steps"] as const,
   },
 } as const;
