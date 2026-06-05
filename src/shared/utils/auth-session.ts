@@ -18,8 +18,12 @@ export function normalizeAuthTokens(
   const accessTokenExpiresIn =
     getNumberValue(payload.accessTokenExpiresIn) ||
     getNumberValue(payload.expiresIn) ||
-    getNumberValue(payload.expires_in);
-  const refreshTokenExpiresIn = getNumberValue(payload.refreshTokenExpiresIn);
+    getNumberValue(payload.expires_in) ||
+    getNumberValue(payload.access_token_expires_in);
+  const refreshTokenExpiresIn =
+    getNumberValue(payload.refreshTokenExpiresIn) ||
+    getNumberValue(payload.refreshExpiresIn) ||
+    getNumberValue(payload.refresh_token_expires_in);
 
   if (!accessToken) {
     return null;

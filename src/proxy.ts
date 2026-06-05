@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { API_HOST, JSON_CONTENT_TYPE } from "@/shared/constants/api";
 import { applyAuthCookies, clearAuthCookies } from "@/shared/utils/auth-cookie";
-import { normalizeAuthTokens } from "@/shared/utils/auth-session";
+import { getAuthTokensFromResponse } from "@/shared/utils/auth-response";
 import type { AuthTokens } from "@/shared/types/auth";
 import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
 
@@ -72,7 +72,7 @@ async function refreshAuthSession(refreshToken: string): Promise<RefreshSessionR
       cache: "no-store",
     });
     const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-    const tokens = normalizeAuthTokens((payload?.data as Record<string, unknown> | undefined) || payload || undefined);
+    const tokens = getAuthTokensFromResponse(payload, response.headers, refreshToken);
 
     if (response.status === 401 || response.status === 403) {
       return { status: "invalid" };
@@ -84,7 +84,7 @@ async function refreshAuthSession(refreshToken: string): Promise<RefreshSessionR
 
     return {
       status: "success",
-      tokens: tokens.refreshToken ? tokens : { ...tokens, refreshToken },
+      tokens,
     };
   } catch {
     return { status: "failed" };
