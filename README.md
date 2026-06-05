@@ -92,6 +92,7 @@ NEXT_PUBLIC_ENV=local
 NEXT_PUBLIC_API_HOST=http://localhost:4000
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 PASSWORD_VERIFY_SECRET=change-me
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
 ```
 

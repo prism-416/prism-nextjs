@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo } from "react";
+import { resolveGoogleClientId } from "@/shared/constants/google-oauth";
 import type { ServerInitDataType } from "@/shared/utils/server-util";
 
 type OAuthContextValue = {
@@ -17,7 +18,7 @@ type OAuthProviderProps = {
 export function OAuthProvider({ children, initData }: OAuthProviderProps) {
   const value = useMemo(
     () => ({
-      googleClientId: initData.googleClientId,
+      googleClientId: initData.googleClientId ?? resolveGoogleClientId(),
     }),
     [initData.googleClientId],
   );
