@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { cn } from "@/shared/utils/cn";
 import { Input } from "@/atomics/atoms/Input";
+import { SidebarTrigger } from "@/atomics/organisms/Sidebar";
 import { AppHeaderNotifications } from "@/domains/workspaces/components/AppHeaderNotifications";
 import { AppHeaderUserMenu } from "@/domains/workspaces/components/AppHeaderUserMenu";
 import { WorkspacePath } from "@/domains/workspaces/components/WorkspacePath";
@@ -23,6 +24,8 @@ export function AppHeader({ pathSegments, actions, className }: AppHeaderProps) 
         className,
       )}
     >
+      <SidebarTrigger className="size-9 shrink-0 text-prism-muted hover:bg-prism-navy/5 hover:text-prism-body md:hidden" />
+
       <Link
         href="/"
         aria-label="Prism home"
