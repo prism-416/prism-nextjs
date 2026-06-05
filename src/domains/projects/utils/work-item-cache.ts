@@ -9,6 +9,90 @@ import type { ProjectWorkItemDeletedPayload } from "@/domains/projects/types/rea
 import { PROJECT_WORK_ITEM_STATUSES } from "@/domains/projects/utils/work-item-display";
 import { QUERY_KEYS } from "@/shared/query/queryKeys";
 
+/**
+ * Insert a work item into a list so it stays ordered by `sortOrder` ascending,
+ * matching the order the API returns (sort_order ASC).
+ */
+function insertWorkItemBySortOrder(items: ProjectWorkItem[], workItem: ProjectWorkItem) {
+  const insertIndex = items.findIndex(item => item.sortOrder > workItem.sortOrder);
+  return insertIndex === -1
+    ? [...items, workItem]
+    : [...items.slice(0, insertIndex), workItem, ...items.slice(insertIndex)];
+}
+
+/**
+ * Optimistically merge a patch into a single board item in place. Used for field
+ * edits that don't change ordering (title, description, priority, assignees…).
+ */
+export function patchProjectBoardWorkItem(
+  queryClient: QueryClient,
+  boardQueryKey: QueryKey,
+  itemId: string,
+  patch: Partial<ProjectWorkItem>,
+) {
+  queryClient.setQueryData<ProjectWorkItemSearchResult>(boardQueryKey, previous => {
+    if (!previous) return previous;
+    return {
+      ...previous,
+      items: previous.items.map(item => (item.itemId === itemId ? { ...item, ...patch } : item)),
+    };
+  });
+}
+
+/**
+ * Optimistically apply a patch and re-position the item by its new `sortOrder`.
+ * Used when status changes (the API reassigns sort_order within the new column).
+ */
+export function moveProjectBoardWorkItem(
+  queryClient: QueryClient,
+  boardQueryKey: QueryKey,
+  itemId: string,
+  patch: Partial<ProjectWorkItem>,
+) {
+  queryClient.setQueryData<ProjectWorkItemSearchResult>(boardQueryKey, previous => {
+    if (!previous) return previous;
+    const existing = previous.items.find(item => item.itemId === itemId);
+    if (!existing) return previous;
+    const updated = { ...existing, ...patch };
+    const withoutItem = previous.items.filter(item => item.itemId !== itemId);
+    return { ...previous, items: insertWorkItemBySortOrder(withoutItem, updated) };
+  });
+}
+
+/**
+ * Optimistically insert a freshly created work item at its sorted position.
+ */
+export function insertProjectBoardWorkItem(
+  queryClient: QueryClient,
+  boardQueryKey: QueryKey,
+  workItem: ProjectWorkItem,
+) {
+  queryClient.setQueryData<ProjectWorkItemSearchResult>(boardQueryKey, previous => {
+    if (!previous || previous.items.some(item => item.itemId === workItem.itemId)) {
+      return previous;
+    }
+    return {
+      ...previous,
+      items: insertWorkItemBySortOrder(previous.items, workItem),
+      total: previous.total + 1,
+    };
+  });
+}
+
+/**
+ * Optimistically merge a patch into the cached work item detail, if present.
+ */
+export function patchProjectWorkItemDetail(
+  queryClient: QueryClient,
+  projectId: string,
+  itemId: string,
+  patch: Partial<ProjectWorkItem>,
+) {
+  queryClient.setQueryData<ProjectWorkItem>(QUERY_KEYS.project.workItemDetail(projectId, itemId), previous =>
+    previous ? { ...previous, ...patch } : previous,
+  );
+}
+
 function replaceWorkItemInSearchResult(previous: ProjectWorkItemSearchResult | undefined, workItem: ProjectWorkItem) {
   if (!previous) {
     return previous;
@@ -92,7 +176,21 @@ export function syncProjectWorkItemUpdated(queryClient: QueryClient, workItem: P
     {
       predicate: query => isProjectWorkItemListQuery(query.queryKey, projectId),
     },
-    previous => replaceWorkItemInSearchResult(previous, workItem),
+    previous => {
+      if (!previous) return previous;
+      const existing = previous.items.find(i => i.itemId === itemId);
+      if (!existing) return replaceWorkItemInSearchResult(previous, workItem);
+
+      // When sortOrder changes (e.g. after a status change that reassigns sort_order),
+      // move the item to its new sorted position so the display is stable before the
+      // next refetch arrives.
+      if (existing.sortOrder !== workItem.sortOrder) {
+        const withoutItem = previous.items.filter(i => i.itemId !== itemId);
+        return { ...previous, items: insertWorkItemBySortOrder(withoutItem, workItem) };
+      }
+
+      return replaceWorkItemInSearchResult(previous, workItem);
+    },
   );
   queryClient.setQueriesData<ProjectWorkItem[]>(
     {
@@ -179,7 +277,22 @@ export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: Pr
     },
     previous => removeWorkItemFromChildren(previous, itemId),
   );
-  invalidateProjectWorkItemCollections(queryClient, projectId);
+  // Invalidate the work item collections (and other items' subtrees) but NOT the
+  // deleted item's own detail/children subtree — it no longer exists on the
+  // server, so refetching it would 404 (the delete dialog may still be observing
+  // its children to show the child count).
+  queryClient.invalidateQueries({
+    predicate: query => {
+      const key = query.queryKey;
+      const underWorkItems =
+        key[0] === "project" && key[1] === "detail" && key[2] === projectId && key[3] === "work-items";
+      if (!underWorkItems) {
+        return false;
+      }
+      const isDeletedItemSubtree = key[4] === "detail" && key[5] === itemId;
+      return !isDeletedItemSubtree;
+    },
+  });
   queryClient.invalidateQueries({
     predicate: query =>
       query.queryKey[0] === "workspace" && query.queryKey[1] === "detail" && query.queryKey[3] === "sprints",

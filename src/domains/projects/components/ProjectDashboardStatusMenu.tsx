@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { Check } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -54,7 +54,6 @@ export function ProjectDashboardStatusMenu({ item, disabled, onStatusUpdate }: P
           aria-label={`Change ${item.title} status`}
         >
           <StatusLabel status={item.status} />
-          <ChevronDown className="size-3 opacity-60" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
