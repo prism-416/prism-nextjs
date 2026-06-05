@@ -9,7 +9,7 @@ export function useCurrentWorkspaceAgentRuns(workspaceId: string, initialData?: 
     queryKey: QUERY_KEYS.project.currentAgentRuns(workspaceId),
     queryFn: () => getCurrentWorkspaceAgentRuns(workspaceId),
     initialData: initialData ?? undefined,
-    staleTime: 15 * 1000,
-    refetchInterval: 30 * 1000,
+    staleTime: 5 * 1000,
+    refetchInterval: 5 * 1000,
   });
 }

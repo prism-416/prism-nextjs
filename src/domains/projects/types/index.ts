@@ -164,6 +164,27 @@ export interface AgentRunSearchResult {
   offset: number;
 }
 
+export type AgentStepStatus = "pending" | "running" | "completed" | "failed" | "skipped";
+
+export interface AgentStep {
+  stepId: string;
+  runId: string;
+  stepOrder: number;
+  stepType: string;
+  status: AgentStepStatus;
+  title: string;
+  inputObjectName: string | null;
+  outputObjectName: string | null;
+  inputSummary: string | null;
+  outputSummary: string | null;
+  errorMessage: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+export type AgentRunStepsByRunId = Record<string, AgentStep[]>;
+
 export type FeatureProvisioningRequestStatus = "pending" | "queued" | "dispatch_failed";
 
 export interface FeatureProvisioningRequest {

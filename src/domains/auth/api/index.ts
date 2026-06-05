@@ -15,22 +15,31 @@ import type {
   SignUpCreatedUser,
 } from "../types";
 
-export async function signInWithGoogle(idToken: string) {
-  return commonAxios<GoogleOAuthSignInRequest, ApiResponse<OAuthTokenResult>>({
-    url: "/auth/oauth/google",
+async function postLocalAuth<TBody, TResult>(url: string, body: TBody) {
+  const response = await fetch(url, {
     method: "POST",
-    data: { idToken },
-    version: null,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify(body),
   });
+  const payload = (await response.json().catch(() => null)) as ApiResponse<TResult> | null;
+
+  if (!response.ok) {
+    return payload ?? { message: "Authentication request failed." };
+  }
+
+  return payload;
+}
+
+export async function signInWithGoogle(idToken: string) {
+  return postLocalAuth<GoogleOAuthSignInRequest, OAuthTokenResult>("/api/auth/oauth/google", { idToken });
 }
 
 export async function signInWithEmail(body: EmailSignInPayload) {
-  return commonAxios<EmailSignInPayload, ApiResponse<AccessTokenBundle>>({
-    url: "/auth/signin",
-    method: "POST",
-    data: body,
-    version: null,
-  });
+  return postLocalAuth<EmailSignInPayload, AccessTokenBundle>("/api/auth/signin", body);
 }
 
 export async function requestEmailVerification(body: RequestEmailVerificationPayload) {
@@ -87,10 +96,5 @@ export async function getGithubAuthorizationUrl() {
 }
 
 export async function signInWithGithub(body: GithubOAuthSignInRequest) {
-  return commonAxios<GithubOAuthSignInRequest, ApiResponse<OAuthTokenResult>>({
-    url: "/auth/oauth/github",
-    method: "POST",
-    data: body,
-    version: null,
-  });
+  return postLocalAuth<GithubOAuthSignInRequest, OAuthTokenResult>("/api/auth/oauth/github", body);
 }

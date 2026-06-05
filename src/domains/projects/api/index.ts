@@ -5,7 +5,9 @@ import type {
   AgentRun,
   AgentRunSearchParams,
   AgentRunSearchResult,
+  AgentRunStepsByRunId,
   AgentRunStatus,
+  AgentStep,
   CreateFeatureProvisioningRequestPayload,
   CreateProjectPayload,
   Project,
@@ -233,6 +235,27 @@ export async function getCurrentWorkspaceAgentRuns(workspaceId: string) {
     limit: CURRENT_AGENT_RUN_LIMIT,
     offset: 0,
   } satisfies AgentRunSearchResult;
+}
+
+export async function getAgentRunSteps(workspaceId: string, runId: string) {
+  const response = await commonAxios<null, ApiResponse<AgentStep[]>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/agent-runs/${encodeURIComponent(runId)}/steps`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? [];
+}
+
+export async function getAgentRunStepsByRunId(workspaceId: string, runs: AgentRun[]) {
+  const entries = await Promise.all(
+    runs.map(async run => {
+      const steps = await getAgentRunSteps(workspaceId, run.runId).catch(() => []);
+      return [run.runId, steps] as const;
+    }),
+  );
+
+  return Object.fromEntries(entries) as AgentRunStepsByRunId;
 }
 
 export async function requestFeatureProvisioning(workspaceId: string, body: CreateFeatureProvisioningRequestPayload) {

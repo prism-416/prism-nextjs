@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { API_HOST } from "@/shared/constants/api";
 import { clearAuthCookies, applyAuthCookies } from "@/shared/utils/auth-cookie";
-import { normalizeAuthTokens } from "@/shared/utils/auth-session";
+import { getAuthTokensFromResponse } from "@/shared/utils/auth-response";
 
 async function readRefreshTokenFromBody(request: NextRequest) {
   const contentType = request.headers.get("content-type") || "";
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     });
 
     const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-    const tokens = normalizeAuthTokens((payload?.data as Record<string, unknown> | undefined) || payload || undefined);
+    const tokens = getAuthTokensFromResponse(payload, response.headers, refreshToken);
 
     if (response.status === 401 || response.status === 403) {
       return clearAuthCookies(
@@ -63,14 +63,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const nextTokens = tokens.refreshToken ? tokens : { ...tokens, refreshToken };
-
     const refreshResponse = NextResponse.json({
       authenticated: true,
-      accessToken: nextTokens.accessToken,
+      accessToken: tokens.accessToken,
     });
 
-    return applyAuthCookies(refreshResponse, nextTokens);
+    return applyAuthCookies(refreshResponse, tokens);
   } catch {
     return NextResponse.json(
       {

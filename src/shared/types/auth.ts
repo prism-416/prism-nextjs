@@ -17,6 +17,9 @@ export interface AuthSessionPayload extends Partial<AuthTokens> {
   refresh_token?: string;
   expiresIn?: number;
   expires_in?: number;
+  access_token_expires_in?: number;
+  refreshExpiresIn?: number;
+  refresh_token_expires_in?: number;
 }
 
 export interface CurrentUser {
