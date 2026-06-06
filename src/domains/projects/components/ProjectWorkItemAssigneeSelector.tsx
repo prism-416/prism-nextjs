@@ -13,6 +13,10 @@ import {
 import type { ProjectParticipant } from "@/domains/projects/types";
 import { cn } from "@/shared/utils/cn";
 
+function areUsernamesEqual(a: string[], b: string[]) {
+  return a.length === b.length && a.every((username, index) => username === b[index]);
+}
+
 type ProjectWorkItemAssigneeSelectorProps = {
   id?: string;
   members: ProjectParticipant[];
@@ -37,9 +41,11 @@ export function ProjectWorkItemAssigneeSelector({
   // Keep refs always pointing at the latest values for use in effects/cleanup
   const onChangeRef = React.useRef(onChange);
   const localUsernamesRef = React.useRef(localUsernames);
+  const selectedUsernamesRef = React.useRef(selectedUsernames);
   React.useEffect(() => {
     onChangeRef.current = onChange;
     localUsernamesRef.current = localUsernames;
+    selectedUsernamesRef.current = selectedUsernames;
   });
 
   // Sync from parent when selectedUsernames changes externally (e.g. API rollback)
@@ -48,10 +54,14 @@ export function ProjectWorkItemAssigneeSelector({
   }, [selectedUsernames]);
 
   // If the editor unmounts while the dropdown is still open (user clicked outside
-  // the card), commit whatever selections were in progress.
+  // the card), commit whatever selections were in progress — but only if they
+  // actually changed, so unmounting (e.g. after the item is deleted) never fires
+  // a spurious update against a now-missing item.
   React.useEffect(() => {
     return () => {
-      onChangeRef.current(localUsernamesRef.current);
+      if (!areUsernamesEqual(localUsernamesRef.current, selectedUsernamesRef.current)) {
+        onChangeRef.current(localUsernamesRef.current);
+      }
     };
   }, []);
 
@@ -79,7 +89,7 @@ export function ProjectWorkItemAssigneeSelector({
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
+    if (!open && !areUsernamesEqual(localUsernamesRef.current, selectedUsernamesRef.current)) {
       onChange(localUsernamesRef.current);
     }
   };
