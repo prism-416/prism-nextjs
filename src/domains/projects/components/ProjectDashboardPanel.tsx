@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -10,7 +10,7 @@ import {
   type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { LayoutDashboard, Plus, RefreshCw } from "lucide-react";
+import { CheckSquare, LayoutDashboard, Plus, RefreshCw, Trash2, X } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
@@ -65,6 +65,14 @@ type ProjectDashboardPanelProps = {
   onItemsReorder: (items: ProjectWorkItem[]) => void;
   onRetry: () => void;
   onCreateWorkItem: (status?: ProjectWorkItemStatus) => void;
+  selectionMode: boolean;
+  selectedIds: Set<string>;
+  selectedCount: number;
+  isBulkDeleting: boolean;
+  onToggleSelectionMode: () => void;
+  onExitSelectionMode: () => void;
+  onToggleSelected: (itemId: string) => void;
+  onBulkDelete: () => void | Promise<void>;
 };
 
 export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
@@ -88,6 +96,14 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
   onItemsReorder,
   onRetry,
   onCreateWorkItem,
+  selectionMode,
+  selectedIds,
+  selectedCount,
+  isBulkDeleting,
+  onToggleSelectionMode,
+  onExitSelectionMode,
+  onToggleSelected,
+  onBulkDelete,
 }: ProjectDashboardPanelProps) {
   const [activeItem, setActiveItem] = useState<ProjectWorkItem | null>(null);
   const [previewItems, setPreviewItems] = useState<ProjectWorkItem[] | null>(null);
@@ -158,6 +174,22 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
     resetDragState();
   }, [resetDragState]);
 
+  // Exit selection mode with Escape.
+  useEffect(() => {
+    if (!selectionMode) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onExitSelectionMode();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [selectionMode, onExitSelectionMode]);
+
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -182,14 +214,25 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {!isError && (
-            <Button
-              type="button"
-              className="h-10 rounded-lg px-4"
-              onClick={() => onCreateWorkItem()}
-            >
-              <Plus className="size-4" />
-              New work item
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 rounded-lg px-4"
+                onClick={onToggleSelectionMode}
+              >
+                {selectionMode ? <X className="size-4" /> : <CheckSquare className="size-4" />}
+                {selectionMode ? "Cancel" : "Select"}
+              </Button>
+              <Button
+                type="button"
+                className="h-10 rounded-lg px-4"
+                onClick={() => onCreateWorkItem()}
+              >
+                <Plus className="size-4" />
+                New work item
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -244,6 +287,9 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
                   onInlineEditCancel={onInlineEditCancel}
                   onEditWorkItem={onEditWorkItem}
                   onDeleteWorkItem={onDeleteWorkItem}
+                  selectionMode={selectionMode}
+                  selectedIds={selectedIds}
+                  onToggleSelected={onToggleSelected}
                 />
               ))}
             </div>
@@ -265,6 +311,42 @@ export const ProjectDashboardPanel = memo(function ProjectDashboardPanel({
               )}
             </DragOverlay>
           </DndContext>
+        </div>
+      )}
+
+      {selectionMode && selectedCount > 0 && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-border bg-surface-strong px-4 py-2 shadow-[0_16px_40px_rgba(12,71,103,0.18)]">
+            <Typography
+              variant="bodySm"
+              tone="primary"
+              weight="medium"
+            >
+              {selectedCount} selected
+            </Typography>
+            <span
+              className="h-5 w-px bg-border"
+              aria-hidden="true"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 rounded-lg px-3 text-prism-muted hover:text-prism-body"
+              onClick={onExitSelectionMode}
+              disabled={isBulkDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="h-8 rounded-lg bg-prism-danger px-4 text-white hover:bg-prism-danger/90"
+              onClick={() => void onBulkDelete()}
+              disabled={isBulkDeleting}
+            >
+              <Trash2 className="size-4" />
+              {isBulkDeleting ? "Moving..." : "Move to trash"}
+            </Button>
+          </div>
         </div>
       )}
     </section>

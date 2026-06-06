@@ -4,7 +4,6 @@ import { useProjectDashboard } from "@/domains/projects/hooks/useProjectDashboar
 import { CreateProjectWorkItemDialog } from "@/domains/projects/components/CreateProjectWorkItemDialog";
 import { ProjectDashboardPanel } from "@/domains/projects/components/ProjectDashboardPanel";
 import { ProjectDashboardSkeleton } from "@/domains/projects/components/ProjectDashboardSkeleton";
-import { ProjectWorkItemDeleteDialog } from "@/domains/projects/components/ProjectWorkItemDeleteDialog";
 import type { ProjectParticipant, ProjectWorkItemSearchResult } from "@/domains/projects/types";
 
 type ProjectDashboardClientProps = {
@@ -45,6 +44,14 @@ export function ProjectDashboardClient(props: ProjectDashboardClientProps) {
         onItemsReorder={dashboard.onItemsReorder}
         onRetry={dashboard.onRetry}
         onCreateWorkItem={dashboard.onCreateWorkItem}
+        selectionMode={dashboard.selectionMode}
+        selectedIds={dashboard.selectedIds}
+        selectedCount={dashboard.selectedCount}
+        isBulkDeleting={dashboard.isBulkDeleting}
+        onToggleSelectionMode={dashboard.onToggleSelectionMode}
+        onExitSelectionMode={dashboard.onExitSelectionMode}
+        onToggleSelected={dashboard.onToggleSelected}
+        onBulkDelete={dashboard.onBulkDelete}
       />
 
       <CreateProjectWorkItemDialog
@@ -55,17 +62,6 @@ export function ProjectDashboardClient(props: ProjectDashboardClientProps) {
         initialStatus={dashboard.createInitialStatus}
         onOpenChange={dashboard.onCreateOpenChange}
       />
-
-      {dashboard.deletingWorkItem && (
-        <ProjectWorkItemDeleteDialog
-          projectId={props.projectId}
-          workItem={dashboard.deletingWorkItem}
-          childCount={dashboard.deletingWorkItemChildren.length}
-          open
-          onOpenChange={dashboard.onDeletingOpenChange}
-          onDeleted={dashboard.onDeleted}
-        />
-      )}
     </>
   );
 }

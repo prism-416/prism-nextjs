@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, type KeyboardEvent, type MouseEve
 import { useRouter } from "next/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CalendarDays, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { CalendarDays, Check, MoreVertical, Pencil, Trash2 } from "lucide-react";
 
 import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { Button } from "@/atomics/atoms/Button";
@@ -49,7 +49,7 @@ export function DashboardWorkItemActionsMenu({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-7 w-7 shrink-0 rounded-md text-prism-muted hover:bg-prism-navy/5 hover:text-prism-body"
+          className="ml-1.5 h-7 w-7 shrink-0 rounded-md text-prism-muted hover:bg-prism-navy/5 hover:text-prism-body"
           aria-label={`${item.title} options`}
           onClick={event => event.stopPropagation()}
           onPointerDown={event => event.stopPropagation()}
@@ -103,6 +103,9 @@ type WorkItemCardContentProps = {
   onAssigneesUpdate?: (item: ProjectWorkItem, usernames: string[]) => void | Promise<void>;
   onEditWorkItem?: (item: ProjectWorkItem) => void;
   onDeleteWorkItem?: (item: ProjectWorkItem) => void;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelected?: (itemId: string) => void;
 };
 
 export const WorkItemCardContent = memo(function WorkItemCardContent({
@@ -119,6 +122,9 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
   onAssigneesUpdate,
   onEditWorkItem,
   onDeleteWorkItem,
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelected,
 }: WorkItemCardContentProps) {
   const visibleLabels = item.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(item.labelNames.length - visibleLabels.length, 0);
@@ -126,7 +132,29 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
 
   return (
     <>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center">
+        {selectionMode && !isDragOverlay && !isEditingTitle && onToggleSelected && (
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={isSelected}
+            aria-label={isSelected ? `Deselect ${item.title}` : `Select ${item.title}`}
+            className={cn(
+              "mr-2 grid size-5 shrink-0 place-items-center rounded-md border transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isSelected
+                ? "border-prism-teal-500 bg-prism-teal-500 text-white"
+                : "border-border bg-surface-strong text-transparent hover:border-border-strong",
+            )}
+            onPointerDown={event => event.stopPropagation()}
+            onClick={event => {
+              event.stopPropagation();
+              onToggleSelected(item.itemId);
+            }}
+          >
+            <Check className="size-3.5" />
+          </button>
+        )}
         {isEditingTitle &&
         onTitleUpdate &&
         onDescriptionUpdate &&
@@ -245,13 +273,21 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
   onAssigneesUpdate,
   onEditWorkItem,
   onDeleteWorkItem,
-}: Omit<WorkItemCardContentProps, "isDragOverlay"> & { projectSlug: string }) {
+  selectionMode = false,
+  isSelected = false,
+  onToggleSelected,
+}: Omit<WorkItemCardContentProps, "isDragOverlay"> & {
+  projectSlug: string;
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelected?: (itemId: string) => void;
+}) {
   const router = useRouter();
   const didDragRef = useRef(false);
   const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
   const { attributes, listeners, setNodeRef, isDragging, isOver, transform, transition } = useSortable({
     id: item.itemId,
-    disabled: isEditingTitle,
+    disabled: isEditingTitle || selectionMode,
     data: { item, itemId: item.itemId, status: item.status } satisfies ProjectWorkItemDropTarget & {
       item: ProjectWorkItem;
     },
@@ -270,6 +306,12 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
         return;
       }
 
+      if (selectionMode) {
+        event.preventDefault();
+        onToggleSelected?.(item.itemId);
+        return;
+      }
+
       if (didDragRef.current) {
         event.preventDefault();
         didDragRef.current = false;
@@ -282,7 +324,7 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
 
       router.push(detailHref);
     },
-    [detailHref, isEditingTitle, router],
+    [detailHref, isEditingTitle, item.itemId, onToggleSelected, router, selectionMode],
   );
 
   const handleKeyDown = useCallback(
@@ -296,9 +338,13 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
       }
 
       event.preventDefault();
+      if (selectionMode) {
+        onToggleSelected?.(item.itemId);
+        return;
+      }
       router.push(detailHref);
     },
-    [detailHref, isEditingTitle, router],
+    [detailHref, isEditingTitle, item.itemId, onToggleSelected, router, selectionMode],
   );
 
   return (
@@ -312,9 +358,13 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
       className={cn(
         "group/card rounded-xl border border-border/80 bg-surface p-3",
         "shadow-[0_1px_0_rgba(255,255,255,0.65)_inset]",
-        isEditingTitle ? "cursor-default touch-auto" : "cursor-pointer touch-none select-none active:cursor-grabbing",
+        isEditingTitle || selectionMode
+          ? "cursor-pointer touch-auto"
+          : "cursor-pointer touch-none select-none active:cursor-grabbing",
+        isEditingTitle && "cursor-default",
         "transition-[opacity,border-color,box-shadow] duration-100",
         isOver && !isDragging && "border-prism-teal-500/40 shadow-[0_0_0_1px_rgba(19,177,165,0.18)]",
+        isSelected && "border-prism-teal-500/60 shadow-[0_0_0_1px_rgba(19,177,165,0.3)]",
         isDragging ? "opacity-35" : "opacity-100",
       )}
       {...attributes}
@@ -338,6 +388,9 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
         onAssigneesUpdate={onAssigneesUpdate}
         onEditWorkItem={onEditWorkItem}
         onDeleteWorkItem={onDeleteWorkItem}
+        selectionMode={selectionMode}
+        isSelected={isSelected}
+        onToggleSelected={onToggleSelected}
       />
     </article>
   );

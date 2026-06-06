@@ -99,6 +99,15 @@ export interface ReorderProjectWorkItemsPayload {
   }>;
 }
 
+export interface TrashedProjectWorkItem extends ProjectWorkItem {
+  deletedAt: string;
+  descendantCount: number;
+}
+
+export interface TrashedProjectWorkItemSearchResult {
+  items: TrashedProjectWorkItem[];
+}
+
 export interface ProjectWorkItemComment {
   commentId: string;
   projectId: string;
