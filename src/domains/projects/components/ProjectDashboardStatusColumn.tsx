@@ -90,6 +90,9 @@ export const DroppableStatusColumn = memo(function DroppableStatusColumn({
   onInlineEditCancel,
   onEditWorkItem,
   onDeleteWorkItem,
+  selectionMode,
+  selectedIds,
+  onToggleSelected,
 }: {
   projectSlug: string;
   status: ProjectWorkItemStatus;
@@ -118,6 +121,9 @@ export const DroppableStatusColumn = memo(function DroppableStatusColumn({
   onInlineEditCancel: () => void;
   onEditWorkItem: (item: ProjectWorkItem) => void;
   onDeleteWorkItem: (item: ProjectWorkItem) => void;
+  selectionMode: boolean;
+  selectedIds: Set<string>;
+  onToggleSelected: (itemId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: getProjectWorkItemStatusDropId(status),
@@ -184,6 +190,9 @@ export const DroppableStatusColumn = memo(function DroppableStatusColumn({
                 onAssigneesUpdate={onInlineAssigneesUpdate}
                 onEditWorkItem={onEditWorkItem}
                 onDeleteWorkItem={onDeleteWorkItem}
+                selectionMode={selectionMode}
+                isSelected={selectedIds.has(item.itemId)}
+                onToggleSelected={onToggleSelected}
               />
             ))}
             <AddWorkItemSlot

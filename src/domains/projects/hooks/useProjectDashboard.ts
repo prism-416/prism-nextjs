@@ -4,7 +4,8 @@ import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { PROJECT_DASHBOARD_WORK_ITEM_FILTERS } from "@/domains/projects/constants/dashboard";
-import { useProjectWorkItemChildren } from "@/domains/projects/hooks/useProjectWorkItemChildren";
+import { useDeleteProjectWorkItem } from "@/domains/projects/hooks/useDeleteProjectWorkItem";
+import { useProjectWorkItemBulkSelection } from "@/domains/projects/hooks/useProjectWorkItemBulkSelection";
 import { useProjectWorkItemInlineEditor } from "@/domains/projects/hooks/useProjectWorkItemInlineEditor";
 import { useProjectWorkItemQuickFields } from "@/domains/projects/hooks/useProjectWorkItemQuickFields";
 import { useProjectWorkItems } from "@/domains/projects/hooks/useProjectWorkItems";
@@ -33,7 +34,6 @@ export function useProjectDashboard({ projectId, initialData }: ProjectDashboard
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createInitialStatus, setCreateInitialStatus] = useState<ProjectWorkItemStatus>("todo");
-  const [deletingWorkItem, setDeletingWorkItem] = useState<ProjectWorkItem | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
 
   const { data, isPending, isError, refetch } = useProjectWorkItems(
@@ -41,13 +41,14 @@ export function useProjectDashboard({ projectId, initialData }: ProjectDashboard
     PROJECT_DASHBOARD_WORK_ITEM_FILTERS,
     initialData,
   );
-  const { data: deletingWorkItemChildren = [] } = useProjectWorkItemChildren(projectId, deletingWorkItem?.itemId);
+  const { mutate: deleteWorkItem } = useDeleteProjectWorkItem();
   const { mutate: reorderWorkItems } = useReorderProjectWorkItems(projectId);
 
   const boardQueryKey = QUERY_KEYS.project.workItemList(projectId, PROJECT_DASHBOARD_WORK_ITEM_FILTERS);
 
   const quickFields = useProjectWorkItemQuickFields({ projectId, boardQueryKey, setUpdateError });
   const inlineEditor = useProjectWorkItemInlineEditor({ projectId, boardQueryKey, setUpdateError });
+  const bulkSelection = useProjectWorkItemBulkSelection({ projectId, setUpdateError });
 
   const handleItemsReorder = useCallback(
     (items: ProjectWorkItem[]) => {
@@ -93,6 +94,22 @@ export function useProjectDashboard({ projectId, initialData }: ProjectDashboard
     setIsCreateOpen(true);
   }, []);
 
+  // Soft delete: move straight to trash (recoverable there) without a confirm dialog.
+  const handleDeleteWorkItem = useCallback(
+    (item: ProjectWorkItem) => {
+      setUpdateError(null);
+      deleteWorkItem(
+        { projectId, itemId: item.itemId },
+        {
+          onError: error => {
+            setUpdateError(error instanceof Error ? error.message : "Work item could not be deleted.");
+          },
+        },
+      );
+    },
+    [deleteWorkItem, projectId],
+  );
+
   return {
     data,
     isPending,
@@ -101,18 +118,13 @@ export function useProjectDashboard({ projectId, initialData }: ProjectDashboard
     updateError,
     ...quickFields,
     ...inlineEditor,
-    onDeleteWorkItem: setDeletingWorkItem,
+    ...bulkSelection,
+    onDeleteWorkItem: handleDeleteWorkItem,
     onItemsReorder: handleItemsReorder,
     onRetry: handleRetry,
     onCreateWorkItem: handleCreateOpen,
     isCreateOpen,
     createInitialStatus,
     onCreateOpenChange: setIsCreateOpen,
-    deletingWorkItem,
-    deletingWorkItemChildren,
-    onDeletingOpenChange: (open: boolean) => {
-      if (!open) setDeletingWorkItem(null);
-    },
-    onDeleted: () => setDeletingWorkItem(null),
   };
 }

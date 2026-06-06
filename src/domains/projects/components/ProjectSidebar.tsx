@@ -10,6 +10,7 @@ import {
   ListTodo,
   LogOut,
   Settings,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -144,6 +145,7 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
   );
   const generalNav = React.useMemo<ProjectSidebarNavItem[]>(
     () => [
+      { label: "Trash", href: `${projectHref}/trash`, icon: Trash2, exact: true },
       { label: "Settings", href: `${projectHref}/settings`, icon: Settings, exact: true },
       { label: "Workspace projects", href: workspaceHref, icon: Layers, exact: true },
       { label: "All workspaces", href: "/workspaces", icon: LayoutDashboard, exact: true },

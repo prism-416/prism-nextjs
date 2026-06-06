@@ -58,10 +58,11 @@ export function formatProjectDateTime(value: string) {
     return "Invalid date";
   }
 
-  const hours = padDatePart(date.getUTCHours());
-  const minutes = padDatePart(date.getUTCMinutes());
+  // Use the viewer's local timezone (formatProjectDate is already local).
+  const hours = padDatePart(date.getHours());
+  const minutes = padDatePart(date.getMinutes());
 
-  return `${formatProjectDate(value)} ${hours}:${minutes} UTC`;
+  return `${formatProjectDate(value)} ${hours}:${minutes}`;
 }
 
 export function formatProjectRelativeDateTime(value: string) {

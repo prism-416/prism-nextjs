@@ -38,6 +38,7 @@ export const QUERY_KEYS = {
       [...QUERY_KEYS.project.workItems(projectId), "list", filters ?? {}] as const,
     myTasks: (projectId: string, assigneeUsername: string, filters?: object) =>
       [...QUERY_KEYS.project.workItems(projectId), "my-tasks", assigneeUsername, filters ?? {}] as const,
+    workItemTrash: (projectId: string) => [...QUERY_KEYS.project.workItems(projectId), "trash"] as const,
     workItemDetail: (projectId: string, itemId: string) =>
       [...QUERY_KEYS.project.workItems(projectId), "detail", itemId] as const,
     workItemChildren: (projectId: string, itemId: string) =>

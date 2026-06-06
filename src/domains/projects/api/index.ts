@@ -19,6 +19,7 @@ import type {
   ReorderProjectWorkItemsPayload,
   CreateProjectWorkItemPayload,
   FeatureProvisioningRequest,
+  TrashedProjectWorkItemSearchResult,
   UpdateProjectPayload,
   UpdateProjectWorkItemPayload,
 } from "../types";
@@ -196,6 +197,61 @@ export async function getProjectWorkItemChildren(projectId: string, itemId: stri
   });
 
   return response?.data ?? [];
+}
+
+export async function bulkDeleteProjectWorkItems(projectId: string, itemIds: string[]) {
+  await commonAxios<{ itemIds: string[] }, unknown>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/bulk-delete`,
+    method: "POST",
+    data: { itemIds },
+    version: null,
+  });
+}
+
+export async function getTrashedProjectWorkItems(projectId: string) {
+  const response = await commonAxios<null, ApiResponse<TrashedProjectWorkItemSearchResult>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/trash`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? { items: [] };
+}
+
+export async function restoreProjectWorkItem(projectId: string, itemId: string) {
+  const response = await commonAxios<null, ApiResponse<ProjectWorkItem>>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/trash/${encodeURIComponent(itemId)}/restore`,
+    method: "POST",
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function permanentlyDeleteProjectWorkItem(projectId: string, itemId: string) {
+  await commonAxios<null, unknown>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/trash/${encodeURIComponent(itemId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
+export async function bulkRestoreProjectWorkItems(projectId: string, itemIds: string[]) {
+  await commonAxios<{ itemIds: string[] }, unknown>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/trash/bulk-restore`,
+    method: "POST",
+    data: { itemIds },
+    version: null,
+  });
+}
+
+export async function bulkPermanentlyDeleteProjectWorkItems(projectId: string, itemIds: string[]) {
+  await commonAxios<{ itemIds: string[] }, unknown>({
+    url: `/projects/${encodeURIComponent(projectId)}/work-items/trash/bulk-delete`,
+    method: "POST",
+    data: { itemIds },
+    version: null,
+  });
 }
 
 export async function getWorkspaceAgentRuns(workspaceId: string, params?: AgentRunSearchParams) {

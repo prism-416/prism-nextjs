@@ -261,9 +261,11 @@ export function syncProjectWorkItemsReordered(queryClient: QueryClient, workItem
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.sprints(firstWorkItem.workspaceId) });
 }
 
-export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: ProjectWorkItemDeletedPayload) {
-  const { itemId, projectId } = payload;
-
+/**
+ * Remove a work item from the cached lists/children/detail without triggering any
+ * refetch. Used for optimistic deletes (apply instantly, reconcile later).
+ */
+export function removeProjectWorkItemFromCaches(queryClient: QueryClient, projectId: string, itemId: string) {
   queryClient.setQueryData(QUERY_KEYS.project.workItemDetail(projectId, itemId), undefined);
   queryClient.setQueriesData<ProjectWorkItemSearchResult>(
     {
@@ -277,6 +279,12 @@ export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: Pr
     },
     previous => removeWorkItemFromChildren(previous, itemId),
   );
+}
+
+export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: ProjectWorkItemDeletedPayload) {
+  const { itemId, projectId } = payload;
+
+  removeProjectWorkItemFromCaches(queryClient, projectId, itemId);
   // Invalidate the work item collections (and other items' subtrees) but NOT the
   // deleted item's own detail/children subtree — it no longer exists on the
   // server, so refetching it would 404 (the delete dialog may still be observing
