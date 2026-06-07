@@ -46,11 +46,7 @@ export function GitHubCallbackHandler() {
     clearGithubOAuthState();
 
     try {
-      const result = await signInWithGithub({
-        code,
-        state,
-        transaction: stored.transaction,
-      });
+      const result = await signInWithGithub({ code, state });
       const data = result?.data;
 
       if (!data?.accessToken) {
