@@ -125,7 +125,28 @@ function getNextResponseWithSession(request: NextRequest, tokens: AuthTokens) {
   );
 }
 
+function getOptionsResponse(request: NextRequest) {
+  const origin = request.headers.get("origin") ?? request.nextUrl.origin;
+  const requestHeaders = request.headers.get("access-control-request-headers");
+
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      Allow: "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Headers": requestHeaders ?? "Content-Type, Authorization",
+      "Access-Control-Allow-Credentials": "true",
+      Vary: "Origin, Access-Control-Request-Method, Access-Control-Request-Headers",
+    },
+  });
+}
+
 export async function proxy(request: NextRequest) {
+  if (request.method === "OPTIONS") {
+    return getOptionsResponse(request);
+  }
+
   const { pathname } = request.nextUrl;
 
   const isPublicRoute = matchesRoute(pathname, PUBLIC_ROUTES);
