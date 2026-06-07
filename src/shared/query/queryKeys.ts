@@ -21,6 +21,9 @@ export const QUERY_KEYS = {
     sprintDetail: (id: string, sprintId: string) => [...QUERY_KEYS.workspace.sprints(id), "detail", sprintId] as const,
     sprintWorkItems: (id: string, sprintId: string, filters?: object) =>
       [...QUERY_KEYS.workspace.sprintDetail(id, sprintId), "work-items", filters ?? {}] as const,
+    repositories: (workspaceId: string) => [...QUERY_KEYS.workspace.detail(workspaceId), "repositories"] as const,
+    githubInstallationRepositories: (workspaceId: string, githubInstallationId: string) =>
+      [...QUERY_KEYS.workspace.repositories(workspaceId), "github-installation", githubInstallationId] as const,
     invitation: (token: string) => ["workspace", "invitation", token] as const,
     notifications: () => ["workspace", "notifications"] as const,
     notificationList: (filters?: object) => [...QUERY_KEYS.workspace.notifications(), "list", filters ?? {}] as const,

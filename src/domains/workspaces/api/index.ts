@@ -3,6 +3,7 @@ import type { ApiResponse } from "@/shared/types/api";
 
 import type {
   AcceptInvitationPayload,
+  CreateWorkspaceRepositoryLinkPayload,
   CreateInvitationPayload,
   CreateWorkspaceJobsPayload,
   CreateWorkspacePayload,
@@ -18,8 +19,11 @@ import type {
   WorkspaceInvitation,
   WorkspaceInvitationPreview,
   WorkspaceJob,
+  WorkspaceRepositoryLink,
   WorkspaceMemberCandidateSearchResult,
   WorkspaceMember,
+  GithubInstallationAuthorization,
+  GithubRepositoryOption,
 } from "../types";
 
 export async function getWorkspaces() {
@@ -73,6 +77,57 @@ export async function updateWorkspace(workspaceId: string, body: UpdateWorkspace
 export async function deleteWorkspace(workspaceId: string) {
   await commonAxios<null, ApiResponse<null>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}`,
+    method: "DELETE",
+    version: null,
+  });
+}
+
+export async function getWorkspaceRepositories(workspaceId: string) {
+  const response = await commonAxios<null, ApiResponse<WorkspaceRepositoryLink[]>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/repositories`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? [];
+}
+
+export async function createWorkspaceGithubInstallationAuthorization(workspaceId: string) {
+  const response = await commonAxios<null, ApiResponse<GithubInstallationAuthorization>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/repositories/github/authorize`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function getGithubInstallationRepositories(workspaceId: string, githubInstallationId: string) {
+  const response = await commonAxios<null, ApiResponse<GithubRepositoryOption[]>>({
+    url: `/workspaces/${encodeURIComponent(
+      workspaceId,
+    )}/repositories/github/installations/${encodeURIComponent(githubInstallationId)}/repositories`,
+    method: "GET",
+    version: null,
+  });
+
+  return response?.data ?? [];
+}
+
+export async function connectWorkspaceRepository(workspaceId: string, body: CreateWorkspaceRepositoryLinkPayload) {
+  const response = await commonAxios<CreateWorkspaceRepositoryLinkPayload, ApiResponse<WorkspaceRepositoryLink>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/repositories`,
+    method: "POST",
+    data: body,
+    version: null,
+  });
+
+  return response?.data;
+}
+
+export async function disconnectWorkspaceRepository(workspaceId: string, linkId: string) {
+  await commonAxios<null, unknown>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/repositories/${encodeURIComponent(linkId)}`,
     method: "DELETE",
     version: null,
   });
