@@ -4,13 +4,14 @@ const MAX_AGE_MS = 10 * 60 * 1000;
 
 type GithubOAuthSession = {
   state: string;
+  transaction?: string;
   issuedAt: number;
 };
 
-export function persistGithubOAuthState(state: string) {
+export function persistGithubOAuthState(state: string, transaction?: string) {
   if (typeof window === "undefined") return;
 
-  const value: GithubOAuthSession = { state, issuedAt: Date.now() };
+  const value: GithubOAuthSession = { state, transaction, issuedAt: Date.now() };
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
 }
 
@@ -33,7 +34,11 @@ export function readGithubOAuthState(): GithubOAuthSession | null {
       return null;
     }
 
-    return parsed as GithubOAuthSession;
+    return {
+      state: parsed.state,
+      transaction: typeof parsed.transaction === "string" ? parsed.transaction : undefined,
+      issuedAt: parsed.issuedAt,
+    };
   } catch {
     sessionStorage.removeItem(STORAGE_KEY);
     return null;
