@@ -166,4 +166,45 @@ export interface WorkspaceInvitationPreview {
   requiresSignup: boolean;
 }
 
+export type GithubRepositoryVisibility = "public" | "private" | "internal";
+
+export interface WorkspaceRepositoryLink {
+  linkId: string;
+  workspaceId: string;
+  githubInstallationId: string;
+  githubRepositoryId: string;
+  repositoryOwner: string;
+  repositoryName: string;
+  repositoryFullName: string;
+  repositoryUrl: string;
+  defaultBranch: string | null;
+  visibility: GithubRepositoryVisibility | null;
+  connectedByUserId: string | null;
+  connectedAt: string;
+}
+
+export interface GithubInstallationAuthorization {
+  authorizationUrl: string;
+  state: string;
+  expiresAt: string;
+}
+
+export interface GithubRepositoryOption {
+  githubRepositoryId: string;
+  nodeId: string | null;
+  owner: string;
+  name: string;
+  fullName: string;
+  htmlUrl: string;
+  defaultBranch: string | null;
+  visibility: GithubRepositoryVisibility | null;
+  private: boolean;
+  archived: boolean;
+}
+
+export interface CreateWorkspaceRepositoryLinkPayload {
+  githubInstallationId: string;
+  githubRepositoryId: string;
+}
+
 export * from "./notification";

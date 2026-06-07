@@ -6,6 +6,7 @@ import { TriangleAlert } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { WorkspaceLeaveDialog } from "@/domains/workspaces/components/WorkspaceLeaveDialog";
+import { WorkspaceRepositoriesCard } from "@/domains/workspaces/components/WorkspaceRepositoriesCard";
 import { WorkspaceSettingsCard } from "@/domains/workspaces/components/WorkspaceSettingsCard";
 import { WorkspaceDeleteDialog } from "@/domains/workspaces/components/list/WorkspaceDeleteDialog";
 import { WorkspaceEditDialog } from "@/domains/workspaces/components/list/WorkspaceEditDialog";
@@ -43,6 +44,11 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
           workspace={workspace}
           canManage={canManage}
           onEdit={() => setIsEditing(true)}
+        />
+
+        <WorkspaceRepositoriesCard
+          workspaceId={workspace.workspaceId}
+          canManage={canManage}
         />
       </section>
 
