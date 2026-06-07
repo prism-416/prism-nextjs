@@ -1,4 +1,5 @@
 import { commonAxios } from "@/shared/http/common-axios";
+import { API_HOST, JSON_CONTENT_TYPE } from "@/shared/constants/api";
 import type { ApiResponse } from "@/shared/types/api";
 
 import type {
@@ -19,7 +20,26 @@ async function postLocalAuth<TBody, TResult>(url: string, body: TBody) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": JSON_CONTENT_TYPE,
+    },
+    credentials: "include",
+    cache: "no-store",
+    body: JSON.stringify(body),
+  });
+  const payload = (await response.json().catch(() => null)) as ApiResponse<TResult> | null;
+
+  if (!response.ok) {
+    return payload ?? { message: "Authentication request failed." };
+  }
+
+  return payload;
+}
+
+async function postUpstreamAuth<TBody, TResult>(url: string, body: TBody) {
+  const response = await fetch(`${API_HOST}${url}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": JSON_CONTENT_TYPE,
     },
     credentials: "include",
     cache: "no-store",
@@ -96,5 +116,5 @@ export async function getGithubAuthorizationUrl() {
 }
 
 export async function signInWithGithub(body: GithubOAuthSignInRequest) {
-  return postLocalAuth<GithubOAuthSignInRequest, OAuthTokenResult>("/api/auth/oauth/github", body);
+  return postUpstreamAuth<GithubOAuthSignInRequest, OAuthTokenResult>("/auth/oauth/github", body);
 }
