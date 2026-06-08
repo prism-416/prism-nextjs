@@ -9,7 +9,7 @@ import { WorkspaceEmptyState } from "@/domains/workspaces/components/list/Worksp
 import { WorkspaceErrorState } from "@/domains/workspaces/components/list/WorkspaceErrorState";
 import { WorkspaceNoResults } from "@/domains/workspaces/components/list/WorkspaceNoResults";
 import { WorkspaceRow } from "@/domains/workspaces/components/list/WorkspaceRow";
-import { WorkspaceToolbar } from "@/domains/workspaces/components/list/WorkspaceToolbar";
+import { WorkspaceToolbar, WorkspaceToolbarActions } from "@/domains/workspaces/components/list/WorkspaceToolbar";
 import { useWorkspaces } from "@/domains/workspaces/hooks/useWorkspaces";
 import type { Workspace } from "@/domains/workspaces/types";
 import { filterWorkspaces } from "@/domains/workspaces/utils/display";
@@ -41,12 +41,23 @@ export function WorkspacesClient({ initialData }: WorkspacesClientProps) {
     <>
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-xl font-semibold text-prism-heading">Workspaces</h1>
+              <p className="mt-1 text-sm text-prism-muted">
+                Create, organize, and switch between the workspaces your teams use.
+              </p>
+            </div>
+            <WorkspaceToolbarActions
+              viewMode={viewMode}
+              onCreate={() => setIsCreateOpen(true)}
+              onViewModeChange={setViewMode}
+            />
+          </div>
+
           <WorkspaceToolbar
             query={query}
-            viewMode={viewMode}
-            onCreate={() => setIsCreateOpen(true)}
             onQueryChange={setQuery}
-            onViewModeChange={setViewMode}
           />
 
           {isError && <WorkspaceErrorState onRetry={() => refetch()} />}

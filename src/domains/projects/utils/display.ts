@@ -35,3 +35,15 @@ export function formatProjectRelativeDate(value: string) {
 
   return `${MONTH_LABELS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 }
+
+export function filterProjects(projects: ProjectSummary[], query: string) {
+  const keyword = query.trim().toLowerCase();
+
+  if (!keyword) return projects;
+
+  return projects.filter(project => {
+    const searchable = [project.name, project.slug, project.description ?? ""].join(" ").toLowerCase();
+
+    return searchable.includes(keyword);
+  });
+}
