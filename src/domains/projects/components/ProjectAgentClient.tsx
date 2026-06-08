@@ -625,19 +625,23 @@ export function ProjectAgentClient({
         </form>
       </div>
 
-      <aside className="flex min-w-0 flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
+      <aside className="flex min-w-0 flex-col gap-5">
+        <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
+            <div className="flex items-center gap-2">
+              <Network className="size-5 text-prism-muted" />
+              <Typography
+                variant="h3"
+                tone="primary"
+                className="text-xl tracking-normal md:text-xl"
+              >
+                Realtime job DAG
+              </Typography>
+            </div>
             <Typography
-              variant="title"
-              tone="primary"
-              className="text-base tracking-normal md:text-base"
-            >
-              Realtime job DAG
-            </Typography>
-            <Typography
-              variant="caption"
+              variant="bodySm"
               tone="muted"
+              className="mt-1"
             >
               Active agent runs and steps
             </Typography>
