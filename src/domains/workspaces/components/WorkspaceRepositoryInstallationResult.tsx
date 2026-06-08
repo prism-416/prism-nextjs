@@ -13,6 +13,10 @@ import { useConnectWorkspaceRepository } from "@/domains/workspaces/hooks/useCon
 import { useGithubInstallationRepositories } from "@/domains/workspaces/hooks/useGithubInstallationRepositories";
 import { useWorkspaceById } from "@/domains/workspaces/hooks/useWorkspaceById";
 import { getWorkspaceMutationErrorMessage } from "@/domains/workspaces/utils/error";
+import {
+  isGithubInstallationWindow,
+  notifyRepositoryConnected,
+} from "@/domains/workspaces/utils/github-installation-window";
 
 type WorkspaceRepositoryInstallationResultProps = {
   workspaceId?: string;
@@ -164,6 +168,12 @@ export function WorkspaceRepositoryInstallationResult({
           githubRepositoryId: activeRepositoryId,
         },
       });
+
+      if (isGithubInstallationWindow()) {
+        notifyRepositoryConnected(workspaceId);
+        window.close();
+        return;
+      }
 
       if (workspaceSettingsHref) {
         router.replace(workspaceSettingsHref);

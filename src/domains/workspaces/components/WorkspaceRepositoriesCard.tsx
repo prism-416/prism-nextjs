@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ExternalLink, Github, GitBranch, LoaderCircle, Plug, Trash2 } from "lucide-react";
 
 import { Badge } from "@/atomics/atoms/Badge";
@@ -12,6 +13,11 @@ import { useDisconnectWorkspaceRepository } from "@/domains/workspaces/hooks/use
 import { useWorkspaceRepositories } from "@/domains/workspaces/hooks/useWorkspaceRepositories";
 import type { WorkspaceRepositoryLink } from "@/domains/workspaces/types";
 import { getWorkspaceMutationErrorMessage } from "@/domains/workspaces/utils/error";
+import {
+  markGithubInstallationWindow,
+  subscribeToGithubInstallationMessages,
+} from "@/domains/workspaces/utils/github-installation-window";
+import { QUERY_KEYS } from "@/shared/query";
 
 type WorkspaceRepositoriesCardProps = {
   workspaceId: string;
@@ -99,6 +105,7 @@ function RepositorySkeletonRows() {
 }
 
 export function WorkspaceRepositoriesCard({ workspaceId, canManage }: WorkspaceRepositoriesCardProps) {
+  const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [disconnectingLinkId, setDisconnectingLinkId] = useState<string | null>(null);
   const { data: links = [], isLoading } = useWorkspaceRepositories(workspaceId);
@@ -106,13 +113,32 @@ export function WorkspaceRepositoriesCard({ workspaceId, canManage }: WorkspaceR
     useCreateWorkspaceGithubInstallationAuthorization();
   const { mutateAsync: disconnectRepository } = useDisconnectWorkspaceRepository();
 
+  useEffect(
+    () =>
+      subscribeToGithubInstallationMessages(message => {
+        if (message.workspaceId !== workspaceId) return;
+        void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.repositories(workspaceId) });
+      }),
+    [queryClient, workspaceId],
+  );
+
   const handleConnect = async () => {
     setErrorMessage(null);
+    const installationWindow = window.open("", "_blank");
+
+    if (!installationWindow) {
+      setErrorMessage("Allow new tabs to connect a GitHub repository.");
+      return;
+    }
+
+    markGithubInstallationWindow(installationWindow);
+    installationWindow.focus();
 
     try {
       const authorization = await createAuthorization(workspaceId);
-      window.location.assign(authorization.authorizationUrl);
+      installationWindow.location.assign(authorization.authorizationUrl);
     } catch (error) {
+      installationWindow.close();
       setErrorMessage(getWorkspaceMutationErrorMessage(error, "Failed to start GitHub connection."));
     }
   };
