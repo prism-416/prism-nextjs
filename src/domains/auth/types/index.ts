@@ -85,12 +85,14 @@ export interface GithubOAuthAuthorizeResult {
   authorizationUrl: string;
   state: string;
   expiresAt: string;
+  transaction?: string;
 }
 
 /** `POST /auth/oauth/github` request body */
 export interface GithubOAuthSignInRequest {
   code: string;
   state: string;
+  transaction?: string;
 }
 
 /** `POST /auth/verify` response `data` */

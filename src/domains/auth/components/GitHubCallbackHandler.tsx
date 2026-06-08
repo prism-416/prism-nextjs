@@ -49,6 +49,7 @@ export function GitHubCallbackHandler() {
       const result = await signInWithGithub({
         code,
         state,
+        transaction: stored.transaction,
       });
       const data = result?.data;
 
