@@ -35,7 +35,7 @@ export function AuthSocialButtons({ legend }: AuthSocialButtonsProps) {
         return;
       }
 
-      persistGithubOAuthState(data.state);
+      persistGithubOAuthState(data.state, data.transaction);
       window.location.assign(data.authorizationUrl);
     } catch {
       setErrorMessage("Failed to connect to GitHub.");
