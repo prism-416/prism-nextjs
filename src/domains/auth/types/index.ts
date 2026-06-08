@@ -80,19 +80,17 @@ export interface GoogleAccountsIdApi {
 
 // --- GitHub OAuth ---
 
-/** `GET /auth/oauth/github/authorize` · `GET /auth/oauth/github/signup/authorize` response `data` */
+/** `GET /auth/oauth/github/authorize` response `data` */
 export interface GithubOAuthAuthorizeResult {
   authorizationUrl: string;
   state: string;
   expiresAt: string;
-  transaction: string;
 }
 
 /** `POST /auth/oauth/github` request body */
 export interface GithubOAuthSignInRequest {
   code: string;
   state: string;
-  transaction?: string;
 }
 
 /** `POST /auth/verify` response `data` */

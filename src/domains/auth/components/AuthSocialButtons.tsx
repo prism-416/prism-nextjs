@@ -29,13 +29,13 @@ export function AuthSocialButtons({ legend }: AuthSocialButtonsProps) {
       const result = await getGithubAuthorizationUrl();
       const data = result?.data;
 
-      if (!data?.authorizationUrl || !data.state || !data.transaction) {
+      if (!data?.authorizationUrl || !data.state) {
         setErrorMessage("Failed to start GitHub sign-in.");
         setIsRedirecting(false);
         return;
       }
 
-      persistGithubOAuthState(data.state, data.transaction);
+      persistGithubOAuthState(data.state);
       window.location.assign(data.authorizationUrl);
     } catch {
       setErrorMessage("Failed to connect to GitHub.");
