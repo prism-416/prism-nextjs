@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { CreateProjectDialog } from "@/domains/projects/components/CreateProjectDialog";
 import { ProjectCard } from "@/domains/projects/components/ProjectCard";
+import { ProjectNoResults } from "@/domains/projects/components/ProjectNoResults";
+import { ProjectRow } from "@/domains/projects/components/ProjectRow";
+import { ProjectToolbar, ProjectToolbarActions } from "@/domains/projects/components/ProjectToolbar";
+import { filterProjects } from "@/domains/projects/utils/display";
 
 import { useProjects } from "../hooks/useProjects";
 import type { ProjectSummary } from "../types";
@@ -17,6 +21,10 @@ type ProjectsClientProps = {
   canCreateProject: boolean;
 };
 
+type ViewMode = "grid" | "list";
+
+const EMPTY_PROJECTS: ProjectSummary[] = [];
+
 export function ProjectsClient({ slug, initialData, canCreateProject }: ProjectsClientProps) {
   const {
     data,
@@ -25,9 +33,13 @@ export function ProjectsClient({ slug, initialData, canCreateProject }: Projects
     refetch: refetchProjects,
   } = useProjects(slug, initialData);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
-  const projects = data ?? [];
+  const projects = data ?? EMPTY_PROJECTS;
+  const filteredProjects = useMemo(() => filterProjects(projects, query), [projects, query]);
   const hasCreatePermission = canCreateProject && Boolean(slug);
+  const showNoResults = !isProjectsError && projects.length > 0 && filteredProjects.length === 0;
 
   const handleRetry = () => {
     void refetchProjects();
@@ -57,16 +69,18 @@ export function ProjectsClient({ slug, initialData, canCreateProject }: Projects
                 : "Browse projects in this workspace."}
             </p>
           </div>
-          {hasCreatePermission && (
-            <Button
-              onClick={handleCreate}
-              className="h-10 gap-1.5 rounded-lg px-4"
-            >
-              <Plus className="size-4" />
-              Create project
-            </Button>
-          )}
+          <ProjectToolbarActions
+            canCreateProject={hasCreatePermission}
+            viewMode={viewMode}
+            onCreate={handleCreate}
+            onViewModeChange={setViewMode}
+          />
         </div>
+
+        <ProjectToolbar
+          query={query}
+          onQueryChange={setQuery}
+        />
 
         {isProjectsError && (
           <div className="rounded-xl border border-prism-danger-soft bg-surface px-5 py-4 text-sm text-prism-danger">
@@ -101,10 +115,23 @@ export function ProjectsClient({ slug, initialData, canCreateProject }: Projects
           </div>
         )}
 
-        {!isProjectsError && projects.length > 0 && (
+        {showNoResults && <ProjectNoResults />}
+
+        {!isProjectsError && filteredProjects.length > 0 && viewMode === "grid" && (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {projects.map(project => (
+            {filteredProjects.map(project => (
               <ProjectCard
+                key={project.projectId}
+                project={project}
+              />
+            ))}
+          </div>
+        )}
+
+        {!isProjectsError && filteredProjects.length > 0 && viewMode === "list" && (
+          <div className="flex flex-col gap-2">
+            {filteredProjects.map(project => (
+              <ProjectRow
                 key={project.projectId}
                 project={project}
               />

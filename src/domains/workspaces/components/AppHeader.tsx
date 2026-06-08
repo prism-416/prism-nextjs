@@ -1,9 +1,7 @@
 import * as React from "react";
-import { Search } from "lucide-react";
 import Link from "next/link";
 
 import { cn } from "@/shared/utils/cn";
-import { Input } from "@/atomics/atoms/Input";
 import { SidebarTrigger } from "@/atomics/organisms/Sidebar";
 import { AppHeaderNotifications } from "@/domains/workspaces/components/AppHeaderNotifications";
 import { AppHeaderUserMenu } from "@/domains/workspaces/components/AppHeaderUserMenu";
@@ -44,15 +42,6 @@ export function AppHeader({ pathSegments, actions, className }: AppHeaderProps) 
       ) : (
         <div className="min-w-0 flex-1" />
       )}
-
-      <div className="relative hidden w-72 shrink-0 md:block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-prism-muted" />
-        <Input
-          type="search"
-          placeholder="Search..."
-          className="h-9 border-border bg-surface-field pl-9 text-sm"
-        />
-      </div>
 
       <div className="flex shrink-0 items-center gap-2">
         {actions}
