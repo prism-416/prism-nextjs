@@ -124,12 +124,13 @@ export function renderCommentBodyWithMentions(body: string) {
   );
 }
 
-export function renderLiveCommentBodyWithMentions(body: string, usernames: string[]) {
+export function renderLiveCommentBodyWithMentions(body: string) {
+  // Highlight the in-progress mention immediately as the user types, without
+  // waiting for it to match a known member, so "@" turns blue right away.
   const nodes = renderBodyWithMentionPattern(
     body,
     LIVE_MENTION_TOKEN_PATTERN,
     "rounded-md bg-prism-info-soft text-prism-info shadow-[0_0_0_2px_var(--color-prism-info-soft)]",
-    new Set(usernames.map(username => username.toLowerCase())),
   );
 
   if (Array.isArray(nodes) && body.endsWith("\n")) {
