@@ -138,6 +138,42 @@ export interface UpdateProjectWorkItemCommentPayload {
   body: string;
 }
 
+export interface ProjectDocument {
+  documentId: string;
+  workspaceId: string;
+  projectId: string;
+  title: string;
+  description: string | null;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  storageETag: string | null;
+  storageVersionId: string | null;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectDocumentSearchParams {
+  query?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ProjectDocumentSearchResult {
+  items: ProjectDocument[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface UploadProjectDocumentPayload {
+  file: File;
+  title?: string;
+  description?: string;
+}
+
 export type AgentRunStatus = "queued" | "running" | "waiting" | "completed" | "failed" | "cancelled";
 
 export type AgentRunTriggerType = "manual" | "event" | "scheduled" | "webhook" | "recursive";

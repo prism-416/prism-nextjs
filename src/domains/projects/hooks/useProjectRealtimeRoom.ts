@@ -9,6 +9,8 @@ import { PROJECT_REALTIME_EVENTS } from "@/domains/projects/constants/realtime";
 import type {
   ProjectCommentDeletedPayload,
   ProjectCommentPayload,
+  ProjectDocumentCreatedPayload,
+  ProjectDocumentDeletedPayload,
   ProjectRealtimeErrorPayload,
   ProjectRealtimeSocket,
   ProjectWorkItemDeletedPayload,
@@ -21,6 +23,7 @@ import {
   syncProjectCommentDeleted,
   syncProjectCommentUpdated,
 } from "@/domains/projects/utils/comment-cache";
+import { syncProjectDocumentsChanged } from "@/domains/projects/utils/document-cache";
 import {
   syncProjectWorkItemCreated,
   syncProjectWorkItemDeleted,
@@ -138,6 +141,18 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
       }
     };
 
+    const handleDocumentCreated = (payload: ProjectDocumentCreatedPayload) => {
+      if (payload.projectId === projectId) {
+        syncProjectDocumentsChanged(queryClient, projectId);
+      }
+    };
+
+    const handleDocumentDeleted = (payload: ProjectDocumentDeletedPayload) => {
+      if (payload.projectId === projectId) {
+        syncProjectDocumentsChanged(queryClient, projectId);
+      }
+    };
+
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
@@ -150,6 +165,8 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
     socket.on(PROJECT_REALTIME_EVENTS.COMMENT_CREATED, handleCommentCreated);
     socket.on(PROJECT_REALTIME_EVENTS.COMMENT_UPDATED, handleCommentUpdated);
     socket.on(PROJECT_REALTIME_EVENTS.COMMENT_DELETED, handleCommentDeleted);
+    socket.on(PROJECT_REALTIME_EVENTS.DOCUMENT_CREATED, handleDocumentCreated);
+    socket.on(PROJECT_REALTIME_EVENTS.DOCUMENT_DELETED, handleDocumentDeleted);
     socket.connect();
 
     return () => {
