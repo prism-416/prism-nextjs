@@ -182,7 +182,6 @@ export function ProjectWorkItemClient({
         childItems={childItems}
         comments={comments ?? { comments: [], total: 0, limit: 50, offset: 0 }}
         members={members}
-        initialMembers={initialMembers}
         initialCurrentUser={initialCurrentUser}
         isChildrenError={isChildrenError}
         isCommentsError={isCommentsError}

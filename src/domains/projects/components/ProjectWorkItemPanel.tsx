@@ -42,7 +42,6 @@ type ProjectWorkItemPanelProps = {
   childItems: ProjectWorkItem[];
   comments: ProjectWorkItemCommentSearchResult;
   members: ProjectParticipant[];
-  initialMembers?: ProjectParticipant[];
   initialCurrentUser?: CurrentUser;
   isChildrenError: boolean;
   isCommentsError: boolean;
@@ -143,7 +142,6 @@ export function ProjectWorkItemPanel({
   childItems,
   comments,
   members,
-  initialMembers,
   initialCurrentUser,
   isChildrenError,
   isCommentsError,
@@ -317,7 +315,7 @@ export function ProjectWorkItemPanel({
         workspaceId={workItem.workspaceId}
         itemId={workItem.itemId}
         comments={comments}
-        initialMembers={initialMembers}
+        members={members}
         initialCurrentUser={initialCurrentUser}
         isError={isCommentsError}
         onRetry={onRetryComments}

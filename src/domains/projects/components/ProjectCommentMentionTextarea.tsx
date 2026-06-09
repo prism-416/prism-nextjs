@@ -144,7 +144,10 @@ export function ProjectCommentMentionTextarea({
       return;
     }
 
-    refreshLookup(value, textarea.selectionStart);
+    // Read the live DOM value, not the (one render stale) `value` prop, so the
+    // select event that trails a keystroke doesn't clear the mention lookup
+    // that handleChange just set — otherwise a fresh "@" never opens the menu.
+    refreshLookup(textarea.value, textarea.selectionStart);
   };
 
   return (
@@ -158,7 +161,7 @@ export function ProjectCommentMentionTextarea({
           "text-prism-body",
         )}
       >
-        {value ? renderLiveCommentBodyWithMentions(value, memberUsernames) : null}
+        {value ? renderLiveCommentBodyWithMentions(value) : null}
       </div>
       <Textarea
         ref={textareaRef}

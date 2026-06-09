@@ -24,7 +24,7 @@ type ProjectWorkItemCommentsPanelProps = {
   workspaceId: string;
   itemId: string;
   comments: ProjectWorkItemCommentSearchResult;
-  initialMembers?: ProjectParticipant[];
+  members: ProjectParticipant[];
   initialCurrentUser?: CurrentUser;
   isError: boolean;
   onRetry: () => void;
@@ -52,7 +52,7 @@ export function ProjectWorkItemCommentsPanel({
   workspaceId,
   itemId,
   comments,
-  initialMembers,
+  members,
   initialCurrentUser,
   isError,
   onRetry,
@@ -82,10 +82,7 @@ export function ProjectWorkItemCommentsPanel({
     return map;
   }, [documentsData]);
 
-  const memberByUserId = React.useMemo(
-    () => new Map((initialMembers ?? []).map(member => [member.userId, member])),
-    [initialMembers],
-  );
+  const memberByUserId = React.useMemo(() => new Map(members.map(member => [member.userId, member])), [members]);
   const currentUserName = currentUser ? getCurrentUserDisplayName(currentUser) : "You";
   const trimmedBody = body.trim();
   const canSubmit = Boolean(trimmedBody) && !isPending;
@@ -241,7 +238,7 @@ export function ProjectWorkItemCommentsPanel({
                 canDownloadAttachments={canContribute}
                 currentUser={currentUser}
                 memberByUserId={memberByUserId}
-                members={initialMembers ?? []}
+                members={members}
                 isConsecutive={isConsecutive}
               />
             </div>
@@ -353,7 +350,7 @@ export function ProjectWorkItemCommentsPanel({
                 value={body}
                 onValueChange={setBody}
                 onKeyDown={handleKeyDown}
-                members={initialMembers ?? []}
+                members={members}
                 currentUserId={currentUser?.userId}
                 placeholder="Write a comment... (@ mentions supported)"
                 maxLength={COMMENT_BODY_MAX_LENGTH}
