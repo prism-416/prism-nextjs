@@ -4,13 +4,14 @@ import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { NOTIFICATION_REALTIME_EVENTS } from "@/domains/workspaces/constants/notification-realtime";
-import type { Notification, NotificationSearchResult } from "@/domains/workspaces/types";
+import type { Notification, NotificationSearchResult, Workspace } from "@/domains/workspaces/types";
 import type {
   NotificationRealtimeErrorPayload,
   NotificationRealtimeSocket,
 } from "@/domains/workspaces/types/notification-realtime";
 import { prependNotificationToCache } from "@/domains/workspaces/utils/notification-cache";
 import { createNotificationRealtimeSocket } from "@/domains/workspaces/utils/notification-realtime-client";
+import { syncWorkspaceUpdated } from "@/domains/workspaces/utils/workspace-realtime-cache";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
 import { QUERY_KEYS } from "@/shared/query/queryKeys";
 import { getCookie } from "@/shared/utils/cookie";
@@ -72,11 +73,27 @@ export function useNotificationRealtime() {
       });
     };
 
+    const handleWorkspaceAdded = (payload: Workspace & { recipientUserId: string }) => {
+      const workspace: Workspace = {
+        workspaceId: payload.workspaceId,
+        ownerId: payload.ownerId,
+        name: payload.name,
+        slug: payload.slug,
+        description: payload.description,
+        createdAt: payload.createdAt,
+        memberCount: payload.memberCount,
+        projectCount: payload.projectCount,
+      };
+
+      syncWorkspaceUpdated(queryClient, workspace);
+    };
+
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("connect_error", handleConnectError);
     socket.on("exception", handleException);
     socket.on(NOTIFICATION_REALTIME_EVENTS.NOTIFICATION_CREATED, handleNotificationCreated);
+    socket.on(NOTIFICATION_REALTIME_EVENTS.WORKSPACE_ADDED, handleWorkspaceAdded);
     socket.connect();
 
     return () => {

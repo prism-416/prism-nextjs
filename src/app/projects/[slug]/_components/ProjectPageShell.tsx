@@ -47,6 +47,7 @@ export async function ProjectPageShell({ slug, section, children }: ProjectPageS
 
   return (
     <WorkspaceShell
+      workspaceId={project.workspaceId}
       workspace={workspace ? { name: workspace.name } : undefined}
       workspaceSlug={workspaceSlug}
       workspaceOptions={workspaces.map(item => ({

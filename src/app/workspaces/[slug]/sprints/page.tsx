@@ -24,6 +24,7 @@ export default async function WorkspaceSprintsPage({ params }: WorkspaceSprintsP
 
   return (
     <WorkspaceShell
+      workspaceId={workspace.workspaceId}
       workspace={{ name: workspace.name }}
       workspaceSlug={slug}
       workspaceOptions={workspaces.map(item => ({

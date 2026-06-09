@@ -1,7 +1,7 @@
 import type { WorkspaceMember } from "@/domains/workspaces/types";
 
 export function getWorkspaceMemberDisplayName(member: Pick<WorkspaceMember, "fullName" | "username">) {
-  return member.fullName || member.username;
+  return member.fullName?.trim() || member.username?.trim() || "Unknown member";
 }
 
 export function getWorkspaceMemberSortRank(member: Pick<WorkspaceMember, "role" | "userId">, ownerId: string) {

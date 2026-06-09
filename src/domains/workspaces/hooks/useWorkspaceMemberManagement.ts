@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRemoveWorkspaceMember } from "@/domains/workspaces/hooks/useRemoveWorkspaceMember";
 import { useTransferWorkspaceOwner } from "@/domains/workspaces/hooks/useTransferWorkspaceOwner";
 import { useUpdateWorkspaceMemberRole } from "@/domains/workspaces/hooks/useUpdateWorkspaceMemberRole";
+import { useWorkspaceById } from "@/domains/workspaces/hooks/useWorkspaceById";
 import { useWorkspaceMembers } from "@/domains/workspaces/hooks/useWorkspaceMembers";
 import type { InvitationRole, Workspace, WorkspaceMember } from "@/domains/workspaces/types";
 import { getWorkspaceMemberDisplayName, getWorkspaceMemberSortRank } from "@/domains/workspaces/utils/member";
@@ -26,19 +27,21 @@ const EMPTY_MEMBERS: WorkspaceMember[] = [];
 export function useWorkspaceMemberManagement(workspace: Workspace, options: UseWorkspaceMemberManagementOptions = {}) {
   const { initialData, onLeave, onSelfRoleChanged } = options;
 
-  const [ownerId, setOwnerId] = useState(workspace.ownerId);
+  const [optimisticOwnerId, setOptimisticOwnerId] = useState<string | null>(null);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingMemberAction | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const { data: currentUser } = useCurrentUser();
+  const { data: liveWorkspace } = useWorkspaceById(workspace.workspaceId, workspace);
   const { data, isPending, isError, refetch } = useWorkspaceMembers(workspace.workspaceId, initialData);
   const removeMember = useRemoveWorkspaceMember();
   const updateRole = useUpdateWorkspaceMemberRole();
   const transferOwner = useTransferWorkspaceOwner();
 
   const members = data ?? EMPTY_MEMBERS;
+  const ownerId = optimisticOwnerId ?? liveWorkspace?.ownerId ?? workspace.ownerId;
   const currentMember = members.find(member => member.userId === currentUser?.userId);
   const isWorkspaceOwner = currentUser?.userId === ownerId;
   const canManageMembers = isWorkspaceOwner || currentMember?.role === "admin";
@@ -86,19 +89,18 @@ export function useWorkspaceMemberManagement(workspace: Workspace, options: UseW
 
   async function handleTransferOwner(member: WorkspaceMember) {
     setActionMessage(null);
-    const previousOwnerId = ownerId;
     const nextOwnerId = member.userId;
-    setOwnerId(nextOwnerId);
+    setOptimisticOwnerId(nextOwnerId);
 
     try {
-      const updatedWorkspace = await transferOwner.mutateAsync({
+      await transferOwner.mutateAsync({
         workspaceId: workspace.workspaceId,
         ownerId: nextOwnerId,
       });
-      setOwnerId(updatedWorkspace.ownerId || nextOwnerId);
+      setOptimisticOwnerId(null);
       void refetch();
     } catch {
-      setOwnerId(previousOwnerId);
+      setOptimisticOwnerId(null);
       setActionMessage("Workspace owner could not be transferred.");
     }
   }

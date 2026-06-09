@@ -1,6 +1,6 @@
-export type NotificationType = "work_item_comment_mention";
+export type NotificationType = "work_item_comment_mention" | "workspace_invitation";
 
-export type NotificationTargetType = "work_item_comment";
+export type NotificationTargetType = "work_item_comment" | "workspace_invitation";
 
 export interface Notification {
   notificationId: string;
@@ -17,6 +17,11 @@ export interface Notification {
     itemId?: string;
     commentId?: string;
     commentBody?: string;
+    workspaceId?: string;
+    workspaceName?: string;
+    role?: string;
+    invitationLink?: string;
+    expiresAt?: string;
     [key: string]: unknown;
   };
   readAt: string | null;

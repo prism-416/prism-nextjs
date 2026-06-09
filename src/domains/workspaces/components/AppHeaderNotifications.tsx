@@ -37,6 +37,17 @@ export function AppHeaderNotifications() {
     try {
       await readNotification(notification.notificationId);
 
+      if (notification.targetType === "workspace_invitation") {
+        const invitationLink = notification.metadata.invitationLink;
+
+        if (typeof invitationLink === "string" && invitationLink) {
+          router.push(invitationLink);
+          setOpen(false);
+        }
+
+        return;
+      }
+
       const itemId = notification.metadata.itemId;
       if (notification.projectId && typeof itemId === "string" && itemId) {
         const targetProject = await getNotificationProjectTarget(notification.projectId);

@@ -69,12 +69,13 @@ function AssignedJobsSummary({ jobNames, isExpanded, onExpandedChange }: Assigne
 export function WorkspaceMemberJobsEditor({ workspace, member, jobs, canManage }: WorkspaceMemberJobsEditorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [areAssignedJobsExpanded, setAreAssignedJobsExpanded] = useState(false);
-  const [selectedJobIds, setSelectedJobIds] = useState(member.jobIds);
+  const [selectedJobIds, setSelectedJobIds] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { mutateAsync: updateJobs, isPending } = useUpdateWorkspaceMemberJobs();
   const availableJobIds = new Set(jobs.map(job => job.jobId));
-  const selectedAvailableJobIds = selectedJobIds.filter(jobId => availableJobIds.has(jobId));
   const assignedAvailableJobIds = member.jobIds.filter(jobId => availableJobIds.has(jobId));
+  const activeSelectedJobIds = selectedJobIds ?? assignedAvailableJobIds;
+  const selectedAvailableJobIds = activeSelectedJobIds.filter(jobId => availableJobIds.has(jobId));
   const isDirty =
     selectedAvailableJobIds.length !== assignedAvailableJobIds.length ||
     selectedAvailableJobIds.some(jobId => !assignedAvailableJobIds.includes(jobId));
@@ -83,15 +84,19 @@ export function WorkspaceMemberJobsEditor({ workspace, member, jobs, canManage }
     if (open) {
       setSelectedJobIds(assignedAvailableJobIds);
       setError(null);
+    } else {
+      setSelectedJobIds(null);
     }
 
     setIsOpen(open);
   }
 
   function toggleJob(jobId: string, checked: boolean) {
-    setSelectedJobIds(previous =>
-      checked ? Array.from(new Set([...previous, jobId])) : previous.filter(value => value !== jobId),
-    );
+    setSelectedJobIds(previous => {
+      const current = previous ?? assignedAvailableJobIds;
+
+      return checked ? Array.from(new Set([...current, jobId])) : current.filter(value => value !== jobId);
+    });
     setError(null);
   }
 
@@ -104,6 +109,7 @@ export function WorkspaceMemberJobsEditor({ workspace, member, jobs, canManage }
         userId: member.userId,
         jobIds: selectedAvailableJobIds,
       });
+      setSelectedJobIds(null);
       setIsOpen(false);
     } catch (caughtError) {
       setError(getWorkspaceMutationErrorMessage(caughtError, "Member jobs could not be updated."));

@@ -1,19 +1,23 @@
+import type { Workspace } from "@/domains/workspaces/types";
+
 import { getProjects } from "../api";
 import { ProjectsClient } from "./ProjectsClient";
 
 type ProjectsContentProps = {
   slug: string;
-  canCreateProject: boolean;
+  workspace: Pick<Workspace, "workspaceId" | "ownerId">;
+  initialCanCreateProject: boolean;
 };
 
-export async function ProjectsContent({ slug, canCreateProject }: ProjectsContentProps) {
+export async function ProjectsContent({ slug, workspace, initialCanCreateProject }: ProjectsContentProps) {
   const initialData = await getProjects(slug);
 
   return (
     <ProjectsClient
       slug={slug}
+      workspace={workspace}
       initialData={initialData}
-      canCreateProject={canCreateProject}
+      initialCanCreateProject={initialCanCreateProject}
     />
   );
 }

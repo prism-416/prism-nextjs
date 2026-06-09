@@ -3,11 +3,13 @@ import type * as React from "react";
 import MainLayout from "@/atomics/templates/MainLayout";
 import { AppHeader } from "@/domains/workspaces/components/AppHeader";
 import { AppSidebar } from "@/domains/workspaces/components/AppSidebar";
+import { WorkspaceRealtimeRoomBridge } from "@/domains/workspaces/components/WorkspaceRealtimeRoomBridge";
 import type { WorkspacePathOption, WorkspacePathSegment } from "@/domains/workspaces/types/path";
 import { resolveWorkspacePathSegments } from "@/domains/workspaces/utils/path";
 
 export type WorkspaceShellProps = {
   children: React.ReactNode;
+  workspaceId?: string;
   workspace?: WorkspacePathSegment;
   workspaceSlug?: string;
   workspaceOptions?: WorkspacePathOption[];
@@ -25,6 +27,7 @@ export type WorkspaceShellProps = {
 
 export function WorkspaceShell({
   children,
+  workspaceId,
   workspace,
   workspaceSlug,
   workspaceOptions,
@@ -64,6 +67,12 @@ export function WorkspaceShell({
       className={className}
       contentClassName={contentClassName}
     >
+      {workspaceId ? (
+        <WorkspaceRealtimeRoomBridge
+          workspaceId={workspaceId}
+          workspaceSlug={workspaceSlug}
+        />
+      ) : null}
       {children}
     </MainLayout>
   );

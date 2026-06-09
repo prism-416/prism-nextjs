@@ -24,6 +24,7 @@ export default async function WorkspaceMembersPage({ params }: WorkspaceMembersP
 
   return (
     <WorkspaceShell
+      workspaceId={workspace.workspaceId}
       workspace={{ name: workspace.name }}
       workspaceSlug={slug}
       workspaceOptions={workspaces.map(item => ({
