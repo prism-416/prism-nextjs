@@ -31,7 +31,7 @@ type ProjectWorkItemCommentsPanelProps = {
 };
 
 const COMMENT_BODY_MAX_LENGTH = 2000;
-const MAX_DOCUMENT_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+const MAX_DOCUMENT_FILE_SIZE_BYTES = 300 * 1024 * 1024;
 const MAX_COMMENT_ATTACHMENT_COUNT = 10;
 const COMMENT_SUBMIT_BUTTON_CLASS =
   "h-9 rounded-lg bg-prism-navy px-3 text-white hover:bg-prism-navy/90 disabled:cursor-default disabled:opacity-50";

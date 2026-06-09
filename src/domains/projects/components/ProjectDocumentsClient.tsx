@@ -37,7 +37,7 @@ import {
 } from "@/domains/projects/utils/document";
 import { cn } from "@/shared/utils/cn";
 
-const MAX_DOCUMENT_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+const MAX_DOCUMENT_FILE_SIZE_BYTES = 300 * 1024 * 1024;
 
 type ProjectDocumentsClientProps = {
   projectId: string;
