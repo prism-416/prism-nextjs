@@ -1,9 +1,8 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
-import { API_HOST } from "@/shared/constants/api";
 import { clearAuthCookies, applyAuthCookies } from "@/shared/utils/auth-cookie";
-import { getAuthTokensFromResponse } from "@/shared/utils/auth-response";
+import { refreshAuthSession } from "@/shared/utils/auth-refresh";
 
 async function readRefreshTokenFromBody(request: NextRequest) {
   const contentType = request.headers.get("content-type") || "";
@@ -27,54 +26,32 @@ export async function POST(request: NextRequest) {
     return clearAuthCookies(NextResponse.json({ message: "Refresh token is missing." }, { status: 401 }));
   }
 
-  try {
-    const response = await fetch(`${API_HOST}/auth/refresh`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: `${REFRESH_TOKEN_COOKIE_NAME}=${refreshToken}`,
-      },
-      body: JSON.stringify({
-        refreshToken,
-      }),
-      cache: "no-store",
-    });
+  const result = await refreshAuthSession(refreshToken);
 
-    const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-    const tokens = getAuthTokensFromResponse(payload, response.headers, refreshToken);
-
-    if (response.status === 401 || response.status === 403) {
-      return clearAuthCookies(
-        NextResponse.json(
-          {
-            message: "Failed to refresh access token.",
-          },
-          { status: 401 },
-        ),
-      );
-    }
-
-    if (!response.ok || !tokens) {
-      return NextResponse.json(
+  if (result.status === "invalid") {
+    return clearAuthCookies(
+      NextResponse.json(
         {
           message: "Failed to refresh access token.",
         },
-        { status: 502 },
-      );
-    }
+        { status: 401 },
+      ),
+    );
+  }
 
-    const refreshResponse = NextResponse.json({
-      authenticated: true,
-      accessToken: tokens.accessToken,
-    });
-
-    return applyAuthCookies(refreshResponse, tokens);
-  } catch {
+  if (result.status === "failed") {
     return NextResponse.json(
       {
         message: "Failed to refresh access token.",
       },
-      { status: 500 },
+      { status: 502 },
     );
   }
+
+  const refreshResponse = NextResponse.json({
+    authenticated: true,
+    accessToken: result.tokens.accessToken,
+  });
+
+  return applyAuthCookies(refreshResponse, result.tokens);
 }
