@@ -10,6 +10,5 @@ export function useCurrentWorkspaceAgentRuns(workspaceId: string, initialData?: 
     queryFn: () => getCurrentWorkspaceAgentRuns(workspaceId),
     initialData: initialData ?? undefined,
     staleTime: 5 * 1000,
-    refetchInterval: 5 * 1000,
   });
 }
