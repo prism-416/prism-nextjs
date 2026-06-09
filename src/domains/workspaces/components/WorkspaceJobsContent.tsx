@@ -4,10 +4,10 @@ import type { Workspace } from "@/domains/workspaces/types";
 
 type WorkspaceJobsContentProps = {
   workspace: Workspace;
-  canManageJobs: boolean;
+  initialCanManageJobs: boolean;
 };
 
-export async function WorkspaceJobsContent({ workspace, canManageJobs }: WorkspaceJobsContentProps) {
+export async function WorkspaceJobsContent({ workspace, initialCanManageJobs }: WorkspaceJobsContentProps) {
   const initialData = await getWorkspaceJobs(workspace.workspaceId);
 
   return (
@@ -15,7 +15,7 @@ export async function WorkspaceJobsContent({ workspace, canManageJobs }: Workspa
       key={workspace.workspaceId}
       workspace={workspace}
       initialData={initialData}
-      canManageJobs={canManageJobs}
+      initialCanManageJobs={initialCanManageJobs}
     />
   );
 }

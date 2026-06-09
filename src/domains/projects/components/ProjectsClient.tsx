@@ -10,6 +10,8 @@ import { ProjectNoResults } from "@/domains/projects/components/ProjectNoResults
 import { ProjectRow } from "@/domains/projects/components/ProjectRow";
 import { ProjectToolbar, ProjectToolbarActions } from "@/domains/projects/components/ProjectToolbar";
 import { filterProjects } from "@/domains/projects/utils/display";
+import { useWorkspacePermissions } from "@/domains/workspaces/hooks/useWorkspacePermissions";
+import type { Workspace } from "@/domains/workspaces/types";
 
 import { useProjects } from "../hooks/useProjects";
 import type { ProjectSummary } from "../types";
@@ -17,28 +19,30 @@ import { ProjectsSkeleton } from "./ProjectsSkeleton";
 
 type ProjectsClientProps = {
   slug: string;
+  workspace: Pick<Workspace, "workspaceId" | "ownerId">;
   initialData?: ProjectSummary[];
-  canCreateProject: boolean;
+  initialCanCreateProject: boolean;
 };
 
 type ViewMode = "grid" | "list";
 
 const EMPTY_PROJECTS: ProjectSummary[] = [];
 
-export function ProjectsClient({ slug, initialData, canCreateProject }: ProjectsClientProps) {
+export function ProjectsClient({ slug, workspace, initialData, initialCanCreateProject }: ProjectsClientProps) {
   const {
     data,
     isPending: isProjectsPending,
     isError: isProjectsError,
     refetch: refetchProjects,
   } = useProjects(slug, initialData);
+  const { canManage } = useWorkspacePermissions(workspace, { initialCanManage: initialCanCreateProject });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   const projects = data ?? EMPTY_PROJECTS;
   const filteredProjects = useMemo(() => filterProjects(projects, query), [projects, query]);
-  const hasCreatePermission = canCreateProject && Boolean(slug);
+  const hasCreatePermission = canManage && Boolean(slug);
   const showNoResults = !isProjectsError && projects.length > 0 && filteredProjects.length === 0;
 
   const handleRetry = () => {

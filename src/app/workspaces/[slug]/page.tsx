@@ -32,6 +32,7 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
 
   return (
     <WorkspaceShell
+      workspaceId={workspace.workspaceId}
       workspace={{ name: workspace.name }}
       workspaceSlug={slug}
       workspaceOptions={workspaces.map(item => ({
@@ -50,7 +51,8 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
       <Suspense fallback={<ProjectsSkeleton />}>
         <ProjectsContent
           slug={slug}
-          canCreateProject={canCreateProject}
+          workspace={workspace}
+          initialCanCreateProject={canCreateProject}
         />
       </Suspense>
     </WorkspaceShell>

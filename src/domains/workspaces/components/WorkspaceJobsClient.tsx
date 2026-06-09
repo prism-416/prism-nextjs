@@ -13,6 +13,7 @@ import { WorkspaceJobsSkeleton } from "@/domains/workspaces/components/Workspace
 import { useDeleteWorkspaceJob } from "@/domains/workspaces/hooks/useDeleteWorkspaceJob";
 import { useSaveWorkspaceJobs } from "@/domains/workspaces/hooks/useSaveWorkspaceJobs";
 import { useWorkspaceJobs } from "@/domains/workspaces/hooks/useWorkspaceJobs";
+import { useWorkspacePermissions } from "@/domains/workspaces/hooks/useWorkspacePermissions";
 import type {
   CreateWorkspaceJobPayload,
   UpdateWorkspaceJobPayload,
@@ -25,7 +26,7 @@ import { cn } from "@/shared/utils/cn";
 type WorkspaceJobsClientProps = {
   workspace: Workspace;
   initialData?: WorkspaceJob[];
-  canManageJobs: boolean;
+  initialCanManageJobs: boolean;
 };
 
 type JobDraft = {
@@ -174,23 +175,30 @@ function getSavePayload(drafts: JobDraft[]) {
   };
 }
 
-export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: WorkspaceJobsClientProps) {
+export function WorkspaceJobsClient({ workspace, initialData, initialCanManageJobs }: WorkspaceJobsClientProps) {
   const { data, isPending, isError, refetch } = useWorkspaceJobs(workspace.workspaceId, initialData);
+  const { canManage: canManageJobs } = useWorkspacePermissions(workspace, { initialCanManage: initialCanManageJobs });
   const saveJobs = useSaveWorkspaceJobs();
   const deleteJob = useDeleteWorkspaceJob();
   const jobs = data ?? EMPTY_JOBS;
-  const [drafts, setDrafts] = useState<JobDraft[]>(() => toDrafts(initialData ?? EMPTY_JOBS));
+  const serverDrafts = useMemo(() => toDrafts(jobs), [jobs]);
+  const [drafts, setDrafts] = useState<JobDraft[] | null>(null);
   const [draftErrors, setDraftErrors] = useState<DraftErrors>({});
   const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
   const [pendingDeleteDraft, setPendingDeleteDraft] = useState<JobDraft | null>(null);
-  const savePayload = useMemo(() => getSavePayload(drafts), [drafts]);
+  const activeDrafts = drafts ?? serverDrafts;
+  const savePayload = useMemo(() => getSavePayload(activeDrafts), [activeDrafts]);
   const hasChanges = savePayload.createJobs.length > 0 || savePayload.updateJobs.length > 0;
-  const hasDraftChanges = drafts.length !== jobs.length || drafts.some(isChangedDraft);
+  const hasDraftChanges = drafts !== null && (activeDrafts.length !== jobs.length || activeDrafts.some(isChangedDraft));
   const isMutating = saveJobs.isPending || deleteJob.isPending;
   const canSubmit = canManageJobs && hasChanges && !hasErrors(draftErrors) && !isMutating;
 
+  function updateDrafts(updater: (current: JobDraft[]) => JobDraft[]) {
+    setDrafts(current => updater(current ?? serverDrafts));
+  }
+
   function updateDraft(draftId: string, field: "name" | "description", value: string) {
-    setDrafts(current => current.map(draft => (draft.draftId === draftId ? { ...draft, [field]: value } : draft)));
+    updateDrafts(current => current.map(draft => (draft.draftId === draftId ? { ...draft, [field]: value } : draft)));
     setDraftErrors(current => ({
       ...current,
       [draftId]: {
@@ -202,7 +210,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
   }
 
   function handleAddJob() {
-    setDrafts(current => [
+    updateDrafts(current => [
       ...current,
       {
         draftId: createDraftId(),
@@ -214,7 +222,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
   }
 
   function handleRemoveDraft(draftId: string) {
-    setDrafts(current => current.filter(draft => draft.draftId !== draftId));
+    updateDrafts(current => current.filter(draft => draft.draftId !== draftId));
     setDraftErrors(current => {
       const next = { ...current };
       delete next[draftId];
@@ -224,7 +232,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
   }
 
   function handleCancelChanges() {
-    setDrafts(toDrafts(jobs));
+    setDrafts(null);
     setDraftErrors({});
     setActionFeedback(null);
   }
@@ -241,7 +249,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
         workspaceId: workspace.workspaceId,
         jobId,
       });
-      setDrafts(current => current.filter(draft => draft.jobId !== jobId));
+      setDrafts(current => (current ? current.filter(draft => draft.jobId !== jobId) : current));
       setDraftErrors(current => {
         const next = { ...current };
         delete next[pendingDeleteDraft.draftId];
@@ -259,7 +267,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
   }
 
   async function handleSave() {
-    const nextErrors = validateDrafts(drafts);
+    const nextErrors = validateDrafts(activeDrafts);
     setDraftErrors(nextErrors);
     setActionFeedback(null);
 
@@ -272,21 +280,11 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
     }
 
     try {
-      const result = await saveJobs.mutateAsync({
+      await saveJobs.mutateAsync({
         workspaceId: workspace.workspaceId,
         ...savePayload,
       });
-      const nextJobsById = new Map(jobs.map(job => [job.jobId, job]));
-
-      for (const job of result.updatedJobs) {
-        nextJobsById.set(job.jobId, job);
-      }
-
-      for (const job of result.createdJobs) {
-        nextJobsById.set(job.jobId, job);
-      }
-
-      setDrafts(toDrafts(Array.from(nextJobsById.values())));
+      setDrafts(null);
       setDraftErrors({});
       setActionFeedback({ message: "Workspace jobs saved.", tone: "success" });
     } catch (caughtError) {
@@ -297,7 +295,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
     }
   }
 
-  if (isPending && drafts.length === 0) {
+  if (isPending && activeDrafts.length === 0) {
     return <WorkspaceJobsSkeleton />;
   }
 
@@ -344,7 +342,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
         </div>
       ) : null}
 
-      {!isError && drafts.length === 0 && !canManageJobs ? (
+      {!isError && activeDrafts.length === 0 && !canManageJobs ? (
         <div className="rounded-lg border border-dashed border-border-strong/60 bg-surface px-6 py-10 text-center">
           <h2 className="text-base font-semibold text-prism-heading">No jobs yet</h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-prism-muted">
@@ -353,7 +351,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
         </div>
       ) : null}
 
-      {!isError && (drafts.length > 0 || canManageJobs) ? (
+      {!isError && (activeDrafts.length > 0 || canManageJobs) ? (
         <div className="flex flex-col gap-3">
           <div className="overflow-hidden rounded-lg border border-border/80 bg-surface shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_rgba(12,71,103,0.04)]">
             <div className="hidden h-9 grid-cols-[minmax(10rem,14rem)_minmax(0,1fr)_6.5rem] items-center gap-3 border-b border-border/70 bg-surface-strong px-3 text-xs font-medium uppercase tracking-[0.08em] text-prism-muted md:grid">
@@ -362,7 +360,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
               <span>Status</span>
             </div>
 
-            {drafts.map(draft => {
+            {activeDrafts.map(draft => {
               const errors = draftErrors[draft.draftId] ?? {};
               const isNewDraft = !draft.jobId;
               const isChanged = isChangedDraft(draft);
@@ -502,7 +500,7 @@ export function WorkspaceJobsClient({ workspace, initialData, canManageJobs }: W
                 </div>
               );
             })}
-            {drafts.length === 0 ? (
+            {activeDrafts.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-prism-muted">
                 No jobs yet. Add a job to make it available for member assignment.
               </div>

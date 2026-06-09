@@ -32,6 +32,7 @@ export default async function WorkspaceJobsPage({ params }: WorkspaceJobsPagePro
 
   return (
     <WorkspaceShell
+      workspaceId={workspace.workspaceId}
       workspace={{ name: workspace.name }}
       workspaceSlug={slug}
       workspaceOptions={workspaces.map(item => ({
@@ -51,7 +52,7 @@ export default async function WorkspaceJobsPage({ params }: WorkspaceJobsPagePro
       <Suspense fallback={<WorkspaceJobsSkeleton />}>
         <WorkspaceJobsContent
           workspace={workspace}
-          canManageJobs={canManageJobs}
+          initialCanManageJobs={canManageJobs}
         />
       </Suspense>
     </WorkspaceShell>
