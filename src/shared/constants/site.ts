@@ -1,10 +1,6 @@
 ﻿export const SITE_NAVIGATION = [
   { href: "/#capabilities", label: "Product" },
   { href: "/#workflow", label: "Use Cases" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/docs", label: "Docs" },
-  { href: "/blog", label: "Blog" },
-  { href: "/company", label: "Company" },
 ] as const;
 
 export const AUTHENTICATED_ENTRY_PATH = "/workspaces";
