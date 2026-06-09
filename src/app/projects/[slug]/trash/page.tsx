@@ -16,10 +16,11 @@ export default async function ProjectTrashPage({ params }: ProjectTrashPageProps
       slug={slug}
       section={{ name: "Trash" }}
     >
-      {({ projectId, projectSlug }) => (
+      {({ projectId, projectSlug, workspaceId }) => (
         <ProjectTrashClient
           projectId={projectId}
           projectSlug={projectSlug}
+          workspaceId={workspaceId}
         />
       )}
     </ProjectPageShell>

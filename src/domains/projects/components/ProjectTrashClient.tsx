@@ -19,7 +19,9 @@ import { getProjectWorkItemPriorityBadgeClassName } from "@/domains/projects/com
 import { WORK_ITEM_TRASH_RETENTION_DAYS } from "@/domains/projects/constants/dashboard";
 import { useBulkPermanentlyDeleteProjectWorkItems } from "@/domains/projects/hooks/useBulkPermanentlyDeleteProjectWorkItems";
 import { useBulkRestoreProjectWorkItems } from "@/domains/projects/hooks/useBulkRestoreProjectWorkItems";
+import { useProjectParticipants } from "@/domains/projects/hooks/useProjectParticipants";
 import { useProjectWorkItemTrash } from "@/domains/projects/hooks/useProjectWorkItemTrash";
+import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
 import {
   formatProjectDateTime,
@@ -32,6 +34,7 @@ import { cn } from "@/shared/utils/cn";
 type ProjectTrashClientProps = {
   projectId: string;
   projectSlug: string;
+  workspaceId: string;
 };
 
 function TrashCheckbox({ checked, label, onChange }: { checked: boolean; label: string; onChange: () => void }) {
@@ -55,8 +58,9 @@ function TrashCheckbox({ checked, label, onChange }: { checked: boolean; label: 
   );
 }
 
-export function ProjectTrashClient({ projectId }: ProjectTrashClientProps) {
+export function ProjectTrashClient({ projectId, workspaceId }: ProjectTrashClientProps) {
   const { data, isPending, isError, refetch } = useProjectWorkItemTrash(projectId);
+  const { data: members = [] } = useProjectParticipants(workspaceId);
   const { mutateAsync: bulkRestore } = useBulkRestoreProjectWorkItems(projectId);
   const { mutateAsync: bulkPermanentlyDelete } = useBulkPermanentlyDeleteProjectWorkItems(projectId);
 
@@ -293,7 +297,7 @@ export function ProjectTrashClient({ projectId }: ProjectTrashClientProps) {
             {items.map(item => {
               const isSelected = selectedIds.has(item.itemId);
               const scheduleSummary = formatProjectScheduleSummary(item.startDate, item.dueDate);
-              const assigneeUsers = item.assigneeUsernames.map(username => ({ id: username, name: username }));
+              const assigneeUsers = resolveAssigneeAvatarUsers(item.assigneeUsernames, members);
               return (
                 <li
                   key={item.itemId}
