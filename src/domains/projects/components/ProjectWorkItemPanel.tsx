@@ -314,6 +314,7 @@ export function ProjectWorkItemPanel({
 
       <ProjectWorkItemCommentsPanel
         projectId={projectId}
+        workspaceId={workItem.workspaceId}
         itemId={workItem.itemId}
         comments={comments}
         initialMembers={initialMembers}

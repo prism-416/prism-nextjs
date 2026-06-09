@@ -1,3 +1,4 @@
+import { MULTIPART_CONTENT_TYPE } from "@/shared/constants/api";
 import { commonAxios } from "@/shared/http/common-axios";
 import type { ApiResponse } from "@/shared/types/api";
 
@@ -32,13 +33,35 @@ export async function getProjectWorkItemComments(
 export async function createProjectWorkItemComment(
   projectId: string,
   itemId: string,
-  body: CreateProjectWorkItemCommentPayload,
+  payload: CreateProjectWorkItemCommentPayload,
 ) {
-  const response = await commonAxios<CreateProjectWorkItemCommentPayload, ApiResponse<ProjectWorkItemComment>>({
+  const hasFiles = Boolean(payload.files?.length);
+  const data = hasFiles
+    ? (() => {
+        const formData = new FormData();
+        formData.append("body", payload.body);
+        for (const file of payload.files ?? []) {
+          formData.append("files", file);
+        }
+        return formData;
+      })()
+    : payload;
+
+  const response = await commonAxios<
+    FormData | CreateProjectWorkItemCommentPayload,
+    ApiResponse<ProjectWorkItemComment>
+  >({
     url: `/projects/${encodeURIComponent(projectId)}/work-items/${encodeURIComponent(itemId)}/comments`,
     method: "POST",
-    data: body,
+    data,
     version: null,
+    config: hasFiles
+      ? {
+          headers: {
+            "Content-Type": MULTIPART_CONTENT_TYPE,
+          },
+        }
+      : undefined,
   });
 
   return response?.data;

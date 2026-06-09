@@ -4,9 +4,10 @@ import * as React from "react";
 import { X } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
+import { ProjectCommentAttachments } from "@/domains/projects/components/ProjectCommentAttachments";
 import { ProjectCommentMentionTextarea } from "@/domains/projects/components/ProjectCommentMentionTextarea";
 import { useUpdateProjectWorkItemComment } from "@/domains/projects/hooks/useUpdateProjectWorkItemComment";
-import type { ProjectParticipant, ProjectWorkItemComment } from "@/domains/projects/types";
+import type { ProjectDocument, ProjectParticipant, ProjectWorkItemComment } from "@/domains/projects/types";
 
 const COMMENT_BODY_MAX_LENGTH = 2000;
 
@@ -14,8 +15,11 @@ type ProjectWorkItemCommentEditFormProps = {
   projectId: string;
   itemId: string;
   comment: ProjectWorkItemComment;
+  attachments: ProjectDocument[];
   members: ProjectParticipant[];
   currentUserId?: string;
+  canDownloadAttachments: boolean;
+  canDeleteAttachments: boolean;
   onClose: () => void;
 };
 
@@ -23,8 +27,11 @@ export function ProjectWorkItemCommentEditForm({
   projectId,
   itemId,
   comment,
+  attachments,
   members,
   currentUserId,
+  canDownloadAttachments,
+  canDeleteAttachments,
   onClose,
 }: ProjectWorkItemCommentEditFormProps) {
   const [editBody, setEditBody] = React.useState(comment.body);
@@ -77,13 +84,22 @@ export function ProjectWorkItemCommentEditForm({
         maxLength={COMMENT_BODY_MAX_LENGTH}
         disabled={isUpdating}
         autoFocus
-        className="min-h-20 resize-y rounded-xl border-border bg-surface-field px-4 py-3 text-sm text-prism-body placeholder:text-prism-muted focus-visible:ring-ring disabled:cursor-default"
+        className="min-h-28 resize-none rounded-xl border-border bg-surface-field px-4 py-3 text-sm text-prism-body placeholder:text-prism-muted focus-visible:ring-ring disabled:cursor-default"
       />
       <div className="mt-1 flex justify-end">
         <span className="text-xs text-prism-muted">
           {trimmedEditBody.length}/{COMMENT_BODY_MAX_LENGTH}
         </span>
       </div>
+      {attachments.length > 0 ? (
+        <ProjectCommentAttachments
+          projectId={projectId}
+          itemId={itemId}
+          attachments={attachments}
+          canDownload={canDownloadAttachments}
+          canDelete={canDeleteAttachments}
+        />
+      ) : null}
       {editError && <p className="mt-1 text-sm text-prism-danger">{editError}</p>}
       <div className="mt-2 flex items-center justify-end gap-2">
         <Button

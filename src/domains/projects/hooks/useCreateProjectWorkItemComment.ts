@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { createProjectWorkItemComment } from "@/domains/projects/api";
 import type { CreateProjectWorkItemCommentPayload, ProjectWorkItemComment } from "@/domains/projects/types";
+import { syncProjectCommentCreated } from "@/domains/projects/utils/comment-cache";
 import { QUERY_KEYS, useApiMutation } from "@/shared/query";
 
 type CreateProjectWorkItemCommentVariables = {
@@ -25,9 +26,10 @@ export function useCreateProjectWorkItemComment() {
 
       return comment;
     },
-    onSuccess: (_comment, { projectId, itemId }) => {
+    onSuccess: (comment, { projectId }) => {
+      syncProjectCommentCreated(queryClient, comment);
       queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.project.workItemComments(projectId, itemId),
+        queryKey: QUERY_KEYS.project.documents(projectId),
       });
     },
   });

@@ -116,6 +116,7 @@ export interface ProjectWorkItemComment {
   body: string;
   createdAt: string;
   updatedAt: string | null;
+  attachments?: ProjectDocument[];
 }
 
 export interface ProjectWorkItemCommentSearchParams {
@@ -132,6 +133,7 @@ export interface ProjectWorkItemCommentSearchResult {
 
 export interface CreateProjectWorkItemCommentPayload {
   body: string;
+  files?: File[];
 }
 
 export interface UpdateProjectWorkItemCommentPayload {
@@ -149,14 +151,32 @@ export interface ProjectDocument {
   sizeBytes: number;
   storageETag: string | null;
   storageVersionId: string | null;
+  sourceKind: "direct" | "work_item";
+  sourceWorkItemId: string | null;
+  sourceWorkItemIdSnapshot: string | null;
+  sourceWorkItemTitle: string | null;
+  sourceWorkItemTitleSnapshot: string | null;
+  sourceCommentId: string | null;
   createdBy: string;
   updatedBy: string;
   createdAt: string;
   updatedAt: string;
 }
 
+export type ProjectDocumentSourceFilter = "direct" | "work_item";
+
+export interface ProjectDocumentSourceGroup {
+  kind: ProjectDocumentSourceFilter;
+  workItemId: string | null;
+  workItemIdSnapshot: string | null;
+  title: string;
+  count: number;
+}
+
 export interface ProjectDocumentSearchParams {
   query?: string;
+  workItemId?: string;
+  source?: ProjectDocumentSourceFilter;
   limit?: number;
   offset?: number;
 }
@@ -166,12 +186,15 @@ export interface ProjectDocumentSearchResult {
   total: number;
   limit: number;
   offset: number;
+  groups: ProjectDocumentSourceGroup[];
 }
 
 export interface UploadProjectDocumentPayload {
   file: File;
   title?: string;
   description?: string;
+  workItemId?: string;
+  commentId?: string;
 }
 
 export type AgentRunStatus = "queued" | "running" | "waiting" | "completed" | "failed" | "cancelled";

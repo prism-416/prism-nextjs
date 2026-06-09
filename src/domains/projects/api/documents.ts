@@ -34,6 +34,14 @@ export async function uploadProjectDocument(projectId: string, payload: UploadPr
     formData.append("description", payload.description);
   }
 
+  if (payload.workItemId) {
+    formData.append("workItemId", payload.workItemId);
+  }
+
+  if (payload.commentId) {
+    formData.append("commentId", payload.commentId);
+  }
+
   const response = await commonAxios<FormData, ApiResponse<ProjectDocument>>({
     url: `/projects/${encodeURIComponent(projectId)}/documents`,
     method: "POST",

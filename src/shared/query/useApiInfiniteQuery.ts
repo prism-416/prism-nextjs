@@ -8,12 +8,18 @@ import { useInfiniteQuery, type UseInfiniteQueryOptions, type InfiniteData } fro
  * - Query keys must come from QUERY_KEYS factory
  * - initialData should be undefined (not null) if missing
  */
-export function useApiInfiniteQuery<TQueryFnData = unknown, TError = Error, TData = InfiniteData<TQueryFnData>>(
-  options: Omit<UseInfiniteQueryOptions<TQueryFnData, TError, TData>, "queryKey"> & {
-    queryKey: readonly unknown[];
+export function useApiInfiniteQuery<
+  TQueryFnData = unknown,
+  TError = Error,
+  TData = InfiniteData<TQueryFnData>,
+  TQueryKey extends readonly unknown[] = readonly unknown[],
+  TPageParam = unknown,
+>(
+  options: Omit<UseInfiniteQueryOptions<TQueryFnData, TError, TData, TQueryKey, TPageParam>, "queryKey"> & {
+    queryKey: TQueryKey;
   },
 ) {
-  return useInfiniteQuery<TQueryFnData, TError, TData>({
+  return useInfiniteQuery<TQueryFnData, TError, TData, TQueryKey, TPageParam>({
     ...options,
     initialData: options.initialData ?? undefined,
   });

@@ -1,7 +1,7 @@
 import type { Socket } from "socket.io-client";
 
 import type { PROJECT_REALTIME_EVENTS } from "@/domains/projects/constants/realtime";
-import type { Project, ProjectWorkItem } from "@/domains/projects/types";
+import type { Project, ProjectDocument, ProjectWorkItem } from "@/domains/projects/types";
 
 export type ProjectRealtimeErrorPayload = {
   code: string;
@@ -38,6 +38,7 @@ export type ProjectCommentPayload = {
   body: string;
   createdAt: string;
   updatedAt: string | null;
+  attachments?: ProjectDocument[];
 };
 
 export type ProjectCommentDeletedPayload = {
@@ -55,6 +56,12 @@ export type ProjectDocumentCreatedPayload = {
   fileName: string;
   contentType: string;
   sizeBytes: number;
+  sourceKind: "direct" | "work_item";
+  sourceWorkItemId: string | null;
+  sourceWorkItemIdSnapshot: string | null;
+  sourceWorkItemTitle: string | null;
+  sourceWorkItemTitleSnapshot: string | null;
+  sourceCommentId: string | null;
   createdBy: string;
   createdAt: string;
 };

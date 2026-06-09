@@ -166,12 +166,14 @@ function invalidateProjectWorkItemCollections(queryClient: QueryClient, projectI
 export function syncProjectWorkItemCreated(queryClient: QueryClient, workItem: ProjectWorkItem) {
   queryClient.setQueryData(QUERY_KEYS.project.workItemDetail(workItem.projectId, workItem.itemId), workItem);
   invalidateProjectWorkItemCollections(queryClient, workItem.projectId, workItem.workspaceId);
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.documents(workItem.projectId) });
 }
 
 export function syncProjectWorkItemUpdated(queryClient: QueryClient, workItem: ProjectWorkItem) {
   const { itemId, projectId } = workItem;
 
   queryClient.setQueryData(QUERY_KEYS.project.workItemDetail(projectId, itemId), workItem);
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.documents(projectId) });
   queryClient.setQueriesData<ProjectWorkItemSearchResult>(
     {
       predicate: query => isProjectWorkItemListQuery(query.queryKey, projectId),
@@ -285,6 +287,7 @@ export function syncProjectWorkItemDeleted(queryClient: QueryClient, payload: Pr
   const { itemId, projectId } = payload;
 
   removeProjectWorkItemFromCaches(queryClient, projectId, itemId);
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.documents(projectId) });
   // Invalidate the work item collections (and other items' subtrees) but NOT the
   // deleted item's own detail/children subtree — it no longer exists on the
   // server, so refetching it would 404 (the delete dialog may still be observing
