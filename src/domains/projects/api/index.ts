@@ -26,6 +26,7 @@ import type {
 import { getDefinedProjectWorkItemSearchParams, getEmptyProjectWorkItemSearchResult } from "../utils/work-item";
 
 export * from "./comments";
+export * from "./documents";
 
 const CURRENT_AGENT_RUN_STATUSES: AgentRunStatus[] = ["queued", "running", "waiting"];
 const CURRENT_AGENT_RUN_LIMIT = 50;

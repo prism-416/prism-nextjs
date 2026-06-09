@@ -1,6 +1,7 @@
-import { Files } from "lucide-react";
+import { Suspense } from "react";
 
-import { ProjectSectionPlaceholder } from "@/domains/projects/components/ProjectSectionPlaceholder";
+import { ProjectDocumentsContent } from "@/domains/projects/components/ProjectDocumentsContent";
+import { ProjectDocumentsSkeleton } from "@/domains/projects/components/ProjectDocumentsSkeleton";
 
 import { ProjectPageShell } from "../_components/ProjectPageShell";
 
@@ -18,11 +19,14 @@ export default async function ProjectDocumentsPage({ params }: ProjectDocumentsP
       slug={slug}
       section={{ name: "Documents" }}
     >
-      <ProjectSectionPlaceholder
-        title="Documents"
-        description="No documents yet."
-        icon={Files}
-      />
+      {({ projectId, workspaceId }) => (
+        <Suspense fallback={<ProjectDocumentsSkeleton />}>
+          <ProjectDocumentsContent
+            projectId={projectId}
+            workspaceId={workspaceId}
+          />
+        </Suspense>
+      )}
     </ProjectPageShell>
   );
 }
