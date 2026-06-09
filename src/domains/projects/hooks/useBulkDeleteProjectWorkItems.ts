@@ -29,6 +29,9 @@ export function useBulkDeleteProjectWorkItems(projectId: string) {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.project.workItems(variablesProjectId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.project.documents(variablesProjectId),
+      });
     },
   });
 }

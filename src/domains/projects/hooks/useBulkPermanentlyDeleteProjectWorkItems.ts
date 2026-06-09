@@ -44,6 +44,9 @@ export function useBulkPermanentlyDeleteProjectWorkItems(projectId: string) {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.project.workItemTrash(variablesProjectId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.project.documents(variablesProjectId),
+      });
     },
   });
 }

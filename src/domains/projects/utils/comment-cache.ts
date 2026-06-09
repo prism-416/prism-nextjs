@@ -88,3 +88,30 @@ export function syncProjectCommentDeleted(queryClient: QueryClient, payload: Pro
     removeComment(previous, payload.commentId),
   );
 }
+
+export function syncProjectCommentAttachmentDeleted(
+  queryClient: QueryClient,
+  projectId: string,
+  itemId: string,
+  documentId: string,
+) {
+  setProjectCommentQueries(queryClient, projectId, itemId, previous => {
+    if (!previous) {
+      return previous;
+    }
+
+    return {
+      ...previous,
+      comments: previous.comments.map(comment => {
+        if (!comment.attachments) {
+          return comment;
+        }
+
+        return {
+          ...comment,
+          attachments: comment.attachments.filter(attachment => attachment.documentId !== documentId),
+        };
+      }),
+    };
+  });
+}

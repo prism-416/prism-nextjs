@@ -6,10 +6,11 @@ import { CircleCheck } from "lucide-react";
 import { UserAvatar } from "@/atomics/atoms/Avatar";
 import { Badge } from "@/atomics/atoms/Badge";
 import { Typography } from "@/atomics/atoms/Typography";
+import { ProjectCommentAttachments } from "@/domains/projects/components/ProjectCommentAttachments";
 import { ProjectWorkItemCommentActionMenu } from "@/domains/projects/components/ProjectWorkItemCommentActionMenu";
 import { ProjectWorkItemCommentEditForm } from "@/domains/projects/components/ProjectWorkItemCommentEditForm";
 import { useDeleteProjectWorkItemComment } from "@/domains/projects/hooks/useDeleteProjectWorkItemComment";
-import type { ProjectParticipant, ProjectWorkItemComment } from "@/domains/projects/types";
+import type { ProjectDocument, ProjectParticipant, ProjectWorkItemComment } from "@/domains/projects/types";
 import { renderCommentBodyWithMentions } from "@/domains/projects/utils/mentions";
 import type { CurrentUser } from "@/shared/types/auth";
 import {
@@ -22,6 +23,8 @@ type ProjectWorkItemCommentRowProps = {
   projectId: string;
   itemId: string;
   comment: ProjectWorkItemComment;
+  attachments: ProjectDocument[];
+  canDownloadAttachments: boolean;
   currentUser?: CurrentUser;
   memberByUserId: Map<string, ProjectParticipant>;
   members: ProjectParticipant[];
@@ -32,6 +35,8 @@ export function ProjectWorkItemCommentRow({
   projectId,
   itemId,
   comment,
+  attachments,
+  canDownloadAttachments,
   currentUser,
   memberByUserId,
   members,
@@ -56,19 +61,32 @@ export function ProjectWorkItemCommentRow({
       projectId={projectId}
       itemId={itemId}
       comment={comment}
+      attachments={attachments}
       members={members}
       currentUserId={currentUser?.userId}
+      canDownloadAttachments={canDownloadAttachments}
+      canDeleteAttachments={isCurrentUser}
       onClose={() => setIsEditing(false)}
     />
   );
 
   const bodyContent = (
-    <div className="flex items-start justify-between gap-2">
-      <p className="min-w-0 flex-1 whitespace-pre-wrap break-words text-sm leading-6 text-prism-body">
-        {renderCommentBodyWithMentions(comment.body)}
-        {comment.updatedAt && !isEditing && <span className="ml-1 text-xs text-prism-muted/60">· Edited</span>}
-      </p>
-      {actionMenu}
+    <div>
+      <div className="flex items-start justify-between gap-2">
+        <p className="min-w-0 flex-1 whitespace-pre-wrap break-words text-sm leading-6 text-prism-body">
+          {renderCommentBodyWithMentions(comment.body)}
+          {comment.updatedAt && !isEditing && <span className="ml-1 text-xs text-prism-muted/60">· Edited</span>}
+        </p>
+        {actionMenu}
+      </div>
+      {attachments.length > 0 ? (
+        <ProjectCommentAttachments
+          projectId={projectId}
+          itemId={itemId}
+          attachments={attachments}
+          canDownload={canDownloadAttachments}
+        />
+      ) : null}
     </div>
   );
 
