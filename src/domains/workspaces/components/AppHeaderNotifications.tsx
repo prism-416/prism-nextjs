@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/atomics/atoms/Popover";
-import { getNotificationProjectTarget } from "@/domains/workspaces/api";
+import { getNotificationProjectTarget, getWorkspaceInvitation } from "@/domains/workspaces/api";
 import { AppHeaderNotificationItem } from "@/domains/workspaces/components/AppHeaderNotificationItem";
 import { useNotificationActions } from "@/domains/workspaces/hooks/useNotificationActions";
 import { useNotificationRealtime } from "@/domains/workspaces/hooks/useNotificationRealtime";
@@ -39,12 +39,29 @@ export function AppHeaderNotifications() {
 
       if (notification.targetType === "workspace_invitation") {
         const invitationLink = notification.metadata.invitationLink;
+        const invitationToken = notification.metadata.invitationToken;
+
+        if (typeof invitationToken === "string" && invitationToken) {
+          const invitation = await getWorkspaceInvitation({ token: invitationToken }).catch(() => null);
+
+          if (invitation?.status === "accepted") {
+            router.push("/workspaces");
+            setOpen(false);
+            return;
+          }
+        }
 
         if (typeof invitationLink === "string" && invitationLink) {
           router.push(invitationLink);
           setOpen(false);
         }
 
+        return;
+      }
+
+      if (notification.notificationType === "workspace_member_removed") {
+        router.push("/workspaces");
+        setOpen(false);
         return;
       }
 
