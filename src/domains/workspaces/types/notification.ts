@@ -19,6 +19,7 @@ export interface Notification {
     commentBody?: string;
     workspaceId?: string;
     workspaceName?: string;
+    invitationId?: string;
     role?: string;
     invitationLink?: string;
     invitationToken?: string;
