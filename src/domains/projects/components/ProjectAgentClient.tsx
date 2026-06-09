@@ -25,6 +25,7 @@ import { Skeleton } from "@/atomics/atoms/Skeleton";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectAgentSkeleton } from "@/domains/projects/components/ProjectAgentSkeleton";
+import { useAgentRealtimeWorkspace } from "@/domains/projects/hooks/useAgentRealtimeWorkspace";
 import { useAgentRunSteps } from "@/domains/projects/hooks/useAgentRunSteps";
 import { useCurrentWorkspaceAgentRuns } from "@/domains/projects/hooks/useCurrentWorkspaceAgentRuns";
 import { useRequestFeatureProvisioning } from "@/domains/projects/hooks/useRequestFeatureProvisioning";
@@ -419,6 +420,7 @@ export function ProjectAgentClient({
   initialStepsByRunId = {},
 }: ProjectAgentClientProps) {
   const queryClient = useQueryClient();
+  const { lastError: agentRealtimeError, status: agentRealtimeStatus } = useAgentRealtimeWorkspace({ workspaceId });
   const [featureSpecification, setFeatureSpecification] = React.useState("");
   const [fieldError, setFieldError] = React.useState<string | null>(null);
   const [requestFeedback, setRequestFeedback] = React.useState<RequestFeedback | null>(null);
@@ -436,6 +438,11 @@ export function ProjectAgentClient({
   const isSpecificationTooLong = specificationLength > FEATURE_SPECIFICATION_MAX_LENGTH;
   const canSubmit =
     trimmedSpecification.length > 0 && !isSpecificationTooLong && !requestProvisioning.isPending && !isRunsPending;
+  const shouldShowAgentSyncButton = agentRealtimeStatus === "disconnected" || agentRealtimeStatus === "error";
+  const agentRealtimeIssueMessage =
+    agentRealtimeStatus === "error"
+      ? (agentRealtimeError?.message ?? "Realtime sync is unavailable.")
+      : "Realtime sync is reconnecting. You can manually sync while it recovers.";
 
   function refreshAgentOverview() {
     void refetch();
@@ -646,17 +653,29 @@ export function ProjectAgentClient({
               Active agent runs and steps
             </Typography>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9 rounded-lg border-border bg-surface px-3 text-prism-body"
-            onClick={refreshAgentOverview}
-            disabled={isRunsFetching}
-          >
-            <RefreshCw className={cn("size-4", isRunsFetching && "animate-spin")} />
-            Refresh
-          </Button>
+          {shouldShowAgentSyncButton ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 rounded-lg border-border bg-surface px-3 text-prism-body"
+              title={agentRealtimeIssueMessage}
+              onClick={refreshAgentOverview}
+              disabled={isRunsFetching}
+            >
+              <RefreshCw className={cn("size-4", isRunsFetching && "animate-spin")} />
+              Sync
+            </Button>
+          ) : null}
         </div>
+
+        {shouldShowAgentSyncButton && !isRunsError ? (
+          <div className="rounded-lg border border-prism-review/30 bg-prism-review/10 px-4 py-3 text-sm text-prism-navy">
+            <div className="flex gap-2">
+              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <p>{agentRealtimeIssueMessage}</p>
+            </div>
+          </div>
+        ) : null}
 
         {isRunsError ? (
           <div className="rounded-lg border border-prism-danger-soft bg-surface px-4 py-3 text-sm text-prism-danger">

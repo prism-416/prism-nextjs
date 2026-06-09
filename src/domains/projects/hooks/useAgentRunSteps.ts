@@ -10,6 +10,5 @@ export function useAgentRunSteps(workspaceId: string, runId: string, initialData
     queryFn: () => getAgentRunSteps(workspaceId, runId),
     initialData: initialData ?? undefined,
     staleTime: 5 * 1000,
-    refetchInterval: 5 * 1000,
   });
 }

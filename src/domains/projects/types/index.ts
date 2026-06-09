@@ -253,6 +253,38 @@ export interface AgentStep {
 
 export type AgentRunStepsByRunId = Record<string, AgentStep[]>;
 
+export type AgentActionStatus = "proposed" | "approved" | "rejected" | "executed" | "failed" | "cancelled";
+
+export interface AgentAction {
+  actionId: string;
+  runId: string;
+  stepId: string | null;
+  workspaceId: string;
+  actionType: string;
+  targetType: string;
+  targetId: string | null;
+  status: AgentActionStatus;
+  reasoningSummary: string | null;
+  payloadObjectName: string | null;
+  resultObjectName: string | null;
+  requiresApproval: boolean;
+  approvedByUserId: string | null;
+  approvedAt: string | null;
+  executedAt: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+}
+
+export interface AgentActionEvent {
+  eventId: string;
+  actionId: string;
+  actorUserId: string | null;
+  eventType: string;
+  message: string | null;
+  eventObjectName: string | null;
+  createdAt: string;
+}
+
 export type FeatureProvisioningRequestStatus = "pending" | "queued" | "dispatch_failed";
 
 export interface FeatureProvisioningRequest {
