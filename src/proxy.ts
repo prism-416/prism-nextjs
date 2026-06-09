@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
-import { API_HOST, JSON_CONTENT_TYPE } from "@/shared/constants/api";
 import { applyAuthCookies, clearAuthCookies } from "@/shared/utils/auth-cookie";
-import { getAuthTokensFromResponse } from "@/shared/utils/auth-response";
+import { refreshAuthSession } from "@/shared/utils/auth-refresh";
 import type { AuthTokens } from "@/shared/types/auth";
 import { AUTHENTICATED_ENTRY_PATH } from "@/shared/constants/site";
 
@@ -11,18 +10,6 @@ const PUBLIC_ROUTES = ["/", "/sign-in", "/sign-up", "/verify", "/workspaces/invi
 
 /** Routes that authenticated users are bounced away from. */
 const GUEST_ONLY_ROUTES = ["/sign-in", "/sign-up"];
-
-type RefreshSessionResult =
-  | {
-      status: "success";
-      tokens: AuthTokens;
-    }
-  | {
-      status: "invalid";
-    }
-  | {
-      status: "failed";
-    };
 
 function matchesRoute(pathname: string, routes: readonly string[]) {
   return routes.some(route =>
@@ -58,37 +45,6 @@ function shouldRefreshAccessToken(accessToken: string | undefined) {
   }
 
   return payload.exp * 1000 <= Date.now() + 30 * 1000;
-}
-
-async function refreshAuthSession(refreshToken: string): Promise<RefreshSessionResult> {
-  try {
-    const response = await fetch(`${API_HOST}/auth/refresh`, {
-      method: "POST",
-      headers: {
-        "Content-Type": JSON_CONTENT_TYPE,
-        Cookie: `${REFRESH_TOKEN_COOKIE_NAME}=${refreshToken}`,
-      },
-      body: JSON.stringify({ refreshToken }),
-      cache: "no-store",
-    });
-    const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-    const tokens = getAuthTokensFromResponse(payload, response.headers, refreshToken);
-
-    if (response.status === 401 || response.status === 403) {
-      return { status: "invalid" };
-    }
-
-    if (!response.ok || !tokens) {
-      return { status: "failed" };
-    }
-
-    return {
-      status: "success",
-      tokens,
-    };
-  } catch {
-    return { status: "failed" };
-  }
 }
 
 function getRedirectToSignInResponse(request: NextRequest, shouldClearCookies = true) {
