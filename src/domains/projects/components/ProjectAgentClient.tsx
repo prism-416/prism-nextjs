@@ -201,19 +201,25 @@ function AgentStepStatusBadge({ status }: { status: AgentStepStatus }) {
 
 function AgentRunStepDagSkeleton() {
   return (
-    <div className="mt-5 rounded-xl border border-border bg-surface-field-soft p-4">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={index}
-          className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 py-2.5"
-        >
-          <Skeleton className="size-10 rounded-full bg-prism-navy/5" />
-          <div>
-            <Skeleton className="h-4 w-64 max-w-full bg-prism-navy/5" />
-            <Skeleton className="mt-2 h-3 w-40 max-w-full bg-prism-navy/5" />
+    <div className="mt-5 overflow-hidden rounded-xl border border-border bg-surface-field-soft">
+      <div className="flex items-center gap-2 border-b border-border/70 px-4 py-3 text-sm font-medium text-prism-muted">
+        <Network className="size-4" />
+        Execution graph
+      </div>
+      <div className="divide-y divide-border/60">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 px-4 py-4"
+          >
+            <Skeleton className="size-10 rounded-full bg-prism-navy/5" />
+            <div>
+              <Skeleton className="h-4 w-64 max-w-full bg-prism-navy/5" />
+              <Skeleton className="mt-2 h-3 w-40 max-w-full bg-prism-navy/5" />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
