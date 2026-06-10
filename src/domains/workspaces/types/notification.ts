@@ -1,6 +1,10 @@
-export type NotificationType = "work_item_comment_mention" | "workspace_invitation" | "workspace_member_removed";
+export type NotificationType =
+  | "work_item_comment_mention"
+  | "work_item_assigned"
+  | "workspace_invitation"
+  | "workspace_member_removed";
 
-export type NotificationTargetType = "work_item_comment" | "workspace_invitation" | "workspace";
+export type NotificationTargetType = "work_item" | "work_item_comment" | "workspace_invitation" | "workspace";
 
 export interface Notification {
   notificationId: string;
@@ -15,6 +19,7 @@ export interface Notification {
   targetId: string;
   metadata: {
     itemId?: string;
+    workItemTitle?: string;
     commentId?: string;
     commentBody?: string;
     workspaceId?: string;
