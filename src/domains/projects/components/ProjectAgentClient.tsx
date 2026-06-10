@@ -218,34 +218,26 @@ function AgentRunStepDagSkeleton() {
   );
 }
 
-function AgentRunRootNode({ run, isLast }: { run: AgentRun; isLast: boolean }) {
+function AgentRunRootNode({ run }: { run: AgentRun }) {
   return (
     <li className="relative grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 px-4 py-4">
-      {!isLast ? (
-        <span
-          aria-hidden="true"
-          className="absolute bottom-[-1px] left-9 top-11 w-px bg-border-strong/50"
-        />
-      ) : null}
+      <span
+        aria-hidden="true"
+        className="absolute bottom-[-1px] left-9 top-11 w-px bg-border-strong/50"
+      />
       <span className="relative z-10 inline-flex size-10 items-center justify-center rounded-full border border-prism-glow-sky/35 bg-prism-glow-sky/10 text-prism-navy">
         <GitBranch className="size-5" />
       </span>
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <Typography
-            variant="bodySm"
-            tone="primary"
-            weight="semibold"
-            className="min-w-0 truncate"
-          >
-            {run.agentType}
-          </Typography>
-          <AgentRunStatusBadge status={run.status} />
-        </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-prism-muted">
-          <span>{run.triggerType}</span>
-          <span>{formatProjectDateTime(run.createdAt)}</span>
-        </div>
+        <Typography
+          variant="bodySm"
+          tone="primary"
+          weight="semibold"
+          className="min-w-0 truncate"
+        >
+          Run started
+        </Typography>
+        <div className="mt-1 text-sm text-prism-muted">{formatProjectDateTime(run.createdAt)}</div>
       </div>
     </li>
   );
@@ -381,10 +373,7 @@ function AgentRunStepDag({
         ) : null}
       </div>
       <ol className="divide-y divide-border/60">
-        <AgentRunRootNode
-          run={run}
-          isLast={steps.length === 0}
-        />
+        <AgentRunRootNode run={run} />
         {steps.map((step, index) => (
           <AgentStepDagNode
             key={step.stepId}
@@ -485,7 +474,7 @@ export function ProjectAgentClient({
   const isSpecificationTooLong = specificationLength > FEATURE_SPECIFICATION_MAX_LENGTH;
   const canSubmit =
     trimmedSpecification.length > 0 && !isSpecificationTooLong && !requestProvisioning.isPending && !isRunsPending;
-  const shouldShowAgentSyncButton = agentRealtimeStatus === "disconnected" || agentRealtimeStatus === "error";
+  const hasRealtimeIssue = agentRealtimeStatus === "disconnected" || agentRealtimeStatus === "error";
   const agentRealtimeIssueMessage =
     agentRealtimeStatus === "error"
       ? (agentRealtimeError?.message ?? "Realtime sync is unavailable.")
@@ -557,26 +546,24 @@ export function ProjectAgentClient({
 
   return (
     <section className="mx-auto flex w-full max-w-[96rem] flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Bot className="size-5 text-prism-muted" />
-            <Typography
-              variant="h3"
-              tone="primary"
-              className="text-xl tracking-normal md:text-2xl"
-            >
-              Agent overview
-            </Typography>
-          </div>
+      <div>
+        <div className="flex items-center gap-2">
+          <Bot className="size-5 text-prism-muted" />
           <Typography
-            variant="bodySm"
-            tone="muted"
-            className="mt-1 max-w-2xl"
+            variant="h3"
+            tone="primary"
+            className="text-xl tracking-normal md:text-2xl"
           >
-            Review recent agent runs, inspect each execution graph, and start a new task-generation run.
+            Agent overview
           </Typography>
         </div>
+        <Typography
+          variant="bodySm"
+          tone="muted"
+          className="mt-1 max-w-2xl"
+        >
+          Review recent agent runs, inspect each execution graph, and start a new task-generation run.
+        </Typography>
       </div>
 
       <div className="grid w-full gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(22rem,0.85fr)]">
@@ -604,17 +591,21 @@ export function ProjectAgentClient({
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-2">
-                <span className="inline-flex min-h-8 items-center rounded-full border border-border bg-surface-strong px-3 text-xs font-medium text-prism-muted">
-                  {activeRunCount} active
-                </span>
-                <span className="inline-flex min-h-8 items-center rounded-full border border-border bg-surface-strong px-3 text-xs font-medium text-prism-muted">
-                  {finishedRunCount} finished
-                </span>
+                {runs.length > 0 ? (
+                  <>
+                    <span className="inline-flex min-h-8 items-center rounded-full border border-border bg-surface-strong px-3 text-xs font-medium text-prism-muted">
+                      {activeRunCount} active
+                    </span>
+                    <span className="inline-flex min-h-8 items-center rounded-full border border-border bg-surface-strong px-3 text-xs font-medium text-prism-muted">
+                      {finishedRunCount} finished
+                    </span>
+                  </>
+                ) : null}
                 <Button
                   type="button"
                   variant="outline"
                   className="h-9 rounded-lg border-border bg-surface px-3 text-prism-body"
-                  title={shouldShowAgentSyncButton ? agentRealtimeIssueMessage : "Refresh agent run history"}
+                  title={hasRealtimeIssue ? agentRealtimeIssueMessage : "Refresh agent run history"}
                   onClick={refreshAgentOverview}
                   disabled={isRunsFetching}
                 >
@@ -624,7 +615,7 @@ export function ProjectAgentClient({
               </div>
             </div>
 
-            {shouldShowAgentSyncButton && !isRunsError ? (
+            {hasRealtimeIssue && !isRunsError ? (
               <div className="mt-4 rounded-lg border border-prism-review/30 bg-prism-review/10 px-4 py-3 text-sm text-prism-navy">
                 <div className="flex gap-2">
                   <AlertCircle className="mt-0.5 size-4 shrink-0" />
@@ -715,7 +706,6 @@ export function ProjectAgentClient({
             <Textarea
               id="feature-specification"
               value={featureSpecification}
-              rows={14}
               maxLength={FEATURE_SPECIFICATION_MAX_LENGTH + 1}
               placeholder="Paste the feature specification here."
               disabled={requestProvisioning.isPending}
