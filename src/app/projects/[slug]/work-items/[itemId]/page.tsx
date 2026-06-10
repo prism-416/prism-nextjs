@@ -1,9 +1,4 @@
-import { Suspense } from "react";
-
-import { ProjectWorkItemContent } from "@/domains/projects/components/ProjectWorkItemContent";
-import { ProjectWorkItemSkeleton } from "@/domains/projects/components/ProjectWorkItemSkeleton";
-
-import { ProjectPageShell } from "../../_components/ProjectPageShell";
+import { ProjectWorkItemRoute } from "@/domains/projects/components/ProjectRoutes";
 
 type ProjectWorkItemPageProps = {
   params: Promise<{
@@ -13,26 +8,7 @@ type ProjectWorkItemPageProps = {
 };
 
 export default async function ProjectWorkItemPage({ params }: ProjectWorkItemPageProps) {
-  const { slug, itemId } = await params;
-  const dashboardHref = `/projects/${encodeURIComponent(slug)}`;
+  const { itemId } = await params;
 
-  return (
-    <ProjectPageShell
-      slug={slug}
-      section={{
-        name: "Dashboard",
-        href: dashboardHref,
-      }}
-    >
-      {({ projectId, projectSlug }) => (
-        <Suspense fallback={<ProjectWorkItemSkeleton />}>
-          <ProjectWorkItemContent
-            projectId={projectId}
-            projectSlug={projectSlug}
-            itemId={itemId}
-          />
-        </Suspense>
-      )}
-    </ProjectPageShell>
-  );
+  return <ProjectWorkItemRoute itemId={itemId} />;
 }

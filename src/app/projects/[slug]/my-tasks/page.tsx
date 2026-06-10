@@ -1,33 +1,5 @@
-import { Suspense } from "react";
+import { ProjectMyTasksRoute } from "@/domains/projects/components/ProjectRoutes";
 
-import { ProjectMyTasksContent } from "@/domains/projects/components/ProjectMyTasksContent";
-import { ProjectMyTasksSkeleton } from "@/domains/projects/components/ProjectMyTasksSkeleton";
-
-import { ProjectPageShell } from "../_components/ProjectPageShell";
-
-type ProjectMyTasksPageProps = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
-
-export default async function ProjectMyTasksPage({ params }: ProjectMyTasksPageProps) {
-  const { slug } = await params;
-
-  return (
-    <ProjectPageShell
-      slug={slug}
-      section={{ name: "My tasks" }}
-    >
-      {({ projectId, projectSlug, workspaceId }) => (
-        <Suspense fallback={<ProjectMyTasksSkeleton />}>
-          <ProjectMyTasksContent
-            projectId={projectId}
-            projectSlug={projectSlug}
-            workspaceId={workspaceId}
-          />
-        </Suspense>
-      )}
-    </ProjectPageShell>
-  );
+export default function ProjectMyTasksPage() {
+  return <ProjectMyTasksRoute />;
 }

@@ -8,6 +8,9 @@ interface Props {
   children: React.ReactNode;
 }
 
+const DEFAULT_QUERY_STALE_TIME_MS = 5 * 60 * 1000;
+const DEFAULT_QUERY_GC_TIME_MS = 30 * 60 * 1000;
+
 /**
  * @desc TanStack query provider
  */
@@ -30,8 +33,8 @@ export default function TanStackQueryProvider({ children }: Props) {
             retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프, 최대 30초
             refetchOnWindowFocus: false, // 창 포커스 시 자동 리페치 비활성화
             refetchOnReconnect: true, // 오프라인 → 온라인 복귀 시 refetch
-            staleTime: 60 * 1000, // 1분 (데이터가 신선하게 유지되는 시간)
-            gcTime: 5 * 60 * 1000, // 5분 (메모리에서 데이터 삭제까지의 시간)
+            staleTime: DEFAULT_QUERY_STALE_TIME_MS,
+            gcTime: DEFAULT_QUERY_GC_TIME_MS,
           },
           mutations: {
             retry: 3, // 변이 작업도 최대 3번 재시도

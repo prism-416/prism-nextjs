@@ -82,6 +82,8 @@ function isActiveProjectHref(pathname: string, item: ProjectSidebarNavItem) {
 }
 
 function ProjectSidebarNavGroup({ label, items, pathname }: ProjectSidebarNavGroupProps) {
+  const router = useRouter();
+
   if (items.length === 0) {
     return null;
   }
@@ -105,6 +107,8 @@ function ProjectSidebarNavGroup({ label, items, pathname }: ProjectSidebarNavGro
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
+                    onMouseEnter={() => router.prefetch(item.href)}
+                    onFocus={() => router.prefetch(item.href)}
                   >
                     <Icon />
                     <span>{item.label}</span>
@@ -186,6 +190,8 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
               <Link
                 href={projectHref}
                 aria-label={`${projectLabel} dashboard`}
+                onMouseEnter={() => router.prefetch(projectHref)}
+                onFocus={() => router.prefetch(projectHref)}
               >
                 <span className="grid size-8 shrink-0 place-items-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
                   <FolderKanban className="size-4" />

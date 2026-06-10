@@ -9,6 +9,7 @@ import {
 } from "@/domains/projects/components/ProjectMyTasksPanel";
 import { ProjectMyTasksSkeleton } from "@/domains/projects/components/ProjectMyTasksSkeleton";
 import { useProjectMyTasks } from "@/domains/projects/hooks/useProjectMyTasks";
+import { useProjectParticipants } from "@/domains/projects/hooks/useProjectParticipants";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
 import type {
   ProjectParticipant,
@@ -20,6 +21,7 @@ import type {
 type ProjectMyTasksClientProps = {
   projectId: string;
   projectSlug: string;
+  workspaceId?: string;
   assigneeUsername?: string;
   initialData?: ProjectWorkItemSearchResult;
   initialMembers?: ProjectParticipant[];
@@ -28,6 +30,7 @@ type ProjectMyTasksClientProps = {
 export function ProjectMyTasksClient({
   projectId,
   projectSlug,
+  workspaceId,
   assigneeUsername,
   initialData,
   initialMembers,
@@ -52,6 +55,7 @@ export function ProjectMyTasksClient({
     filters,
     hasActiveFilters ? undefined : initialData,
   );
+  const { data: members = initialMembers ?? [] } = useProjectParticipants(workspaceId, initialMembers);
   const { mutateAsync: updateWorkItem } = useUpdateProjectWorkItem();
   const tasks = data?.items ?? [];
 
@@ -90,7 +94,7 @@ export function ProjectMyTasksClient({
       tasks={tasks}
       total={data?.total ?? 0}
       projectSlug={projectSlug}
-      members={initialMembers}
+      members={members}
       assigneeUsername={assigneeUsername}
       query={query}
       status={status}
