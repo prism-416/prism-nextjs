@@ -6,7 +6,6 @@ import type {
   AgentRunSearchParams,
   AgentRunSearchResult,
   AgentRunStepsByRunId,
-  AgentRunStatus,
   AgentStep,
   CreateFeatureProvisioningRequestPayload,
   CreateProjectPayload,
@@ -28,10 +27,9 @@ import { getDefinedProjectWorkItemSearchParams, getEmptyProjectWorkItemSearchRes
 export * from "./comments";
 export * from "./documents";
 
-const CURRENT_AGENT_RUN_STATUSES: AgentRunStatus[] = ["queued", "running", "waiting"];
-const CURRENT_AGENT_RUN_LIMIT = 50;
+const AGENT_RUN_HISTORY_LIMIT = 50;
 
-function getEmptyAgentRunSearchResult(limit = CURRENT_AGENT_RUN_LIMIT): AgentRunSearchResult {
+function getEmptyAgentRunSearchResult(limit = AGENT_RUN_HISTORY_LIMIT): AgentRunSearchResult {
   return {
     items: [],
     total: 0,
@@ -266,31 +264,15 @@ export async function getWorkspaceAgentRuns(workspaceId: string, params?: AgentR
   return response?.data ?? getEmptyAgentRunSearchResult(params?.limit);
 }
 
-export async function getCurrentWorkspaceAgentRuns(workspaceId: string) {
-  const results = await Promise.all(
-    CURRENT_AGENT_RUN_STATUSES.map(status =>
-      getWorkspaceAgentRuns(workspaceId, {
-        status,
-        limit: CURRENT_AGENT_RUN_LIMIT,
-        offset: 0,
-      }),
-    ),
-  );
-  const runsById = new Map<string, AgentRun>();
-
-  for (const result of results) {
-    for (const run of result.items) {
-      runsById.set(run.runId, run);
-    }
-  }
-
-  const items = Array.from(runsById.values()).sort(sortAgentRunsByRecency);
+export async function getWorkspaceAgentRunHistory(workspaceId: string) {
+  const result = await getWorkspaceAgentRuns(workspaceId, {
+    limit: AGENT_RUN_HISTORY_LIMIT,
+    offset: 0,
+  });
 
   return {
-    items,
-    total: items.length,
-    limit: CURRENT_AGENT_RUN_LIMIT,
-    offset: 0,
+    ...result,
+    items: [...result.items].sort(sortAgentRunsByRecency),
   } satisfies AgentRunSearchResult;
 }
 
