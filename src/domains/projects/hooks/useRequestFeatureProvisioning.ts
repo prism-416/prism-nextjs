@@ -29,7 +29,7 @@ export function useRequestFeatureProvisioning() {
       return request;
     },
     onSuccess: (_request, { workspaceId, projectId }) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.currentAgentRuns(workspaceId) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.agentRunHistory(workspaceId) });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(projectId) });
     },
   });

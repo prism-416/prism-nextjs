@@ -1,15 +1,10 @@
 import type { QueryClient } from "@tanstack/react-query";
 
-import type { AgentRun, AgentRunSearchResult, AgentRunStatus, AgentStep } from "@/domains/projects/types";
+import type { AgentRun, AgentRunSearchResult, AgentStep } from "@/domains/projects/types";
 import type { AgentStepRealtimePayload } from "@/domains/projects/types/agent-realtime";
 import { QUERY_KEYS } from "@/shared/query";
 
-const CURRENT_AGENT_RUN_LIMIT = 50;
-const CURRENT_AGENT_RUN_STATUSES: AgentRunStatus[] = ["queued", "running", "waiting"];
-
-function isCurrentAgentRun(run: AgentRun) {
-  return CURRENT_AGENT_RUN_STATUSES.includes(run.status);
-}
+const AGENT_RUN_HISTORY_LIMIT = 50;
 
 function sortAgentRunsByRecency(a: AgentRun, b: AgentRun) {
   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -23,7 +18,7 @@ function sortAgentStepsByOrder(a: AgentStep, b: AgentStep) {
   return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 }
 
-function getEmptyAgentRunSearchResult(limit = CURRENT_AGENT_RUN_LIMIT): AgentRunSearchResult {
+function getEmptyAgentRunSearchResult(limit = AGENT_RUN_HISTORY_LIMIT): AgentRunSearchResult {
   return {
     items: [],
     total: 0,
@@ -32,7 +27,7 @@ function getEmptyAgentRunSearchResult(limit = CURRENT_AGENT_RUN_LIMIT): AgentRun
   };
 }
 
-function upsertCurrentAgentRun(previous: AgentRunSearchResult | undefined, run: AgentRun) {
+function upsertAgentRunHistory(previous: AgentRunSearchResult | undefined, run: AgentRun) {
   const base = previous ?? getEmptyAgentRunSearchResult();
   const runsById = new Map(base.items.map(item => [item.runId, item]));
 
@@ -42,20 +37,6 @@ function upsertCurrentAgentRun(previous: AgentRunSearchResult | undefined, run: 
 
   return {
     ...base,
-    items,
-    total: items.length,
-  } satisfies AgentRunSearchResult;
-}
-
-function removeCurrentAgentRun(previous: AgentRunSearchResult | undefined, runId: string) {
-  if (!previous) {
-    return previous;
-  }
-
-  const items = previous.items.filter(item => item.runId !== runId);
-
-  return {
-    ...previous,
     items,
     total: items.length,
   } satisfies AgentRunSearchResult;
@@ -81,18 +62,14 @@ function toAgentStep(payload: AgentStepRealtimePayload): AgentStep {
 }
 
 export function syncAgentRunCreated(queryClient: QueryClient, run: AgentRun) {
-  if (!isCurrentAgentRun(run)) {
-    return;
-  }
-
-  queryClient.setQueryData<AgentRunSearchResult>(QUERY_KEYS.project.currentAgentRuns(run.workspaceId), previous =>
-    upsertCurrentAgentRun(previous, run),
+  queryClient.setQueryData<AgentRunSearchResult>(QUERY_KEYS.project.agentRunHistory(run.workspaceId), previous =>
+    upsertAgentRunHistory(previous, run),
   );
 }
 
 export function syncAgentRunUpdated(queryClient: QueryClient, run: AgentRun) {
-  queryClient.setQueryData<AgentRunSearchResult>(QUERY_KEYS.project.currentAgentRuns(run.workspaceId), previous =>
-    isCurrentAgentRun(run) ? upsertCurrentAgentRun(previous, run) : removeCurrentAgentRun(previous, run.runId),
+  queryClient.setQueryData<AgentRunSearchResult>(QUERY_KEYS.project.agentRunHistory(run.workspaceId), previous =>
+    upsertAgentRunHistory(previous, run),
   );
 }
 
