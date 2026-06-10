@@ -2,9 +2,15 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { clearNotification, markAllNotificationsRead, markNotificationRead } from "@/domains/workspaces/api";
+import {
+  clearAllNotifications,
+  clearNotification,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "@/domains/workspaces/api";
 import type { Notification, NotificationSearchResult } from "@/domains/workspaces/types";
 import {
+  clearNotificationsInCache,
   markAllNotificationsReadInCache,
   markNotificationReadInCache,
   removeNotificationFromCache,
@@ -41,11 +47,20 @@ export function useNotificationActions() {
     },
   });
 
+  const clearAllMutation = useApiMutation<void, Error, void>({
+    mutationFn: clearAllNotifications,
+    onSuccess: () => {
+      updateCache(clearNotificationsInCache);
+    },
+  });
+
   return {
     readNotification: readMutation.mutateAsync,
     readAllNotifications: readAllMutation.mutateAsync,
     clearNotification: clearMutation.mutateAsync,
+    clearAllNotifications: clearAllMutation.mutateAsync,
     isMarkingAllRead: readAllMutation.isPending,
     isClearing: clearMutation.isPending,
+    isClearingAll: clearAllMutation.isPending,
   };
 }

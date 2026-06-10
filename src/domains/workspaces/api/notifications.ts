@@ -45,6 +45,14 @@ export async function clearNotification(notificationId: string) {
   });
 }
 
+export async function clearAllNotifications() {
+  await commonAxios<null, ApiResponse<null>>({
+    url: "/notifications",
+    method: "DELETE",
+    version: null,
+  });
+}
+
 export async function getNotificationProjectTarget(projectId: string) {
   const response = await commonAxios<null, ApiResponse<NotificationProjectTarget>>({
     url: `/projects/${encodeURIComponent(projectId)}`,

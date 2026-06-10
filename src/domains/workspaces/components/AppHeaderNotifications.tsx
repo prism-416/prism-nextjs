@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bell, CheckCheck, Loader2 } from "lucide-react";
+import { Bell, CheckCheck, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/atomics/atoms/Button";
@@ -21,8 +21,15 @@ export function AppHeaderNotifications() {
   const [open, setOpen] = React.useState(false);
   const [openingNotificationId, setOpeningNotificationId] = React.useState<string | null>(null);
   const { data, isPending } = useNotifications(NOTIFICATION_LIST_PARAMS);
-  const { readNotification, readAllNotifications, clearNotification, isMarkingAllRead, isClearing } =
-    useNotificationActions();
+  const {
+    readNotification,
+    readAllNotifications,
+    clearNotification,
+    clearAllNotifications,
+    isMarkingAllRead,
+    isClearing,
+    isClearingAll,
+  } = useNotificationActions();
   useNotificationRealtime();
 
   React.useEffect(() => {
@@ -120,18 +127,32 @@ export function AppHeaderNotifications() {
             <p className="text-sm font-semibold text-prism-heading">Notifications</p>
             <p className="text-xs text-prism-muted">{unreadCount} unread</p>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-8 rounded-lg px-2 text-xs text-prism-muted hover:text-prism-body"
-            disabled={unreadCount === 0 || isMarkingAllRead}
-            onClick={() => {
-              void readAllNotifications();
-            }}
-          >
-            <CheckCheck className="size-3.5" />
-            Read all
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 rounded-lg px-2 text-xs text-prism-muted hover:text-prism-body"
+              disabled={unreadCount === 0 || isMarkingAllRead}
+              onClick={() => {
+                void readAllNotifications();
+              }}
+            >
+              <CheckCheck className="size-3.5" />
+              Read all
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 rounded-lg px-2 text-xs text-prism-muted hover:text-prism-danger"
+              disabled={notifications.length === 0 || isClearingAll}
+              onClick={() => {
+                void clearAllNotifications();
+              }}
+            >
+              <Trash2 className="size-3.5" />
+              Clear all
+            </Button>
+          </div>
         </div>
 
         <div className="max-h-[24rem] overflow-y-auto py-1">
@@ -154,7 +175,7 @@ export function AppHeaderNotifications() {
               key={notification.notificationId}
               notification={notification}
               isOpening={openingNotificationId === notification.notificationId}
-              isClearing={isClearing}
+              isClearing={isClearing || isClearingAll}
               onOpen={handleOpenNotification}
               onClear={notificationId => {
                 void clearNotification(notificationId);
