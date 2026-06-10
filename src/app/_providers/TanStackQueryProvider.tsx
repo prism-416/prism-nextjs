@@ -24,7 +24,6 @@ export default function TanStackQueryProvider({ children }: Props) {
               const err = error as ApiError;
               const status = err?.status;
               if (status === 404 || err?.data?.code === "E404") {
-                console.log("404 에러는 재시도하지 않음.");
                 // 404 에러는 재시도하지 않음
                 return false;
               }
