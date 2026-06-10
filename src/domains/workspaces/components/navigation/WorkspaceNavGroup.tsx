@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   SidebarGroup,
@@ -18,6 +21,8 @@ type WorkspaceNavGroupProps = {
 };
 
 export function WorkspaceNavGroup({ label, items, pathname }: WorkspaceNavGroupProps) {
+  const router = useRouter();
+
   if (items.length === 0) {
     return null;
   }
@@ -41,6 +46,8 @@ export function WorkspaceNavGroup({ label, items, pathname }: WorkspaceNavGroupP
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
+                    onMouseEnter={() => router.prefetch(item.href)}
+                    onFocus={() => router.prefetch(item.href)}
                   >
                     <Icon />
                     <span>{item.label}</span>

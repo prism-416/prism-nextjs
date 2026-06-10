@@ -4,6 +4,7 @@ import { useProjectDashboard } from "@/domains/projects/hooks/useProjectDashboar
 import { CreateProjectWorkItemDialog } from "@/domains/projects/components/CreateProjectWorkItemDialog";
 import { ProjectDashboardPanel } from "@/domains/projects/components/ProjectDashboardPanel";
 import { ProjectDashboardSkeleton } from "@/domains/projects/components/ProjectDashboardSkeleton";
+import { useProjectParticipants } from "@/domains/projects/hooks/useProjectParticipants";
 import type { ProjectParticipant, ProjectWorkItemSearchResult } from "@/domains/projects/types";
 
 type ProjectDashboardClientProps = {
@@ -16,6 +17,10 @@ type ProjectDashboardClientProps = {
 
 export function ProjectDashboardClient(props: ProjectDashboardClientProps) {
   const dashboard = useProjectDashboard(props);
+  const { data: members = props.initialMembers ?? [] } = useProjectParticipants(
+    props.workspaceId,
+    props.initialMembers,
+  );
 
   if (dashboard.isPending && !dashboard.data) {
     return <ProjectDashboardSkeleton />;
@@ -26,7 +31,7 @@ export function ProjectDashboardClient(props: ProjectDashboardClientProps) {
       <ProjectDashboardPanel
         projectSlug={props.projectSlug}
         workItems={dashboard.workItems}
-        members={props.initialMembers}
+        members={members}
         isError={dashboard.isError}
         updateError={dashboard.updateError}
         inlineEditingItemId={dashboard.inlineEditingItemId}
@@ -58,7 +63,7 @@ export function ProjectDashboardClient(props: ProjectDashboardClientProps) {
         open={dashboard.isCreateOpen}
         projectId={props.projectId}
         workspaceId={props.workspaceId}
-        initialMembers={props.initialMembers}
+        initialMembers={members}
         initialStatus={dashboard.createInitialStatus}
         onOpenChange={dashboard.onCreateOpenChange}
       />
