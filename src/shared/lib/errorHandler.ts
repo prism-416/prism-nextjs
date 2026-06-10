@@ -6,8 +6,6 @@ export interface ApiError extends AxiosError {
 }
 
 export function handleApiError(error: ApiError, notify: (message: string) => void) {
-  console.log("HandleApiError", error);
-
   if (error.status === 500 || (error.status === 400 && !error.data?.code)) {
     notify("We couldn't process your request.");
   }
