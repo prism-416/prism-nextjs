@@ -7,6 +7,8 @@ import {
   Bot,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Circle,
   CircleDashed,
   CircleSlash,
@@ -396,18 +398,37 @@ function AgentRunDagCard({
   workspaceId,
   run,
   initialSteps,
+  isExpanded,
+  onToggle,
 }: {
   workspaceId: string;
   run: AgentRun;
   initialSteps?: AgentStep[];
+  isExpanded: boolean;
+  onToggle: () => void;
 }) {
+  const graphRegionId = `agent-run-graph-${run.runId}`;
+
   return (
     <article className="rounded-xl border border-border/80 bg-surface p-5 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset]">
-      <div className="flex flex-wrap items-center gap-2">
-        <AgentRunStatusBadge status={run.status} />
-        <span className="inline-flex min-h-7 items-center rounded-full border border-border bg-surface-strong px-2.5 text-xs font-medium text-prism-muted">
-          {run.agentType}
-        </span>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <AgentRunStatusBadge status={run.status} />
+          <span className="inline-flex min-h-7 items-center rounded-full border border-border bg-surface-strong px-2.5 text-xs font-medium text-prism-muted">
+            {run.agentType}
+          </span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-8 gap-1 rounded-lg px-2.5 text-xs text-prism-muted hover:text-prism-body"
+          onClick={onToggle}
+          aria-expanded={isExpanded}
+          aria-controls={graphRegionId}
+        >
+          {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+          {isExpanded ? "Hide graph" : "Show graph"}
+        </Button>
       </div>
 
       <Typography
@@ -444,11 +465,15 @@ function AgentRunDagCard({
         )}
       </dl>
 
-      <AgentRunStepDag
-        workspaceId={workspaceId}
-        run={run}
-        initialSteps={initialSteps}
-      />
+      {isExpanded ? (
+        <div id={graphRegionId}>
+          <AgentRunStepDag
+            workspaceId={workspaceId}
+            run={run}
+            initialSteps={initialSteps}
+          />
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -464,6 +489,10 @@ export function ProjectAgentClient({
   const [featureSpecification, setFeatureSpecification] = React.useState("");
   const [fieldError, setFieldError] = React.useState<string | null>(null);
   const [requestFeedback, setRequestFeedback] = React.useState<RequestFeedback | null>(null);
+  // Per-run overrides for the lazily-loaded execution graph. Absent runs fall back to
+  // the default policy: only the latest run (index 0) is expanded, so opening the page
+  // fetches steps for one run instead of the whole 50-run history.
+  const [runGraphOverrides, setRunGraphOverrides] = React.useState<Record<string, boolean>>({});
   const {
     data,
     isPending: isRunsPending,
@@ -494,6 +523,10 @@ export function ProjectAgentClient({
         queryKey: QUERY_KEYS.project.agentRunSteps(workspaceId, run.runId),
       });
     }
+  }
+
+  function toggleRunGraph(runId: string, currentlyExpanded: boolean) {
+    setRunGraphOverrides(prev => ({ ...prev, [runId]: !currentlyExpanded }));
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -668,14 +701,20 @@ export function ProjectAgentClient({
 
             {!isRunsError && runs.length > 0 ? (
               <div className="mt-5 grid gap-4">
-                {runs.map(run => (
-                  <AgentRunDagCard
-                    key={run.runId}
-                    workspaceId={workspaceId}
-                    run={run}
-                    initialSteps={initialStepsByRunId[run.runId]}
-                  />
-                ))}
+                {runs.map((run, index) => {
+                  const isExpanded = runGraphOverrides[run.runId] ?? index === 0;
+
+                  return (
+                    <AgentRunDagCard
+                      key={run.runId}
+                      workspaceId={workspaceId}
+                      run={run}
+                      initialSteps={initialStepsByRunId[run.runId]}
+                      isExpanded={isExpanded}
+                      onToggle={() => toggleRunGraph(run.runId, isExpanded)}
+                    />
+                  );
+                })}
               </div>
             ) : null}
           </div>
