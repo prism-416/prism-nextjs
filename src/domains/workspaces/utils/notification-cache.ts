@@ -61,6 +61,20 @@ export function removeNotificationFromCache(previous: NotificationSearchResult |
   };
 }
 
+export function clearNotificationsInCache(previous: NotificationSearchResult | undefined) {
+  if (!previous) {
+    return previous;
+  }
+
+  return {
+    ...previous,
+    notifications: [],
+    total: 0,
+    unreadCount: 0,
+    offset: 0,
+  };
+}
+
 export function prependNotificationToCache(previous: NotificationSearchResult | undefined, notification: Notification) {
   if (!previous || previous.notifications.some(item => item.notificationId === notification.notificationId)) {
     return previous;
