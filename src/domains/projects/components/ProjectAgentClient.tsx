@@ -27,6 +27,7 @@ import { Label } from "@/atomics/atoms/Label";
 import { Skeleton } from "@/atomics/atoms/Skeleton";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Typography } from "@/atomics/atoms/Typography";
+import { AgentProjectSelector, type AgentProjectOption } from "@/domains/projects/components/AgentProjectSelector";
 import { ProjectAgentSkeleton } from "@/domains/projects/components/ProjectAgentSkeleton";
 import { useAgentRealtimeWorkspace } from "@/domains/projects/hooks/useAgentRealtimeWorkspace";
 import { useAgentRunSteps } from "@/domains/projects/hooks/useAgentRunSteps";
@@ -53,8 +54,11 @@ import { QUERY_KEYS } from "@/shared/query";
 import { cn } from "@/shared/utils/cn";
 
 type ProjectAgentClientProps = {
-  projectId: string;
   workspaceId: string;
+  projects: AgentProjectOption[];
+  // When set (project scope) the target project is fixed to this id and the selector is locked.
+  // When omitted (workspace scope) the user picks a target project from `projects`.
+  lockedProjectId?: string;
   initialData?: AgentRunSearchResult;
   initialStepsByRunId?: AgentRunStepsByRunId;
 };
@@ -615,8 +619,9 @@ function AgentRunDagCard({
 }
 
 export function ProjectAgentClient({
-  projectId,
   workspaceId,
+  projects,
+  lockedProjectId,
   initialData,
   initialStepsByRunId = {},
 }: ProjectAgentClientProps) {
@@ -626,6 +631,9 @@ export function ProjectAgentClient({
   const [fieldError, setFieldError] = React.useState<string | null>(null);
   const [requestFeedback, setRequestFeedback] = React.useState<RequestFeedback | null>(null);
   const [cancelRunErrorById, setCancelRunErrorById] = React.useState<Record<string, string>>({});
+  // User-picked target project (workspace scope). Reconciled against `projects` below so a stale
+  // selection (e.g. a project removed from the live list) falls back to the first available project.
+  const [projectSelection, setProjectSelection] = React.useState<string | null>(null);
   // Per-run overrides for the lazily-loaded execution graph. Absent runs fall back to
   // the default policy: only the latest run (index 0) is expanded, so opening the page
   // fetches steps for one run instead of the whole 50-run history.
@@ -645,8 +653,19 @@ export function ProjectAgentClient({
   const trimmedSpecification = featureSpecification.trim();
   const specificationLength = featureSpecification.length;
   const isSpecificationTooLong = specificationLength > FEATURE_SPECIFICATION_MAX_LENGTH;
+  const hasProjects = projects.length > 0;
+  const isProjectLocked = Boolean(lockedProjectId);
+  const targetProjectId =
+    lockedProjectId ??
+    (projectSelection && projects.some(project => project.projectId === projectSelection)
+      ? projectSelection
+      : (projects[0]?.projectId ?? null));
   const canSubmit =
-    trimmedSpecification.length > 0 && !isSpecificationTooLong && !requestProvisioning.isPending && !isRunsPending;
+    trimmedSpecification.length > 0 &&
+    !isSpecificationTooLong &&
+    !requestProvisioning.isPending &&
+    !isRunsPending &&
+    Boolean(targetProjectId);
   const hasRealtimeIssue = agentRealtimeStatus === "disconnected" || agentRealtimeStatus === "error";
   const agentRealtimeIssueMessage =
     agentRealtimeStatus === "error"
@@ -707,12 +726,17 @@ export function ProjectAgentClient({
       return;
     }
 
+    if (!targetProjectId) {
+      setFieldError("Select a project for the generated tasks.");
+      return;
+    }
+
     setFieldError(null);
 
     try {
       const request = await requestProvisioning.mutateAsync({
         workspaceId,
-        projectId,
+        projectId: targetProjectId,
         featureSpecification: trimmedSpecification,
       });
       const statusLabel = getFeatureProvisioningStatusLabel(request.status);
@@ -905,6 +929,27 @@ export function ProjectAgentClient({
               </div>
             </div>
 
+            <div className="mt-4">
+              <Label
+                htmlFor="agent-target-project"
+                className="text-xs font-medium text-prism-muted"
+              >
+                Target project
+              </Label>
+              <div className="mt-1.5">
+                <AgentProjectSelector
+                  id="agent-target-project"
+                  projects={projects}
+                  value={targetProjectId}
+                  disabled={isProjectLocked || requestProvisioning.isPending}
+                  onChange={projectId => {
+                    setProjectSelection(projectId);
+                    setFieldError(null);
+                  }}
+                />
+              </div>
+            </div>
+
             <Textarea
               id="feature-specification"
               value={featureSpecification}
@@ -932,7 +977,9 @@ export function ProjectAgentClient({
                 {fieldError ??
                   (isSpecificationTooLong
                     ? `Feature specification must be ${FEATURE_SPECIFICATION_MAX_LENGTH.toLocaleString()} characters or less.`
-                    : "The request is submitted to the feature provisioning API.")}
+                    : !hasProjects
+                      ? "Create a project in this workspace to start a run."
+                      : "The request is submitted to the feature provisioning API.")}
               </div>
               <span className="text-xs text-prism-muted">
                 {specificationLength.toLocaleString()} / {FEATURE_SPECIFICATION_MAX_LENGTH.toLocaleString()}

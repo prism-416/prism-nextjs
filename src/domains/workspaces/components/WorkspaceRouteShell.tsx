@@ -46,6 +46,8 @@ function getWorkspaceSection(pathname: string, workspaceSlug: string): Workspace
   const section = pathname.slice(workspaceHref.length + 1).split("/")[0];
 
   switch (section) {
+    case "agent":
+      return { name: "Agent" };
     case "jobs":
       return { name: "Jobs" };
     case "members":
