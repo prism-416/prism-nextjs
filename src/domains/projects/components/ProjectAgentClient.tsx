@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Send,
   Sparkles,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
@@ -29,6 +30,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectAgentSkeleton } from "@/domains/projects/components/ProjectAgentSkeleton";
 import { useAgentRealtimeWorkspace } from "@/domains/projects/hooks/useAgentRealtimeWorkspace";
 import { useAgentRunSteps } from "@/domains/projects/hooks/useAgentRunSteps";
+import { useCancelAgentRun } from "@/domains/projects/hooks/useCancelAgentRun";
 import { useRequestFeatureProvisioning } from "@/domains/projects/hooks/useRequestFeatureProvisioning";
 import { useWorkspaceAgentRunHistory } from "@/domains/projects/hooks/useWorkspaceAgentRunHistory";
 import type {
@@ -486,16 +488,25 @@ function AgentRunDagCard({
   timelineNow,
   initialSteps,
   isExpanded,
+  isCancelling,
+  isCancelDisabled,
+  cancelError,
   onToggle,
+  onCancel,
 }: {
   workspaceId: string;
   run: AgentRun;
   timelineNow: number;
   initialSteps?: AgentStep[];
   isExpanded: boolean;
+  isCancelling: boolean;
+  isCancelDisabled: boolean;
+  cancelError?: string;
   onToggle: () => void;
+  onCancel: () => void;
 }) {
   const graphRegionId = `agent-run-graph-${run.runId}`;
+  const canCancel = isActiveAgentRun(run);
 
   return (
     <article className="rounded-xl border border-border/80 bg-surface p-5 shadow-[0_1px_0_rgba(255,255,255,0.6)_inset]">
@@ -506,18 +517,38 @@ function AgentRunDagCard({
             {run.agentType}
           </span>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-8 gap-1 rounded-lg px-2.5 text-xs text-prism-muted hover:text-prism-body"
-          onClick={onToggle}
-          aria-expanded={isExpanded}
-          aria-controls={graphRegionId}
-        >
-          {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-          {isExpanded ? "Hide graph" : "Show graph"}
-        </Button>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {canCancel ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-8 gap-1 rounded-lg border-prism-danger-soft bg-surface px-2.5 text-xs text-prism-danger hover:bg-prism-danger-soft/30 hover:text-prism-danger"
+              disabled={isCancelDisabled}
+              onClick={onCancel}
+            >
+              {isCancelling ? <Loader2 className="size-4 animate-spin" /> : <X className="size-4" />}
+              {isCancelling ? "Cancelling..." : "Cancel run"}
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-8 gap-1 rounded-lg px-2.5 text-xs text-prism-muted hover:text-prism-body"
+            onClick={onToggle}
+            aria-expanded={isExpanded}
+            aria-controls={graphRegionId}
+          >
+            {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+            {isExpanded ? "Hide graph" : "Show graph"}
+          </Button>
+        </div>
       </div>
+
+      {cancelError ? (
+        <div className="mt-3 rounded-lg border border-prism-danger-soft bg-prism-danger-soft/20 px-3 py-2 text-sm text-prism-danger">
+          {cancelError}
+        </div>
+      ) : null}
 
       <Typography
         variant="bodySm"
@@ -594,6 +625,7 @@ export function ProjectAgentClient({
   const [featureSpecification, setFeatureSpecification] = React.useState("");
   const [fieldError, setFieldError] = React.useState<string | null>(null);
   const [requestFeedback, setRequestFeedback] = React.useState<RequestFeedback | null>(null);
+  const [cancelRunErrorById, setCancelRunErrorById] = React.useState<Record<string, string>>({});
   // Per-run overrides for the lazily-loaded execution graph. Absent runs fall back to
   // the default policy: only the latest run (index 0) is expanded, so opening the page
   // fetches steps for one run instead of the whole 50-run history.
@@ -605,6 +637,7 @@ export function ProjectAgentClient({
     refetch,
   } = useWorkspaceAgentRunHistory(workspaceId, initialData);
   const requestProvisioning = useRequestFeatureProvisioning();
+  const cancelAgentRun = useCancelAgentRun();
   const runs = data?.items ?? EMPTY_AGENT_RUNS;
   const activeRunCount = React.useMemo(() => runs.filter(isActiveAgentRun).length, [runs]);
   const timelineNow = useAgentTimelineNow(activeRunCount > 0);
@@ -632,6 +665,30 @@ export function ProjectAgentClient({
 
   function toggleRunGraph(runId: string, currentlyExpanded: boolean) {
     setRunGraphOverrides(prev => ({ ...prev, [runId]: !currentlyExpanded }));
+  }
+
+  function handleCancelRun(run: AgentRun) {
+    setCancelRunErrorById(prev => {
+      if (!(run.runId in prev)) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[run.runId];
+      return next;
+    });
+
+    cancelAgentRun.mutate(
+      { workspaceId, runId: run.runId },
+      {
+        onError: error => {
+          setCancelRunErrorById(prev => ({
+            ...prev,
+            [run.runId]: getProjectMutationErrorMessage(error, "Agent run could not be cancelled."),
+          }));
+        },
+      },
+    );
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -797,6 +854,7 @@ export function ProjectAgentClient({
               <div className="mt-5 grid gap-4">
                 {runs.map((run, index) => {
                   const isExpanded = runGraphOverrides[run.runId] ?? index === 0;
+                  const isCancelling = cancelAgentRun.isPending && cancelAgentRun.variables?.runId === run.runId;
 
                   return (
                     <AgentRunDagCard
@@ -806,7 +864,11 @@ export function ProjectAgentClient({
                       timelineNow={timelineNow}
                       initialSteps={initialStepsByRunId[run.runId]}
                       isExpanded={isExpanded}
+                      isCancelling={isCancelling}
+                      isCancelDisabled={cancelAgentRun.isPending}
+                      cancelError={cancelRunErrorById[run.runId]}
                       onToggle={() => toggleRunGraph(run.runId, isExpanded)}
+                      onCancel={() => handleCancelRun(run)}
                     />
                   );
                 })}

@@ -286,6 +286,16 @@ export async function getAgentRunSteps(workspaceId: string, runId: string) {
   return response?.data ?? [];
 }
 
+export async function cancelAgentRun(workspaceId: string, runId: string) {
+  const response = await commonAxios<null, ApiResponse<AgentRun>>({
+    url: `/workspaces/${encodeURIComponent(workspaceId)}/agent-runs/${encodeURIComponent(runId)}/cancel`,
+    method: "POST",
+    version: null,
+  });
+
+  return response?.data;
+}
+
 export async function getAgentRunStepsByRunId(workspaceId: string, runs: AgentRun[]) {
   const entries = await Promise.all(
     runs.map(async run => {
