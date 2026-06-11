@@ -30,7 +30,7 @@ export function ProjectWorkItemTitleLine({
   code,
   title,
   titleClassName,
-  layout = "inline",
+  layout = "stacked",
 }: ProjectWorkItemTitleLineProps) {
   if (layout === "stacked") {
     return (
@@ -40,7 +40,7 @@ export function ProjectWorkItemTitleLine({
           variant="bodySm"
           tone="primary"
           weight="semibold"
-          className={cn("mt-1.5 line-clamp-2", titleClassName)}
+          className={cn("mt-1", titleClassName)}
         >
           {title}
         </Typography>
