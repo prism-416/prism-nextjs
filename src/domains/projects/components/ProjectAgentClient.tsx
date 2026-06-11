@@ -46,7 +46,7 @@ import {
   getFeatureProvisioningStatusLabel,
 } from "@/domains/projects/utils/agent-display";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
-import { formatProjectDateTime, formatProjectDateTimeWithSeconds } from "@/domains/projects/utils/work-item-display";
+import { formatProjectDateTimeWithSeconds } from "@/domains/projects/utils/work-item-display";
 import { QUERY_KEYS } from "@/shared/query";
 import { cn } from "@/shared/utils/cn";
 
@@ -193,14 +193,18 @@ function sortAgentStepsByOrder(a: AgentStep, b: AgentStep) {
 
 function getStepTimestamp(step: AgentStep) {
   if (step.completedAt) {
-    return formatProjectDateTime(step.completedAt);
+    return formatProjectDateTimeWithSeconds(step.completedAt);
   }
 
   if (step.startedAt) {
-    return formatProjectDateTime(step.startedAt);
+    return formatProjectDateTimeWithSeconds(step.startedAt);
   }
 
-  return formatProjectDateTime(step.createdAt);
+  return formatProjectDateTimeWithSeconds(step.createdAt);
+}
+
+function getStepTitle(step: AgentStep) {
+  return step.inputSummary?.trim() || step.title;
 }
 
 function getStepSummary(step: AgentStep) {
@@ -331,6 +335,7 @@ function AgentRunRootNode({ run }: { run: AgentRun }) {
 
 function AgentStepDagNode({ step, isLast }: { step: AgentStep; isLast: boolean }) {
   const Icon = STEP_STATUS_ICONS[step.status];
+  const title = getStepTitle(step);
   const summary = getStepSummary(step);
 
   return (
@@ -355,9 +360,10 @@ function AgentStepDagNode({ step, isLast }: { step: AgentStep; isLast: boolean }
             variant="bodySm"
             tone="primary"
             weight="semibold"
-            className="min-w-0 truncate"
+            className="min-w-0 flex-1 basis-64 whitespace-normal break-words"
+            title={title}
           >
-            {step.title}
+            {title}
           </Typography>
           <AgentStepStatusBadge status={step.status} />
         </div>
