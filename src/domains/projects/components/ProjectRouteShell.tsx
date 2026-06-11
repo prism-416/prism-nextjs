@@ -124,6 +124,7 @@ export function ProjectRouteShell({ children, project, workspace, workspaces, pr
           <ProjectSidebar
             projectName={resolvedProject.name}
             projectSlug={resolvedProject.slug}
+            workspaceName={resolvedWorkspace.name}
             workspaceSlug={resolvedWorkspace.slug}
           />
         }
