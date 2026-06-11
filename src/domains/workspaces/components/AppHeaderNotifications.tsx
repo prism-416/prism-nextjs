@@ -51,8 +51,13 @@ export function AppHeaderNotifications() {
         if (typeof invitationToken === "string" && invitationToken) {
           const invitation = await getWorkspaceInvitation({ token: invitationToken }).catch(() => null);
 
+          if (!invitation) {
+            setOpen(false);
+            return;
+          }
+
           if (invitation?.status === "accepted") {
-            router.push("/workspaces");
+            router.replace("/workspaces");
             setOpen(false);
             return;
           }
@@ -67,18 +72,21 @@ export function AppHeaderNotifications() {
       }
 
       if (notification.notificationType === "workspace_member_removed") {
-        router.push("/workspaces");
+        router.replace("/workspaces");
         setOpen(false);
         return;
       }
 
       const itemId = notification.metadata.itemId;
       if (notification.projectId && typeof itemId === "string" && itemId) {
-        const targetProject = await getNotificationProjectTarget(notification.projectId);
+        const targetProject = await getNotificationProjectTarget(notification.projectId).catch(() => null);
         if (targetProject?.slug) {
           router.push(`/projects/${encodeURIComponent(targetProject.slug)}/work-items/${encodeURIComponent(itemId)}`);
           setOpen(false);
+          return;
         }
+
+        setOpen(false);
       }
     } finally {
       setOpeningNotificationId(null);

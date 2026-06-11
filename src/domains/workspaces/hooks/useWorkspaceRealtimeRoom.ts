@@ -151,7 +151,8 @@ export function useWorkspaceRealtimeRoom({ workspaceId, workspaceSlug }: UseWork
 
     const handleWorkspaceDeleted = (payload: WorkspaceDeletedPayload) => {
       if (payload.workspaceId === workspaceId) {
-        syncWorkspaceDeleted(queryClient, payload.workspaceId);
+        syncWorkspaceDeleted(queryClient, payload.workspaceId, workspaceSlug);
+        router.replace("/workspaces");
       }
     };
 
