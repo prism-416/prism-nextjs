@@ -46,7 +46,7 @@ import {
   getFeatureProvisioningStatusLabel,
 } from "@/domains/projects/utils/agent-display";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
-import { formatProjectDateTime } from "@/domains/projects/utils/work-item-display";
+import { formatProjectDateTime, formatProjectDateTimeWithSeconds } from "@/domains/projects/utils/work-item-display";
 import { QUERY_KEYS } from "@/shared/query";
 import { cn } from "@/shared/utils/cn";
 
@@ -103,8 +103,50 @@ const STEP_STATUS_ICONS: Record<AgentStepStatus, StatusIcon> = {
   skipped: CircleSlash,
 };
 
-function formatNullableDateTime(value: string | null) {
-  return value ? formatProjectDateTime(value) : "Not started";
+function formatNullableAgentDateTime(value: string | null, emptyLabel: string) {
+  return value ? formatProjectDateTimeWithSeconds(value) : emptyLabel;
+}
+
+function formatElapsedSeconds(milliseconds: number) {
+  if (!Number.isFinite(milliseconds) || milliseconds < 0) {
+    return "Not available";
+  }
+
+  const totalSeconds = Math.max(0, Math.round(milliseconds / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const parts: string[] = [];
+
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (minutes > 0 || hours > 0) {
+    parts.push(`${minutes}m`);
+  }
+  parts.push(`${seconds}s`);
+
+  return parts.join(" ");
+}
+
+function formatElapsedBetween(start: string | null, end: string | null, emptyLabel: string) {
+  if (!start || !end) {
+    return emptyLabel;
+  }
+
+  return formatElapsedSeconds(new Date(end).getTime() - new Date(start).getTime());
+}
+
+function getRunDurationLabel(run: AgentRun) {
+  if (run.startedAt && run.completedAt) {
+    return formatElapsedBetween(run.startedAt, run.completedAt, "Not available");
+  }
+
+  if (run.startedAt && isActiveAgentRun(run)) {
+    return "Running";
+  }
+
+  return run.startedAt ? "Not finished" : "Not started";
 }
 
 function sortAgentStepsByOrder(a: AgentStep, b: AgentStep) {
@@ -245,9 +287,9 @@ function AgentRunRootNode({ run }: { run: AgentRun }) {
           weight="semibold"
           className="min-w-0 truncate"
         >
-          Run started
+          Request created
         </Typography>
-        <div className="mt-1 text-sm text-prism-muted">{formatProjectDateTime(run.createdAt)}</div>
+        <div className="mt-1 text-sm text-prism-muted">{formatProjectDateTimeWithSeconds(run.createdAt)}</div>
       </div>
     </li>
   );
@@ -444,18 +486,37 @@ function AgentRunDagCard({
         {run.objective}
       </Typography>
 
-      <dl className="mt-4 grid gap-3 text-sm text-prism-muted sm:grid-cols-3">
+      <dl className="mt-4 grid gap-3 text-sm text-prism-muted sm:grid-cols-2 lg:grid-cols-5">
         <div className="min-w-0">
           <dt className="flex items-center gap-1.5">
             <Clock3 className="size-3.5" />
             Created
           </dt>
-          <dd className="mt-1 truncate text-prism-body">{formatProjectDateTime(run.createdAt)}</dd>
+          <dd className="mt-1 truncate text-prism-body">{formatProjectDateTimeWithSeconds(run.createdAt)}</dd>
         </div>
         <div className="min-w-0">
           <dt>Started</dt>
-          <dd className="mt-1 truncate text-prism-body">{formatNullableDateTime(run.startedAt)}</dd>
+          <dd className="mt-1 truncate text-prism-body">{formatNullableAgentDateTime(run.startedAt, "Not started")}</dd>
         </div>
+        <div className="min-w-0">
+          <dt>Finished</dt>
+          <dd className="mt-1 truncate text-prism-body">
+            {formatNullableAgentDateTime(run.completedAt, "Not finished")}
+          </dd>
+        </div>
+        <div className="min-w-0">
+          <dt>Queue wait</dt>
+          <dd className="mt-1 truncate text-prism-body">
+            {formatElapsedBetween(run.createdAt, run.startedAt, "Pending")}
+          </dd>
+        </div>
+        <div className="min-w-0">
+          <dt>Duration</dt>
+          <dd className="mt-1 truncate text-prism-body">{getRunDurationLabel(run)}</dd>
+        </div>
+      </dl>
+
+      <dl className="mt-3 grid gap-3 text-sm text-prism-muted sm:grid-cols-2">
         {run.workItemId ? (
           <div className="min-w-0">
             <dt>Work item</dt>
