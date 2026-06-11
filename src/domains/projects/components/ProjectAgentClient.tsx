@@ -176,13 +176,15 @@ function RequestFeedbackBanner({ feedback }: { feedback: RequestFeedback }) {
 }
 
 function AgentRunStatusBadge({ status }: { status: AgentRunStatus }) {
+  const isActive = ACTIVE_AGENT_RUN_STATUSES.has(status);
   return (
     <span
       className={cn(
-        "inline-flex h-7 items-center rounded-full border px-2.5 text-xs font-medium",
+        "inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium",
         RUN_STATUS_CLASS_NAMES[status],
       )}
     >
+      {isActive ? <Loader2 className="size-3 animate-spin" /> : null}
       {getAgentRunStatusLabel(status)}
     </span>
   );
@@ -317,7 +319,9 @@ function AgentRunStepDag({
   run: AgentRun;
   initialSteps?: AgentStep[];
 }) {
-  const { data, isPending, isFetching, isError, refetch } = useAgentRunSteps(workspaceId, run.runId, initialSteps);
+  const { data, isPending, isFetching, isError, refetch } = useAgentRunSteps(workspaceId, run.runId, initialSteps, {
+    isLive: isActiveAgentRun(run),
+  });
   const steps = React.useMemo(() => [...(data ?? EMPTY_AGENT_STEPS)].sort(sortAgentStepsByOrder), [data]);
 
   if (isPending && !initialSteps) {
@@ -496,7 +500,6 @@ export function ProjectAgentClient({
   const {
     data,
     isPending: isRunsPending,
-    isFetching: isRunsFetching,
     isError: isRunsError,
     refetch,
   } = useWorkspaceAgentRunHistory(workspaceId, initialData);
@@ -513,7 +516,7 @@ export function ProjectAgentClient({
   const agentRealtimeIssueMessage =
     agentRealtimeStatus === "error"
       ? (agentRealtimeError?.message ?? "Realtime sync is unavailable.")
-      : "Realtime sync is reconnecting. You can manually sync while it recovers.";
+      : "Realtime sync is reconnecting. Updates continue through periodic refresh.";
 
   function refreshAgentOverview() {
     void refetch();
@@ -640,17 +643,6 @@ export function ProjectAgentClient({
                     </span>
                   </>
                 ) : null}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-9 rounded-lg border-border bg-surface px-3 text-prism-body"
-                  title={hasRealtimeIssue ? agentRealtimeIssueMessage : "Refresh agent run history"}
-                  onClick={refreshAgentOverview}
-                  disabled={isRunsFetching}
-                >
-                  <RefreshCw className={cn("size-4", isRunsFetching && "animate-spin")} />
-                  Refresh
-                </Button>
               </div>
             </div>
 
