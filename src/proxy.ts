@@ -41,7 +41,9 @@ function shouldRefreshAccessToken(accessToken: string | undefined) {
   const payload = decodeJwtPayload(accessToken);
 
   if (typeof payload?.exp !== "number") {
-    return false;
+    // A token we can't decode (or one without an expiry) can't be trusted as
+    // valid — force a refresh attempt instead of authorizing on mere presence.
+    return true;
   }
 
   return payload.exp * 1000 <= Date.now() + 30 * 1000;
@@ -123,7 +125,12 @@ export async function proxy(request: NextRequest) {
 
   const isAuthenticated = Boolean(refreshedTokens || (accessToken && !accessTokenNeedsRefresh));
 
-  if (!isAuthenticated && !isPublicRoute) {
+  // A transient upstream refresh failure (network error / 5xx) is not a logout:
+  // the refresh token is most likely still valid, the auth backend just hiccuped.
+  // Let the request through with the existing cookies and let the client retry
+  // recover, instead of bouncing the user to sign-in on a momentary blip. A
+  // genuinely invalid refresh token still falls through to the redirect below.
+  if (!isAuthenticated && !isPublicRoute && !didRefreshFail) {
     return getRedirectToSignInResponse(request, isRefreshTokenInvalid || !refreshToken);
   }
 

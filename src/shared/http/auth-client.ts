@@ -69,10 +69,16 @@ async function refreshAccessToken() {
 
 authClient.interceptors.request.use(
   config => {
-    if (!IS_SERVER && !config.headers.Authorization) {
+    if (!IS_SERVER) {
+      const originalRequest = config as AxiosRequestType & { _retry?: boolean };
       const accessToken = getCookie(ACCESS_TOKEN_COOKIE_NAME);
 
-      if (accessToken) {
+      // The cookie is the source of truth for the current access token: it is
+      // kept fresh by the middleware refresh, which never updates the axios
+      // default header. Reading it per-request avoids sending a stale token.
+      // The one exception is a retry, where the response interceptor has already
+      // attached the just-refreshed token.
+      if (accessToken && !originalRequest._retry) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
     }
