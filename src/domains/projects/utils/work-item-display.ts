@@ -65,6 +65,20 @@ export function formatProjectDateTime(value: string) {
   return `${formatProjectDate(value)} ${hours}:${minutes}`;
 }
 
+export function formatProjectDateTimeWithSeconds(value: string) {
+  const date = parseDate(value);
+
+  if (!date) {
+    return "Invalid date";
+  }
+
+  const hours = padDatePart(date.getHours());
+  const minutes = padDatePart(date.getMinutes());
+  const seconds = padDatePart(date.getSeconds());
+
+  return `${formatProjectDate(value)} ${hours}:${minutes}:${seconds}`;
+}
+
 export function formatProjectRelativeDateTime(value: string) {
   return formatProjectDateTime(value);
 }
