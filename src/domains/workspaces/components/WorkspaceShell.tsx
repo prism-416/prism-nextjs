@@ -53,7 +53,15 @@ export function WorkspaceShell({
     section,
     pathSegments,
   });
-  const resolvedSidebar = sidebar === undefined ? <AppSidebar workspaceSlug={workspaceSlug} /> : sidebar;
+  const resolvedSidebar =
+    sidebar === undefined ? (
+      <AppSidebar
+        workspaceName={workspace?.name}
+        workspaceSlug={workspaceSlug}
+      />
+    ) : (
+      sidebar
+    );
 
   return (
     <MainLayout

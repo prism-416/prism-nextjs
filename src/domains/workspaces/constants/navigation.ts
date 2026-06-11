@@ -67,11 +67,12 @@ export function getWorkspaceSecondaryNav(workspaceSlug?: string): WorkspaceNavIt
     return [];
   }
 
-  return [
-    ...WORKSPACE_SECONDARY_NAV.map(item => ({
-      ...item,
-      href: item.href(workspaceSlug),
-    })),
-    ...GLOBAL_WORKSPACE_NAV,
-  ];
+  return WORKSPACE_SECONDARY_NAV.map(item => ({
+    ...item,
+    href: item.href(workspaceSlug),
+  }));
+}
+
+export function getGlobalWorkspaceNav(): WorkspaceNavItem[] {
+  return GLOBAL_WORKSPACE_NAV;
 }

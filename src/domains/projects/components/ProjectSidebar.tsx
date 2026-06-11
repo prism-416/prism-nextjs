@@ -3,14 +3,17 @@
 import * as React from "react";
 import {
   Bot,
+  BriefcaseBusiness,
+  Building2,
+  CalendarRange,
   Files,
   FolderKanban,
   LayoutDashboard,
-  Layers,
   ListTodo,
   LogOut,
   Settings,
   Trash2,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -37,6 +40,7 @@ import {
 type ProjectSidebarProps = React.ComponentProps<typeof Sidebar> & {
   projectName?: string;
   projectSlug: string;
+  workspaceName?: string;
   workspaceSlug?: string;
 };
 
@@ -123,7 +127,13 @@ function ProjectSidebarNavGroup({ label, items, pathname }: ProjectSidebarNavGro
   );
 }
 
-export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...props }: ProjectSidebarProps) {
+export function ProjectSidebar({
+  projectName,
+  projectSlug,
+  workspaceName,
+  workspaceSlug,
+  ...props
+}: ProjectSidebarProps) {
   const router = useRouter();
   const pathname = usePathname() ?? "/";
   const queryClient = useQueryClient();
@@ -132,6 +142,7 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
   const projectHref = `/projects/${encodeURIComponent(projectSlug)}`;
   const workspaceHref = workspaceSlug ? `/workspaces/${encodeURIComponent(workspaceSlug)}` : "/workspaces";
   const projectLabel = projectName ?? "Project";
+  const workspaceLabel = workspaceName ?? "Workspace";
   const primaryNav = React.useMemo<ProjectSidebarNavItem[]>(
     () => [
       {
@@ -147,14 +158,28 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
     ],
     [projectHref],
   );
-  const generalNav = React.useMemo<ProjectSidebarNavItem[]>(
+  const workspaceNav = React.useMemo<ProjectSidebarNavItem[]>(
+    () =>
+      workspaceSlug
+        ? [
+            { label: "Projects", href: workspaceHref, icon: FolderKanban, exact: true },
+            { label: "Sprints", href: `${workspaceHref}/sprints`, icon: CalendarRange },
+            { label: "Members", href: `${workspaceHref}/members`, icon: Users },
+            { label: "Jobs", href: `${workspaceHref}/jobs`, icon: BriefcaseBusiness },
+          ]
+        : [],
+    [workspaceHref, workspaceSlug],
+  );
+  const projectAdminNav = React.useMemo<ProjectSidebarNavItem[]>(
     () => [
-      { label: "Trash", href: `${projectHref}/trash`, icon: Trash2, exact: true },
       { label: "Settings", href: `${projectHref}/settings`, icon: Settings, exact: true },
-      { label: "Workspace projects", href: workspaceHref, icon: Layers, exact: true },
-      { label: "All workspaces", href: "/workspaces", icon: LayoutDashboard, exact: true },
+      { label: "Trash", href: `${projectHref}/trash`, icon: Trash2, exact: true },
     ],
-    [projectHref, workspaceHref],
+    [projectHref],
+  );
+  const globalNav = React.useMemo<ProjectSidebarNavItem[]>(
+    () => [{ label: "All workspaces", href: "/workspaces", icon: LayoutDashboard, exact: true }],
+    [],
   );
 
   async function handleLogout() {
@@ -179,8 +204,27 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
       collapsible="icon"
       {...props}
     >
-      <SidebarHeader>
+      <SidebarHeader className="gap-1 border-b border-sidebar-border pb-2">
         <SidebarMenu>
+          {workspaceSlug ? (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                size="sm"
+                tooltip={workspaceLabel}
+              >
+                <Link
+                  href={workspaceHref}
+                  aria-label={`Open ${workspaceLabel} workspace`}
+                  onMouseEnter={() => router.prefetch(workspaceHref)}
+                  onFocus={() => router.prefetch(workspaceHref)}
+                >
+                  <Building2 />
+                  <span>{workspaceLabel}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ) : null}
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
@@ -197,7 +241,7 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
                   <FolderKanban className="size-4" />
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  <span className="text-xs text-sidebar-foreground/70">Project</span>
+                  <span className="text-xs text-sidebar-foreground/70">Current project</span>
                   <span className="truncate text-sm font-medium">{projectLabel}</span>
                 </span>
               </Link>
@@ -213,13 +257,45 @@ export function ProjectSidebar({ projectName, projectSlug, workspaceSlug, ...pro
           pathname={pathname}
         />
         <ProjectSidebarNavGroup
-          label="General"
-          items={generalNav}
+          label="Workspace"
+          items={workspaceNav}
+          pathname={pathname}
+        />
+        <ProjectSidebarNavGroup
+          label="Manage project"
+          items={projectAdminNav}
           pathname={pathname}
         />
       </SidebarContent>
 
       <SidebarFooter>
+        <SidebarSeparator className="mx-0" />
+        <SidebarMenu>
+          {globalNav.map(item => {
+            const Icon = item.icon;
+            const active = isActiveProjectHref(pathname, item);
+
+            return (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={active}
+                  tooltip={item.label}
+                >
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    onMouseEnter={() => router.prefetch(item.href)}
+                    onFocus={() => router.prefetch(item.href)}
+                  >
+                    <Icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
         <SidebarSeparator className="mx-0" />
         <SidebarMenu>
           <SidebarMenuItem>
