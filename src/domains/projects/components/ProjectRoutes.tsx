@@ -24,12 +24,13 @@ export function ProjectDashboardRoute() {
 }
 
 export function ProjectAgentRoute() {
-  const { projectId, workspaceId } = useProjectRoute();
+  const { project, projectId, workspaceId } = useProjectRoute();
 
   return (
     <ProjectAgentClient
-      projectId={projectId}
       workspaceId={workspaceId}
+      projects={[{ projectId, name: project.name }]}
+      lockedProjectId={projectId}
     />
   );
 }

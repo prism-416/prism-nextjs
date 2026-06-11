@@ -1,4 +1,5 @@
 import {
+  Bot,
   BriefcaseBusiness,
   CalendarRange,
   FolderKanban,
@@ -25,6 +26,11 @@ const WORKSPACE_PRIMARY_NAV: WorkspaceScopedNavItem[] = [
     href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}`,
     icon: FolderKanban,
     exact: true,
+  },
+  {
+    label: "Agent",
+    href: workspaceSlug => `/workspaces/${encodeURIComponent(workspaceSlug)}/agent`,
+    icon: Bot,
   },
   {
     label: "Sprints",

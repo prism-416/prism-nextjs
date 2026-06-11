@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { ProjectAgentClient } from "@/domains/projects/components/ProjectAgentClient";
 import { ProjectsClient } from "@/domains/projects/components/ProjectsClient";
 import { WorkspaceSprintClient } from "@/domains/sprints/components/WorkspaceSprintClient";
 import { WorkspaceSprintsClient } from "@/domains/sprints/components/WorkspaceSprintsClient";
@@ -19,6 +20,17 @@ export function WorkspaceProjectsRoute() {
       slug={workspaceSlug}
       workspace={workspace}
       initialCanCreateProject={false}
+    />
+  );
+}
+
+export function WorkspaceAgentRoute() {
+  const { workspace, projects } = useWorkspaceRoute();
+
+  return (
+    <ProjectAgentClient
+      workspaceId={workspace.workspaceId}
+      projects={projects.map(project => ({ projectId: project.projectId, name: project.name }))}
     />
   );
 }
