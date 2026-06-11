@@ -116,7 +116,7 @@ export function WorkspaceSettingsClient({ workspace }: WorkspaceSettingsClientPr
         workspace={workspace}
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
-        onDeleted={() => router.push("/workspaces")}
+        onDeleted={() => router.replace("/workspaces")}
       />
 
       <WorkspaceLeaveDialog

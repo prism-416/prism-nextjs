@@ -128,7 +128,12 @@ export function ProjectRouteShell({ children, project, workspace, workspaces, pr
           />
         }
       >
-        <ProjectRealtimeRoomBridge projectId={resolvedProject.projectId} />
+        <ProjectRealtimeRoomBridge
+          projectId={resolvedProject.projectId}
+          projectSlug={resolvedProject.slug}
+          workspaceId={resolvedWorkspace.workspaceId}
+          workspaceSlug={resolvedWorkspace.slug}
+        />
         {children}
       </WorkspaceShell>
     </ProjectRouteContext.Provider>

@@ -3,12 +3,14 @@
 import * as React from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 import { PROJECT_MUTATION_KEYS } from "@/domains/projects/constants/mutations";
 import { PROJECT_REALTIME_EVENTS } from "@/domains/projects/constants/realtime";
 import type {
   ProjectCommentDeletedPayload,
   ProjectCommentPayload,
+  ProjectDeletedPayload,
   ProjectDocumentCreatedPayload,
   ProjectDocumentDeletedPayload,
   ProjectRealtimeErrorPayload,
@@ -16,7 +18,7 @@ import type {
   ProjectWorkItemDeletedPayload,
   ProjectWorkItemsReorderedPayload,
 } from "@/domains/projects/types/realtime";
-import type { ProjectWorkItem } from "@/domains/projects/types";
+import type { ProjectSummary, ProjectWorkItem } from "@/domains/projects/types";
 import { createProjectRealtimeSocket } from "@/domains/projects/utils/realtime-client";
 import {
   syncProjectCommentCreated,
@@ -31,18 +33,29 @@ import {
   syncProjectWorkItemsReordered,
 } from "@/domains/projects/utils/work-item-cache";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@/shared/constants/auth";
+import { QUERY_KEYS } from "@/shared/query";
 import { getCookie } from "@/shared/utils/cookie";
 
 type ProjectRealtimeRoomStatus = "idle" | "connecting" | "connected" | "joined" | "disconnected" | "error";
 
 type UseProjectRealtimeRoomParams = {
   projectId: string;
+  projectSlug: string;
+  workspaceId: string;
+  workspaceSlug?: string;
 };
 
-export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomParams) {
+export function useProjectRealtimeRoom({
+  projectId,
+  projectSlug,
+  workspaceId,
+  workspaceSlug,
+}: UseProjectRealtimeRoomParams) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [status, setStatus] = React.useState<ProjectRealtimeRoomStatus>("idle");
   const [lastError, setLastError] = React.useState<ProjectRealtimeErrorPayload | null>(null);
+  const workspaceHref = workspaceSlug ? `/workspaces/${encodeURIComponent(workspaceSlug)}` : "/workspaces";
 
   React.useEffect(() => {
     const accessToken = getCookie(ACCESS_TOKEN_COOKIE_NAME);
@@ -87,6 +100,20 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
       if (payload.projectId === projectId) {
         setStatus("joined");
       }
+    };
+
+    const handleProjectDeleted = (payload: ProjectDeletedPayload) => {
+      if (payload.projectId !== projectId) {
+        return;
+      }
+
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.project.detail(projectId) });
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.project.detailBySlug(projectSlug) });
+      queryClient.setQueryData<ProjectSummary[]>(QUERY_KEYS.project.list(workspaceId), previous =>
+        previous?.filter(item => item.projectId !== projectId),
+      );
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.lists() });
+      router.replace(workspaceHref);
     };
 
     const handleWorkItemCreated = (payload: ProjectWorkItem) => {
@@ -158,6 +185,7 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
     socket.on("connect_error", handleConnectError);
     socket.on("exception", handleException);
     socket.on(PROJECT_REALTIME_EVENTS.PROJECT_JOINED, handleProjectJoined);
+    socket.on(PROJECT_REALTIME_EVENTS.PROJECT_DELETED, handleProjectDeleted);
     socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_CREATED, handleWorkItemCreated);
     socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEM_UPDATED, handleWorkItemUpdated);
     socket.on(PROJECT_REALTIME_EVENTS.WORK_ITEMS_REORDERED, handleWorkItemsReordered);
@@ -176,7 +204,7 @@ export function useProjectRealtimeRoom({ projectId }: UseProjectRealtimeRoomPara
 
       socket.disconnect();
     };
-  }, [projectId, queryClient]);
+  }, [projectId, projectSlug, queryClient, router, workspaceHref, workspaceId]);
 
   return {
     lastError,

@@ -63,11 +63,21 @@ export function syncWorkspaceUpdated(queryClient: QueryClient, workspace: Worksp
   queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.members(workspace.workspaceId) });
 }
 
-export function syncWorkspaceDeleted(queryClient: QueryClient, workspaceId: string) {
-  queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.detail(workspaceId) });
+export function syncWorkspaceDeleted(queryClient: QueryClient, workspaceId: string, workspaceSlug?: string) {
   queryClient.setQueryData<Workspace[]>(QUERY_KEYS.workspace.list(), previous =>
     removeById(previous, workspaceId, item => item.workspaceId),
   );
+  queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.detail(workspaceId) });
+  queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.members(workspaceId) });
+  queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.jobs(workspaceId) });
+  queryClient.removeQueries({ queryKey: QUERY_KEYS.workspace.sprints(workspaceId) });
+  queryClient.removeQueries({ queryKey: QUERY_KEYS.project.list(workspaceId) });
+
+  if (workspaceSlug) {
+    queryClient.removeQueries({ queryKey: QUERY_KEYS.project.listByWorkspaceSlug(workspaceSlug) });
+  }
+
+  queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.list() });
 }
 
 export function syncWorkspaceProjectCreated(queryClient: QueryClient, project: ProjectSummary, workspaceSlug?: string) {
