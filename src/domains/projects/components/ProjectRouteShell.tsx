@@ -37,7 +37,7 @@ function getProjectSection(pathname: string, projectSlug: string): WorkspacePath
   const projectHref = `/projects/${encodeURIComponent(projectSlug)}`;
 
   if (pathname === projectHref) {
-    return undefined;
+    return { name: "Dashboard" };
   }
 
   if (pathname.startsWith(`${projectHref}/work-items/`)) {

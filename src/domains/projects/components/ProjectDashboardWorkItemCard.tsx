@@ -19,7 +19,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectDashboardPriorityMenu } from "@/domains/projects/components/ProjectDashboardPriorityMenu";
 import { ProjectDashboardStatusMenu } from "@/domains/projects/components/ProjectDashboardStatusMenu";
 import { ProjectWorkItemAssigneeSelector } from "@/domains/projects/components/ProjectWorkItemAssigneeSelector";
-import { ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
+import { ProjectWorkItemCode } from "@/domains/projects/components/ProjectWorkItemCode";
 import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import type {
   ProjectParticipant,
@@ -127,13 +127,12 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
   isSelected = false,
   onToggleSelected,
 }: WorkItemCardContentProps) {
-  const visibleLabels = item.labelNames.slice(0, 3);
-  const remainingLabelCount = Math.max(item.labelNames.length - visibleLabels.length, 0);
   const assigneeUsers = resolveAssigneeAvatarUsers(item.assigneeUsernames, members);
+  const hasActions = Boolean(!isDragOverlay && !isEditingTitle && onEditWorkItem && onDeleteWorkItem);
 
   return (
     <>
-      <div className="flex items-center">
+      <div className="flex items-start">
         {selectionMode && !isDragOverlay && !isEditingTitle && onToggleSelected && (
           <button
             type="button"
@@ -172,18 +171,26 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
             onEditCancel={onTitleEditCancel}
           />
         ) : (
-          <ProjectWorkItemTitleLine
-            code={item.code}
-            title={item.title}
-            titleClassName="line-clamp-2 group-hover/card:text-prism-navy"
-          />
-        )}
-        {!isDragOverlay && !isEditingTitle && onEditWorkItem && onDeleteWorkItem && (
-          <DashboardWorkItemActionsMenu
-            item={item}
-            onEditWorkItem={onEditWorkItem}
-            onDeleteWorkItem={onDeleteWorkItem}
-          />
+          <div className={cn("relative min-w-0 flex-1", hasActions && "pr-8")}>
+            <ProjectWorkItemCode code={item.code} />
+            <Typography
+              variant="bodySm"
+              tone="primary"
+              weight="semibold"
+              className="mt-1.5 line-clamp-2 group-hover/card:text-prism-navy"
+            >
+              {item.title}
+            </Typography>
+            {hasActions && onEditWorkItem && onDeleteWorkItem && (
+              <div className="absolute right-0 top-0">
+                <DashboardWorkItemActionsMenu
+                  item={item}
+                  onEditWorkItem={onEditWorkItem}
+                  onDeleteWorkItem={onDeleteWorkItem}
+                />
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -231,7 +238,7 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
         </div>
       )}
 
-      {!isEditingTitle && (item.assigneeUsernames.length > 0 || item.labelNames.length > 0) && (
+      {!isEditingTitle && item.assigneeUsernames.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {/* stop propagation so dnd-kit doesn't capture pointer and eat the tooltip */}
           <span onPointerDown={e => e.stopPropagation()}>
@@ -240,19 +247,6 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
               avatarClassName="size-6 text-[10px]"
             />
           </span>
-          {visibleLabels.map(label => (
-            <span
-              key={label}
-              className="inline-flex h-6 items-center rounded-full border border-prism-teal-500/20 bg-prism-teal-500/10 px-2 text-xs text-prism-navy"
-            >
-              {label}
-            </span>
-          ))}
-          {remainingLabelCount > 0 && (
-            <span className="inline-flex h-6 items-center rounded-full border border-border bg-surface-strong px-2 text-xs text-prism-muted">
-              +{remainingLabelCount}
-            </span>
-          )}
         </div>
       )}
     </>
