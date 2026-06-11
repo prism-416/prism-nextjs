@@ -8,7 +8,7 @@ import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import { ProjectWorkItemActionsMenu } from "@/domains/projects/components/ProjectWorkItemActionsMenu";
 import { ProjectWorkItemAssigneeSelector } from "@/domains/projects/components/ProjectWorkItemAssigneeSelector";
-import { ProjectWorkItemCode, ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
+import { ProjectWorkItemCode } from "@/domains/projects/components/ProjectWorkItemCode";
 import { DatePicker } from "@/atomics/molecules/DatePicker";
 import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/ProjectWorkItemCommentsPanel";
 import { ProjectWorkItemInlineControls } from "@/domains/projects/components/ProjectWorkItemInlineControls";
@@ -87,11 +87,15 @@ function ChildWorkItemCard({
       onClick={handleClick}
     >
       <div className="min-w-0">
-        <ProjectWorkItemTitleLine
-          code={item.code}
-          title={item.title}
-          titleClassName="line-clamp-2 group-hover/card:text-prism-navy"
-        />
+        <ProjectWorkItemCode code={item.code} />
+        <Typography
+          variant="bodySm"
+          tone="primary"
+          weight="semibold"
+          className="mt-1.5 line-clamp-2 group-hover/card:text-prism-navy"
+        >
+          {item.title}
+        </Typography>
 
         <Typography
           variant="caption"
