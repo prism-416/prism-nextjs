@@ -13,6 +13,31 @@ let is401EventEmitted = false;
 let is403EventEmitted = false;
 let refreshPromise: Promise<string | null> | null = null;
 
+const NON_SESSION_401_ERROR_CODES = new Set([
+  "INVALID_CREDENTIALS",
+  "EMAIL_NOT_VERIFIED",
+  "INVALID_EMAIL_VERIFICATION_TOKEN",
+  "INVALID_PASSWORD_RESET_TOKEN",
+  "INVALID_CURRENT_PASSWORD",
+  "INVALID_GOOGLE_ID_TOKEN",
+  "UNVERIFIED_GOOGLE_EMAIL",
+  "INVALID_GITHUB_AUTHORIZATION_CODE",
+  "INVALID_GITHUB_OAUTH_STATE",
+  "UNVERIFIED_GITHUB_EMAIL",
+]);
+
+function getErrorCode(error: AxiosError) {
+  const data = error.response?.data;
+
+  if (!data || typeof data !== "object" || !("code" in data)) {
+    return null;
+  }
+
+  const code = (data as { code?: unknown }).code;
+
+  return typeof code === "string" ? code : null;
+}
+
 const authClient = axios.create({
   adapter,
 } as AxiosRequestType);
@@ -62,10 +87,12 @@ authClient.interceptors.response.use(
   async (error: AxiosError) => {
     const is401 = error.response?.status === 401;
     const is403 = error.response?.status === 403;
+    const errorCode = getErrorCode(error);
+    const shouldHandleAsSession401 = is401 && !NON_SESSION_401_ERROR_CODES.has(errorCode ?? "");
     const originalRequest = error.config as (AxiosRequestType & { _retry?: boolean }) | undefined;
 
     if (
-      is401 &&
+      shouldHandleAsSession401 &&
       !IS_SERVER &&
       originalRequest &&
       !originalRequest._retry &&
@@ -82,7 +109,7 @@ authClient.interceptors.response.use(
       }
     }
 
-    if (is401 && !is401EventEmitted && !IS_SERVER) {
+    if (shouldHandleAsSession401 && !is401EventEmitted && !IS_SERVER) {
       is401EventEmitted = true;
       removeAuthToken();
       eventBus.$emit<AuthEventBus>("errorApi", {
