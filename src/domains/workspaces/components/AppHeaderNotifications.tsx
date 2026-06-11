@@ -56,8 +56,8 @@ export function AppHeaderNotifications() {
             return;
           }
 
-          if (invitation?.status === "accepted") {
-            router.replace("/workspaces");
+          if (invitation.status === "accepted") {
+            router.replace(`/workspaces/${encodeURIComponent(invitation.workspaceSlug)}`);
             setOpen(false);
             return;
           }
