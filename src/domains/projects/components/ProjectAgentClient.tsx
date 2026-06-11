@@ -66,6 +66,7 @@ type RequestFeedback = {
 type StatusIcon = React.ComponentType<{ className?: string }>;
 
 const FEATURE_SPECIFICATION_MAX_LENGTH = 20000;
+const AGENT_TIMELINE_TICK_MS = 1000;
 const EMPTY_AGENT_RUNS: AgentRun[] = [];
 const EMPTY_AGENT_STEPS: AgentStep[] = [];
 const ACTIVE_AGENT_RUN_STATUSES = new Set<AgentRunStatus>(["queued", "running", "waiting"]);
@@ -137,16 +138,49 @@ function formatElapsedBetween(start: string | null, end: string | null, emptyLab
   return formatElapsedSeconds(new Date(end).getTime() - new Date(start).getTime());
 }
 
-function getRunDurationLabel(run: AgentRun) {
+function getQueueWaitLabel(run: AgentRun, now: number) {
+  if (run.startedAt) {
+    return formatElapsedBetween(run.createdAt, run.startedAt, "Not available");
+  }
+
+  if (isActiveAgentRun(run)) {
+    return formatElapsedSeconds(now - new Date(run.createdAt).getTime());
+  }
+
+  return "Not started";
+}
+
+function getRunDurationLabel(run: AgentRun, now: number) {
   if (run.startedAt && run.completedAt) {
     return formatElapsedBetween(run.startedAt, run.completedAt, "Not available");
   }
 
   if (run.startedAt && isActiveAgentRun(run)) {
-    return "Running";
+    return formatElapsedSeconds(now - new Date(run.startedAt).getTime());
   }
 
   return run.startedAt ? "Not finished" : "Not started";
+}
+
+function useAgentTimelineNow(enabled: boolean) {
+  const [now, setNow] = React.useState(() => Date.now());
+
+  React.useEffect(() => {
+    if (!enabled) {
+      return undefined;
+    }
+
+    setNow(Date.now());
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, AGENT_TIMELINE_TICK_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [enabled]);
+
+  return now;
 }
 
 function sortAgentStepsByOrder(a: AgentStep, b: AgentStep) {
@@ -443,12 +477,14 @@ function AgentRunStepDag({
 function AgentRunDagCard({
   workspaceId,
   run,
+  timelineNow,
   initialSteps,
   isExpanded,
   onToggle,
 }: {
   workspaceId: string;
   run: AgentRun;
+  timelineNow: number;
   initialSteps?: AgentStep[];
   isExpanded: boolean;
   onToggle: () => void;
@@ -506,13 +542,11 @@ function AgentRunDagCard({
         </div>
         <div className="min-w-0">
           <dt>Queue wait</dt>
-          <dd className="mt-1 truncate text-prism-body">
-            {formatElapsedBetween(run.createdAt, run.startedAt, "Pending")}
-          </dd>
+          <dd className="mt-1 truncate text-prism-body">{getQueueWaitLabel(run, timelineNow)}</dd>
         </div>
         <div className="min-w-0">
           <dt>Duration</dt>
-          <dd className="mt-1 truncate text-prism-body">{getRunDurationLabel(run)}</dd>
+          <dd className="mt-1 truncate text-prism-body">{getRunDurationLabel(run, timelineNow)}</dd>
         </div>
       </dl>
 
@@ -567,6 +601,7 @@ export function ProjectAgentClient({
   const requestProvisioning = useRequestFeatureProvisioning();
   const runs = data?.items ?? EMPTY_AGENT_RUNS;
   const activeRunCount = React.useMemo(() => runs.filter(isActiveAgentRun).length, [runs]);
+  const timelineNow = useAgentTimelineNow(activeRunCount > 0);
   const finishedRunCount = runs.length - activeRunCount;
   const trimmedSpecification = featureSpecification.trim();
   const specificationLength = featureSpecification.length;
@@ -762,6 +797,7 @@ export function ProjectAgentClient({
                       key={run.runId}
                       workspaceId={workspaceId}
                       run={run}
+                      timelineNow={timelineNow}
                       initialSteps={initialStepsByRunId[run.runId]}
                       isExpanded={isExpanded}
                       onToggle={() => toggleRunGraph(run.runId, isExpanded)}
