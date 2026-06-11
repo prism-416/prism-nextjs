@@ -205,6 +205,18 @@ html {
   scroll-behavior: smooth;
 }
 
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--primary);
+  border-color: transparent !important;
+  border-radius: 0;
+  caret-color: var(--primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-neutral-0) inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
 .dark {
   --sidebar: rgba(11, 21, 51, 0.94);
   --sidebar-foreground: rgba(248, 250, 252, 0.9);

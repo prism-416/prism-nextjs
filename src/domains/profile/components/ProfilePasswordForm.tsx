@@ -1,17 +1,19 @@
 "use client";
 
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { Eye, EyeOff, KeyRound } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Typography } from "@/atomics/atoms/Typography";
-import { Field, FieldGroup, FieldLabel } from "@/atomics/molecules/Field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/atomics/molecules/Field";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/atomics/molecules/InputGroup";
 import { useChangePassword } from "@/domains/profile/hooks/useChangePassword";
 
 type PasswordFieldName = "currentPassword" | "newPassword" | "confirmPassword";
 
 type PasswordFormState = Record<PasswordFieldName, string>;
+
+type PasswordFieldErrors = Partial<Record<PasswordFieldName, string>>;
 
 type PasswordVisibilityState = Record<PasswordFieldName, boolean>;
 
@@ -23,6 +25,7 @@ type PasswordFieldProps = {
   onChange: (value: string) => void;
   onVisibilityToggle: () => void;
   value: string;
+  error?: string;
 };
 
 const PASSWORD_MIN_LENGTH = 8;
@@ -38,14 +41,54 @@ const INITIAL_VISIBILITY_STATE: PasswordVisibilityState = {
   confirmPassword: false,
 };
 
-function getPasswordMutationErrorMessage(error: unknown) {
-  const data = (error as { data?: { message?: string } } | undefined)?.data;
+type PasswordMutationError = {
+  data?: {
+    code?: unknown;
+    message?: unknown;
+  } | null;
+  message?: unknown;
+  response?: {
+    data?: {
+      code?: unknown;
+      message?: unknown;
+    } | null;
+    status?: unknown;
+  };
+  status?: unknown;
+};
 
-  return data?.message || "Password could not be changed.";
+function getErrorMessage(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string").join(" ");
+  }
+
+  return typeof value === "string" ? value : "";
+}
+
+function getPasswordMutationError(error: unknown): { field?: PasswordFieldName; message: string } {
+  const candidate = error as PasswordMutationError | null;
+  const data = candidate?.response?.data ?? candidate?.data;
+  const code = typeof data?.code === "string" ? data.code : null;
+  const status = candidate?.response?.status ?? candidate?.status;
+  const message = getErrorMessage(data?.message ?? candidate?.message);
+
+  if (code === "INVALID_CURRENT_PASSWORD") {
+    return {
+      field: "currentPassword",
+      message: "Current password is incorrect.",
+    };
+  }
+
+  if (status === 401) {
+    return { message: "Your session expired. Please sign in again." };
+  }
+
+  return { message: message || "Password could not be changed." };
 }
 
 function PasswordField({
   autoComplete,
+  error,
   id,
   isVisible,
   label,
@@ -53,8 +96,13 @@ function PasswordField({
   onVisibilityToggle,
   value,
 }: PasswordFieldProps) {
+  const errorId = `${id}-error`;
+
   return (
-    <Field className="gap-2">
+    <Field
+      className="gap-2"
+      data-invalid={Boolean(error)}
+    >
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <InputGroup className="h-11 rounded-xl border-border bg-surface-field">
         <InputGroupInput
@@ -64,6 +112,8 @@ function PasswordField({
           autoComplete={autoComplete}
           minLength={id === "currentPassword" ? 1 : PASSWORD_MIN_LENGTH}
           maxLength={PASSWORD_MAX_LENGTH}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : undefined}
           value={value}
           onChange={event => onChange(event.target.value)}
           className="h-full text-prism-heading placeholder:text-prism-muted"
@@ -82,6 +132,7 @@ function PasswordField({
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
+      <FieldError id={errorId}>{error}</FieldError>
     </Field>
   );
 }
@@ -89,22 +140,15 @@ function PasswordField({
 export function ProfilePasswordForm() {
   const [formState, setFormState] = useState<PasswordFormState>(INITIAL_FORM_STATE);
   const [visibility, setVisibility] = useState<PasswordVisibilityState>(INITIAL_VISIBILITY_STATE);
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<PasswordFieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { mutateAsync, isPending, error, reset } = useChangePassword();
 
-  const canSubmit = useMemo(() => {
-    return (
-      formState.currentPassword.length > 0 &&
-      formState.newPassword.length >= PASSWORD_MIN_LENGTH &&
-      formState.confirmPassword.length >= PASSWORD_MIN_LENGTH &&
-      formState.newPassword === formState.confirmPassword
-    );
-  }, [formState]);
-
   function handleFieldChange(field: PasswordFieldName, value: string) {
     setFormState(previous => ({ ...previous, [field]: value }));
-    setFieldError(null);
+    setFieldErrors(previous => ({ ...previous, [field]: undefined }));
+    setFormError(null);
     setSuccessMessage(null);
     reset();
   }
@@ -117,26 +161,27 @@ export function ProfilePasswordForm() {
     event.preventDefault();
 
     if (!formState.currentPassword) {
-      setFieldError("Current password is required.");
+      setFieldErrors({ currentPassword: "Current password is required." });
       return;
     }
 
     if (formState.newPassword.length < PASSWORD_MIN_LENGTH) {
-      setFieldError("New password must be at least 8 characters.");
+      setFieldErrors({ newPassword: "New password must be at least 8 characters." });
       return;
     }
 
     if (formState.newPassword.length > PASSWORD_MAX_LENGTH) {
-      setFieldError("New password must be 72 characters or fewer.");
+      setFieldErrors({ newPassword: "New password must be 72 characters or fewer." });
       return;
     }
 
     if (formState.newPassword !== formState.confirmPassword) {
-      setFieldError("New passwords do not match.");
+      setFieldErrors({ confirmPassword: "New passwords do not match." });
       return;
     }
 
-    setFieldError(null);
+    setFieldErrors({});
+    setFormError(null);
     setSuccessMessage(null);
 
     try {
@@ -147,10 +192,20 @@ export function ProfilePasswordForm() {
       setFormState(INITIAL_FORM_STATE);
       setVisibility(INITIAL_VISIBILITY_STATE);
       setSuccessMessage("Password changed.");
-    } catch {
-      // Mutation error is rendered below.
+    } catch (mutationError) {
+      const passwordError = getPasswordMutationError(mutationError);
+
+      if (passwordError.field) {
+        setFieldErrors({ [passwordError.field]: passwordError.message });
+        return;
+      }
+
+      setFormError(passwordError.message);
     }
   }
+
+  const mutationError = error ? getPasswordMutationError(error) : null;
+  const displayedFormError = formError ?? (mutationError?.field ? null : (mutationError?.message ?? null));
 
   return (
     <form
@@ -181,6 +236,7 @@ export function ProfilePasswordForm() {
           autoComplete="current-password"
           value={formState.currentPassword}
           isVisible={visibility.currentPassword}
+          error={fieldErrors.currentPassword}
           onChange={value => handleFieldChange("currentPassword", value)}
           onVisibilityToggle={() => handleVisibilityToggle("currentPassword")}
         />
@@ -190,6 +246,7 @@ export function ProfilePasswordForm() {
           autoComplete="new-password"
           value={formState.newPassword}
           isVisible={visibility.newPassword}
+          error={fieldErrors.newPassword}
           onChange={value => handleFieldChange("newPassword", value)}
           onVisibilityToggle={() => handleVisibilityToggle("newPassword")}
         />
@@ -199,18 +256,19 @@ export function ProfilePasswordForm() {
           autoComplete="new-password"
           value={formState.confirmPassword}
           isVisible={visibility.confirmPassword}
+          error={fieldErrors.confirmPassword}
           onChange={value => handleFieldChange("confirmPassword", value)}
           onVisibilityToggle={() => handleVisibilityToggle("confirmPassword")}
         />
       </FieldGroup>
 
-      {fieldError || error ? (
+      {displayedFormError ? (
         <Typography
           variant="bodySm"
           tone="inherit"
           className="mt-4 text-red-500"
         >
-          {fieldError || getPasswordMutationErrorMessage(error)}
+          {displayedFormError}
         </Typography>
       ) : null}
 
@@ -227,7 +285,7 @@ export function ProfilePasswordForm() {
       <div className="mt-5 flex justify-end">
         <Button
           type="submit"
-          disabled={isPending || !canSubmit}
+          disabled={isPending}
           className="h-10 rounded-lg px-4"
         >
           {isPending ? "Changing..." : "Change password"}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { LoaderCircle } from "lucide-react";
 
 import { useAuth } from "@/app/_providers/AuthProvider";
 import { Button } from "@/atomics/atoms/Button";
@@ -16,6 +17,38 @@ import { AuthPasswordField } from "./AuthPasswordField";
 import { AuthSocialButtons } from "./AuthSocialButtons";
 import { AuthTextField } from "./AuthTextField";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type SignInFieldName = "email" | "password";
+
+type SignInFieldErrors = Partial<Record<SignInFieldName, string>>;
+
+type SignInError = {
+  fields?: SignInFieldName[];
+  message: string;
+  messageField?: SignInFieldName;
+};
+
+function getSignInError(code?: string, message?: string): SignInError {
+  if (code === "INVALID_CREDENTIALS") {
+    return {
+      fields: ["email", "password"],
+      message: "Email or password is incorrect.",
+      messageField: "password",
+    };
+  }
+
+  if (code === "EMAIL_NOT_VERIFIED") {
+    return {
+      fields: ["email"],
+      message: "Verify your email before signing in.",
+      messageField: "email",
+    };
+  }
+
+  return { message: message || "Sign in failed. Please try again." };
+}
+
 export function SignInForm() {
   const router = useRouter();
   const { setSession } = useAuth();
@@ -23,6 +56,8 @@ export function SignInForm() {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<SignInFieldErrors>({});
+  const [invalidFields, setInvalidFields] = useState<Partial<Record<SignInFieldName, boolean>>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit: NonNullable<React.ComponentProps<"form">["onSubmit"]> = async event => {
@@ -30,11 +65,29 @@ export function SignInForm() {
 
     const trimmedEmail = email.trim();
 
-    if (!trimmedEmail || !password) {
-      setErrorMessage("Email and password are required.");
+    if (!trimmedEmail) {
+      setFieldErrors({ email: "Email is required." });
+      setInvalidFields({ email: true });
+      setErrorMessage(null);
       return;
     }
 
+    if (!EMAIL_PATTERN.test(trimmedEmail)) {
+      setFieldErrors({ email: "Enter a valid email address." });
+      setInvalidFields({ email: true });
+      setErrorMessage(null);
+      return;
+    }
+
+    if (!password) {
+      setFieldErrors({ password: "Password is required." });
+      setInvalidFields({ password: true });
+      setErrorMessage(null);
+      return;
+    }
+
+    setFieldErrors({});
+    setInvalidFields({});
     setErrorMessage(null);
     setIsSubmitting(true);
 
@@ -46,7 +99,15 @@ export function SignInForm() {
       const data = result?.data;
 
       if (!data?.accessToken) {
-        setErrorMessage(result?.message || "Sign in failed.");
+        const signInError = getSignInError(result?.code, result?.message);
+
+        if (signInError.fields?.length) {
+          setInvalidFields(Object.fromEntries(signInError.fields.map(field => [field, true])));
+          setFieldErrors(signInError.messageField ? { [signInError.messageField]: signInError.message } : {});
+          return;
+        }
+
+        setErrorMessage(signInError.message);
         return;
       }
 
@@ -58,7 +119,7 @@ export function SignInForm() {
 
       router.replace(AUTHENTICATED_ENTRY_PATH);
     } catch {
-      setErrorMessage("Sign in failed.");
+      setErrorMessage("Unable to reach the server. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -69,6 +130,7 @@ export function SignInForm() {
       <form
         className="w-full max-w-sm text-primary"
         onSubmit={handleSubmit}
+        noValidate
       >
         <FieldSet className="gap-6">
           <div className="space-y-1">
@@ -96,7 +158,11 @@ export function SignInForm() {
               autoComplete="email"
               placeholder="you@example.com"
               value={email}
+              error={fieldErrors.email}
+              invalid={invalidFields.email}
               onChange={value => {
+                setFieldErrors({});
+                setInvalidFields({});
                 setErrorMessage(null);
                 setEmail(value);
               }}
@@ -110,7 +176,11 @@ export function SignInForm() {
               placeholder="Password"
               isVisible={isPasswordVisible}
               value={password}
+              error={fieldErrors.password}
+              invalid={invalidFields.password}
               onChange={value => {
+                setFieldErrors({});
+                setInvalidFields({});
                 setErrorMessage(null);
                 setPassword(value);
               }}
@@ -138,19 +208,25 @@ export function SignInForm() {
               className="h-11 w-full rounded-xl"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Signing in..." : "Sign in"}
+              {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
+              Sign in
             </Button>
-          </FieldGroup>
 
-          {errorMessage ? (
-            <Typography
-              variant="bodySm"
-              tone="inherit"
-              className="text-center text-red-500"
+            <div
+              className="min-h-6 text-center"
+              aria-live="polite"
             >
-              {errorMessage}
-            </Typography>
-          ) : null}
+              {errorMessage ? (
+                <Typography
+                  variant="bodySm"
+                  tone="inherit"
+                  className="text-red-500"
+                >
+                  {errorMessage}
+                </Typography>
+              ) : null}
+            </div>
+          </FieldGroup>
 
           <AuthFormSeparator />
 
