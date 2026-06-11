@@ -82,6 +82,7 @@ export function WorkspaceRouteShell({
   const { data: liveProjects = projects } = useProjects(workspaceSlug, projects);
   const resolvedWorkspace = liveWorkspace ?? workspace;
   const section = getWorkspaceSection(pathname, workspaceSlug);
+  const showProjectsSegment = section === undefined;
   const contextValue = React.useMemo<WorkspaceRouteContextValue>(
     () => ({
       workspace: resolvedWorkspace,
@@ -105,12 +106,16 @@ export function WorkspaceRouteShell({
           href: `/workspaces/${encodeURIComponent(item.slug)}`,
           isCurrent: item.slug === workspaceSlug,
         }))}
-        project={{ name: "Projects" }}
-        projectOptions={liveProjects.map(project => ({
-          id: project.projectId,
-          name: project.name,
-          href: `/projects/${encodeURIComponent(project.slug)}`,
-        }))}
+        project={showProjectsSegment ? { name: "Projects" } : undefined}
+        projectOptions={
+          showProjectsSegment
+            ? liveProjects.map(project => ({
+                id: project.projectId,
+                name: project.name,
+                href: `/projects/${encodeURIComponent(project.slug)}`,
+              }))
+            : undefined
+        }
         section={section}
       >
         {children}
