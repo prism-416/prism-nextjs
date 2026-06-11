@@ -5,7 +5,8 @@ export function ProjectWorkItemSkeleton() {
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-5">
       <div className="rounded-2xl border border-border/80 bg-surface p-5">
         <Skeleton className="h-5 w-32 bg-prism-navy/5" />
-        <Skeleton className="mt-4 h-8 w-72 bg-prism-navy/5" />
+        <Skeleton className="mt-2 h-5 w-20 bg-prism-navy/5" />
+        <Skeleton className="mt-2 h-8 w-72 bg-prism-navy/5" />
         <Skeleton className="mt-3 h-4 w-full max-w-xl bg-prism-navy/5" />
         <div className="mt-5 flex gap-5 border-t border-border/70 pt-4">
           <Skeleton className="h-5 w-32 bg-prism-navy/5" />
@@ -28,6 +29,7 @@ export function ProjectWorkItemSkeleton() {
               key={index}
               className="rounded-xl border border-border/80 bg-surface p-3"
             >
+              <Skeleton className="h-5 w-16 bg-prism-navy/5" />
               <Skeleton className="h-5 w-40 bg-prism-navy/5" />
               <Skeleton className="mt-2 h-4 w-full bg-prism-navy/5" />
               <Skeleton className="mt-2 h-4 w-8/12 bg-prism-navy/5" />

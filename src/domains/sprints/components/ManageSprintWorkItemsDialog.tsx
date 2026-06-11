@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/atomics/molecules/Dialog";
+import { ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import { ProjectWorkItemStatusBadge } from "@/domains/projects/components/ProjectWorkItemStatusBadge";
 import { useProjects } from "@/domains/projects/hooks/useProjects";
@@ -256,7 +257,11 @@ function WorkItemRow({
         className={["shrink-0 border-border bg-transparent", isExisting && !checked ? "opacity-50" : ""].join(" ")}
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-prism-heading">{item.title}</p>
+        <ProjectWorkItemTitleLine
+          code={item.code}
+          title={item.title}
+          titleClassName="truncate text-prism-heading"
+        />
         {item.description && <p className="mt-0.5 line-clamp-1 text-xs text-prism-muted">{item.description}</p>}
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
           <ProjectWorkItemStatusBadge status={item.status} />

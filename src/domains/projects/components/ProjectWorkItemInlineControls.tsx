@@ -11,6 +11,7 @@ import {
 import { getProjectWorkItemPriorityBadgeClassName } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import type { ProjectWorkItem, ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 import {
+  formatProjectWorkItemLabel,
   getProjectWorkItemPriorityLabel,
   getProjectWorkItemStatusLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
@@ -65,7 +66,7 @@ export function ProjectWorkItemInlineControls({
           <button
             type="button"
             className={STATUS_TRIGGER_CLASS_NAME}
-            aria-label={`Change ${item.title} status`}
+            aria-label={`Change ${formatProjectWorkItemLabel(item)} status`}
           >
             <StatusContent status={item.status} />
             <ChevronDown className="size-3 opacity-60" />
@@ -95,7 +96,7 @@ export function ProjectWorkItemInlineControls({
           <button
             type="button"
             className={getProjectWorkItemPriorityBadgeClassName(item.priority, PRIORITY_TRIGGER_CLASS_NAME)}
-            aria-label={`Change ${item.title} priority`}
+            aria-label={`Change ${formatProjectWorkItemLabel(item)} priority`}
           >
             {getProjectWorkItemPriorityLabel(item.priority)}
             <ChevronDown className="size-3 opacity-60" />

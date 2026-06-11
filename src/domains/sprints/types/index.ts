@@ -29,6 +29,8 @@ export interface SprintWorkItem {
   workspaceId: string;
   projectId: string;
   parentId: string | null;
+  /** Human-readable, unique work item code, e.g. "PRSM-001". */
+  code: string;
   title: string;
   description: string;
   startDate: string | null;

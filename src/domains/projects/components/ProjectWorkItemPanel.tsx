@@ -8,6 +8,7 @@ import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import { ProjectWorkItemActionsMenu } from "@/domains/projects/components/ProjectWorkItemActionsMenu";
 import { ProjectWorkItemAssigneeSelector } from "@/domains/projects/components/ProjectWorkItemAssigneeSelector";
+import { ProjectWorkItemCode, ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
 import { DatePicker } from "@/atomics/molecules/DatePicker";
 import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/ProjectWorkItemCommentsPanel";
 import { ProjectWorkItemInlineControls } from "@/domains/projects/components/ProjectWorkItemInlineControls";
@@ -86,14 +87,11 @@ function ChildWorkItemCard({
       onClick={handleClick}
     >
       <div className="min-w-0">
-        <Typography
-          variant="bodySm"
-          tone="primary"
-          weight="semibold"
-          className="line-clamp-2 group-hover/card:text-prism-navy"
-        >
-          {item.title}
-        </Typography>
+        <ProjectWorkItemTitleLine
+          code={item.code}
+          title={item.title}
+          titleClassName="line-clamp-2 group-hover/card:text-prism-navy"
+        />
 
         <Typography
           variant="caption"
@@ -177,10 +175,11 @@ export function ProjectWorkItemPanel({
 
         <div className="mt-4 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
+            <ProjectWorkItemCode code={workItem.code} />
             <Typography
               variant="h2"
               tone="primary"
-              className="text-2xl tracking-normal md:text-3xl"
+              className="mt-2 text-2xl tracking-normal md:text-3xl"
             >
               {workItem.title}
             </Typography>
@@ -194,6 +193,7 @@ export function ProjectWorkItemPanel({
           </div>
 
           <ProjectWorkItemActionsMenu
+            code={workItem.code}
             title={workItem.title}
             onEdit={onEditWorkItem}
             onDelete={onDeleteWorkItem}

@@ -83,6 +83,10 @@ function formatProjectCompactDate(value: string) {
   return `${MONTH_LABELS[date.getMonth()]} ${date.getDate()}`;
 }
 
+export function formatProjectWorkItemLabel(item: { code: string; title: string }) {
+  return `${item.code}: ${item.title}`;
+}
+
 export function formatProjectScheduleSummary(startDate: string | null, dueDate: string | null) {
   if (startDate && dueDate) {
     return `${formatProjectCompactDate(startDate)} - ${formatProjectCompactDate(dueDate)}`;

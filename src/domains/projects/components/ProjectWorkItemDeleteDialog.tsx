@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/atomics/molecules/Dialog";
 import { WORK_ITEM_TRASH_RETENTION_DAYS } from "@/domains/projects/constants/dashboard";
+import { ProjectWorkItemCode } from "@/domains/projects/components/ProjectWorkItemCode";
 import { useDeleteProjectWorkItem } from "@/domains/projects/hooks/useDeleteProjectWorkItem";
 import type { ProjectWorkItem } from "@/domains/projects/types";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
@@ -75,11 +76,12 @@ export function ProjectWorkItemDeleteDialog({
             >
               Work item
             </Typography>
+            <ProjectWorkItemCode code={workItem.code} />
             <Typography
               variant="bodySm"
               tone="primary"
               weight="semibold"
-              className="mt-1 line-clamp-2"
+              className="mt-2 line-clamp-2"
             >
               {workItem.title}
             </Typography>

@@ -9,7 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/atomics/molecules/DropdownMenu";
 import type { ProjectWorkItem, ProjectWorkItemStatus } from "@/domains/projects/types";
-import { getProjectWorkItemStatusLabel, PROJECT_WORK_ITEM_STATUSES } from "@/domains/projects/utils/work-item-display";
+import {
+  getProjectWorkItemStatusLabel,
+  formatProjectWorkItemLabel,
+  PROJECT_WORK_ITEM_STATUSES,
+} from "@/domains/projects/utils/work-item-display";
 import { cn } from "@/shared/utils/cn";
 
 type ProjectDashboardStatusMenuProps = {
@@ -51,7 +55,7 @@ export function ProjectDashboardStatusMenu({ item, disabled, onStatusUpdate }: P
             "disabled:cursor-not-allowed disabled:opacity-60",
           )}
           onPointerDown={event => event.stopPropagation()}
-          aria-label={`Change ${item.title} status`}
+          aria-label={`Change ${formatProjectWorkItemLabel(item)} status`}
         >
           <StatusLabel status={item.status} />
         </button>

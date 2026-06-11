@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarRange, ListTodo, MoreHorizontal, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
-import { Typography } from "@/atomics/atoms/Typography";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +17,7 @@ import { WorkspaceSprintDeleteDialog } from "@/domains/sprints/components/Worksp
 import { WorkspaceSprintEditDialog } from "@/domains/sprints/components/WorkspaceSprintEditDialog";
 import { SprintStatusBadge } from "@/domains/sprints/components/SprintStatusBadge";
 import type { Sprint, SprintWorkItem, SprintWorkItemSearchResult } from "@/domains/sprints/types";
+import { ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import type { ProjectWorkItemPriority, ProjectWorkItemStatus } from "@/domains/projects/types";
 import { formatSprintRange, formatSprintScheduleSummary, getSprintDurationText } from "@/domains/sprints/utils/sprint";
@@ -70,14 +70,11 @@ function StatusPill({ status }: { status: ProjectWorkItemStatus }) {
 
 function WorkItemRow({ item, projectSlug }: { item: SprintWorkItem; projectSlug?: string }) {
   const content = (
-    <Typography
-      variant="bodySm"
-      tone="primary"
-      weight="semibold"
-      className="truncate"
-    >
-      {item.title}
-    </Typography>
+    <ProjectWorkItemTitleLine
+      code={item.code}
+      title={item.title}
+      titleClassName="truncate"
+    />
   );
 
   return (

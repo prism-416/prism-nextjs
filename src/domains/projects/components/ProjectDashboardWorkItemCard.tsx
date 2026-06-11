@@ -19,6 +19,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { ProjectDashboardPriorityMenu } from "@/domains/projects/components/ProjectDashboardPriorityMenu";
 import { ProjectDashboardStatusMenu } from "@/domains/projects/components/ProjectDashboardStatusMenu";
 import { ProjectWorkItemAssigneeSelector } from "@/domains/projects/components/ProjectWorkItemAssigneeSelector";
+import { ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
 import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import type {
   ProjectParticipant,
@@ -26,7 +27,7 @@ import type {
   ProjectWorkItemPriority,
   ProjectWorkItemStatus,
 } from "@/domains/projects/types";
-import { formatProjectScheduleSummary } from "@/domains/projects/utils/work-item-display";
+import { formatProjectScheduleSummary, formatProjectWorkItemLabel } from "@/domains/projects/utils/work-item-display";
 import type { ProjectWorkItemDropTarget } from "@/domains/projects/utils/work-item-order";
 import { cn } from "@/shared/utils/cn";
 import { InlineWorkItemEditor } from "./ProjectDashboardInlineEditor";
@@ -50,7 +51,7 @@ export function DashboardWorkItemActionsMenu({
           variant="ghost"
           size="icon"
           className="ml-1.5 h-7 w-7 shrink-0 rounded-md text-prism-muted hover:bg-prism-navy/5 hover:text-prism-body"
-          aria-label={`${item.title} options`}
+          aria-label={`${formatProjectWorkItemLabel(item)} options`}
           onClick={event => event.stopPropagation()}
           onPointerDown={event => event.stopPropagation()}
         >
@@ -138,7 +139,9 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
             type="button"
             role="checkbox"
             aria-checked={isSelected}
-            aria-label={isSelected ? `Deselect ${item.title}` : `Select ${item.title}`}
+            aria-label={
+              isSelected ? `Deselect ${formatProjectWorkItemLabel(item)}` : `Select ${formatProjectWorkItemLabel(item)}`
+            }
             className={cn(
               "mr-2 grid size-5 shrink-0 place-items-center rounded-md border transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -169,14 +172,11 @@ export const WorkItemCardContent = memo(function WorkItemCardContent({
             onEditCancel={onTitleEditCancel}
           />
         ) : (
-          <Typography
-            variant="bodySm"
-            tone="primary"
-            weight="semibold"
-            className="min-w-0 flex-1 line-clamp-2 group-hover/card:text-prism-navy"
-          >
-            {item.title}
-          </Typography>
+          <ProjectWorkItemTitleLine
+            code={item.code}
+            title={item.title}
+            titleClassName="line-clamp-2 group-hover/card:text-prism-navy"
+          />
         )}
         {!isDragOverlay && !isEditingTitle && onEditWorkItem && onDeleteWorkItem && (
           <DashboardWorkItemActionsMenu

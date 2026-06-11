@@ -11,13 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/atomics/molecules/DropdownMenu";
 
+import { formatProjectWorkItemLabel } from "@/domains/projects/utils/work-item-display";
+
 type ProjectWorkItemActionsMenuProps = {
+  code: string;
   title: string;
   onEdit: () => void;
   onDelete: () => void;
 };
 
-export function ProjectWorkItemActionsMenu({ title, onEdit, onDelete }: ProjectWorkItemActionsMenuProps) {
+export function ProjectWorkItemActionsMenu({ code, title, onEdit, onDelete }: ProjectWorkItemActionsMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -26,7 +29,7 @@ export function ProjectWorkItemActionsMenu({ title, onEdit, onDelete }: ProjectW
           variant="ghost"
           size="icon"
           className="h-9 w-9 shrink-0 rounded-lg text-prism-muted hover:bg-prism-navy/5 hover:text-prism-body"
-          aria-label={`${title} options`}
+          aria-label={`${formatProjectWorkItemLabel({ code, title })} options`}
         >
           <MoreVertical className="size-4" />
         </Button>

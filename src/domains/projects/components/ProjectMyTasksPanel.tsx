@@ -7,6 +7,7 @@ import { Input } from "@/atomics/atoms/Input";
 import { Typography } from "@/atomics/atoms/Typography";
 import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
+import { ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
 import type {
   ProjectParticipant,
   ProjectWorkItem,
@@ -16,6 +17,7 @@ import type {
 import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import {
   formatProjectScheduleSummary,
+  formatProjectWorkItemLabel,
   getProjectWorkItemPriorityLabel,
   getProjectWorkItemStatusLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
@@ -109,14 +111,11 @@ function TaskRow({ task, projectSlug, members, isUpdating, onStatusUpdate }: Tas
       onClick={handleClick}
     >
       <div className="min-w-0">
-        <Typography
-          variant="bodySm"
-          tone="primary"
-          weight="semibold"
-          className="truncate"
-        >
-          {task.title}
-        </Typography>
+        <ProjectWorkItemTitleLine
+          code={task.code}
+          title={task.title}
+          titleClassName="truncate"
+        />
         <Typography
           variant="caption"
           tone="muted"
@@ -160,7 +159,7 @@ function TaskRow({ task, projectSlug, members, isUpdating, onStatusUpdate }: Tas
               "h-9 w-full rounded-lg border border-border bg-surface-field px-2 text-xs font-medium text-prism-body",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
             )}
-            aria-label={`Update ${task.title} status`}
+            aria-label={`Update ${formatProjectWorkItemLabel(task)} status`}
             disabled={isUpdating}
           >
             {PROJECT_WORK_ITEM_STATUSES.map(item => (

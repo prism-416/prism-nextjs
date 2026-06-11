@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/atomics/molecules/Dialog";
 import { WORK_ITEM_STATUS_DOT_CLASS_NAMES } from "@/domains/projects/components/ProjectDashboardStatusColumn";
+import { ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
 import { getProjectWorkItemPriorityBadgeClassName } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import { WORK_ITEM_TRASH_RETENTION_DAYS } from "@/domains/projects/constants/dashboard";
 import { useBulkPermanentlyDeleteProjectWorkItems } from "@/domains/projects/hooks/useBulkPermanentlyDeleteProjectWorkItems";
@@ -26,6 +27,7 @@ import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
 import {
   formatProjectDateTime,
   formatProjectScheduleSummary,
+  formatProjectWorkItemLabel,
   getProjectWorkItemPriorityLabel,
   getProjectWorkItemStatusLabel,
 } from "@/domains/projects/utils/work-item-display";
@@ -311,7 +313,11 @@ export function ProjectTrashClient({ projectId, workspaceId }: ProjectTrashClien
                   <div className="pt-0.5">
                     <TrashCheckbox
                       checked={isSelected}
-                      label={isSelected ? `Deselect ${item.title}` : `Select ${item.title}`}
+                      label={
+                        isSelected
+                          ? `Deselect ${formatProjectWorkItemLabel(item)}`
+                          : `Select ${formatProjectWorkItemLabel(item)}`
+                      }
                       onChange={() => toggleSelected(item.itemId)}
                     />
                   </div>
@@ -319,14 +325,11 @@ export function ProjectTrashClient({ projectId, workspaceId }: ProjectTrashClien
                   <div className="min-w-0 flex-1">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Typography
-                          variant="bodySm"
-                          tone="primary"
-                          weight="semibold"
-                          className="min-w-0 truncate"
-                        >
-                          {item.title}
-                        </Typography>
+                        <ProjectWorkItemTitleLine
+                          code={item.code}
+                          title={item.title}
+                          titleClassName="truncate"
+                        />
                         <span className="inline-flex h-5 items-center gap-1.5 rounded-full border border-border bg-surface-strong px-2 text-[11px] font-medium text-prism-body">
                           <span
                             aria-hidden="true"

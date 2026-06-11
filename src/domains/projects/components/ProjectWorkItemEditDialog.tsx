@@ -7,6 +7,7 @@ import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
 import { Textarea } from "@/atomics/atoms/Textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/atomics/molecules/Dialog";
+import { ProjectWorkItemCode } from "@/domains/projects/components/ProjectWorkItemCode";
 import { useUpdateProjectWorkItem } from "@/domains/projects/hooks/useUpdateProjectWorkItem";
 import type { ProjectWorkItem } from "@/domains/projects/types";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
@@ -112,6 +113,10 @@ export function ProjectWorkItemEditDialog({ projectId, workItem, open, onOpenCha
           noValidate
         >
           <div className="grid gap-4">
+            <div className="space-y-2">
+              <span className="text-xs font-medium text-prism-muted">Code</span>
+              <ProjectWorkItemCode code={workItem.code} />
+            </div>
             <div className="space-y-2">
               <label
                 htmlFor={`${formId}-work-item-title`}

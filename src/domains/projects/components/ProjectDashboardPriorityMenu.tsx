@@ -11,6 +11,7 @@ import {
 import { getProjectWorkItemPriorityBadgeClassName } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import type { ProjectWorkItem, ProjectWorkItemPriority } from "@/domains/projects/types";
 import {
+  formatProjectWorkItemLabel,
   getProjectWorkItemPriorityLabel,
   PROJECT_WORK_ITEM_PRIORITIES,
 } from "@/domains/projects/utils/work-item-display";
@@ -35,7 +36,7 @@ export function ProjectDashboardPriorityMenu({ item, disabled, onPriorityUpdate 
           disabled={disabled}
           className={getProjectWorkItemPriorityBadgeClassName(item.priority, TRIGGER_CLASS_NAME)}
           onPointerDown={event => event.stopPropagation()}
-          aria-label={`Change ${item.title} priority`}
+          aria-label={`Change ${formatProjectWorkItemLabel(item)} priority`}
         >
           {getProjectWorkItemPriorityLabel(item.priority)}
         </button>
