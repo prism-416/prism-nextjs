@@ -208,6 +208,12 @@ export interface AgentRun {
   workspaceId: string;
   triggeredByUserId: string | null;
   workItemId: string | null;
+  /** Readable code of the linked work item (e.g. "PRSM-001"), snapshotted at run creation. */
+  workItemCode: string | null;
+  /** Title of the linked work item, snapshotted at run creation. */
+  workItemTitle: string | null;
+  /** Project the linked work item belonged to at run creation. */
+  projectId: string | null;
   parentRunId: string | null;
   agentType: string;
   triggerType: AgentRunTriggerType;
