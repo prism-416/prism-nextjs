@@ -28,20 +28,26 @@ export type LandingStep = {
   description: string;
 };
 
-export type LandingProductMetric = {
-  label: string;
-  value: string;
+export type LandingBoardStatus = "todo" | "in_progress" | "in_review" | "done";
+
+export type LandingBoardPriority = "low" | "medium" | "high" | "urgent";
+
+export type LandingBoardAssignee = {
+  id: string;
+  name: string;
 };
 
 export type LandingProductBoardItem = {
+  code: string;
   title: string;
-  meta: string;
-  agent: string;
+  description: string;
+  priority: LandingBoardPriority;
+  schedule?: string;
+  assignees: readonly LandingBoardAssignee[];
 };
 
 export type LandingProductBoardColumn = {
-  title: string;
-  summary: string;
+  status: LandingBoardStatus;
   items: readonly LandingProductBoardItem[];
 };
 
@@ -123,63 +129,83 @@ export const LANDING_CAPABILITIES: readonly LandingCapability[] = [
 
 export const LANDING_PRODUCT_PREVIEW_INTRO = {
   eyebrow: "Product Preview",
-  title: "A sprint board that already knows the plan.",
+  title: "The project board your team actually works in.",
   description:
-    "The landing preview mirrors how Prizmatic keeps goals, agent output, and delivery signals in one premium workspace without live data dependencies.",
+    "A look at the Prizmatic dashboard: top-level work items grouped by status, each with its code, priority, schedule, and assignees — the same board your team opens every day.",
 } as const;
-
-export const LANDING_PRODUCT_METRICS: readonly LandingProductMetric[] = [
-  { label: "Sprint health", value: "92%" },
-  { label: "Open blockers", value: "3" },
-  { label: "Agent actions", value: "18" },
-] as const;
 
 export const LANDING_PRODUCT_BOARD: readonly LandingProductBoardColumn[] = [
   {
-    title: "Ready",
-    summary: "Backlog shaped by AI",
+    status: "todo",
     items: [
       {
+        code: "PRZ-128",
         title: "Refine onboarding checklist",
-        meta: "Acceptance criteria drafted",
-        agent: "Backlog Assistant",
+        description: "Draft acceptance criteria for the first-run setup flow.",
+        priority: "medium",
+        assignees: [{ id: "u-mina", name: "Mina Park" }],
       },
       {
+        code: "PRZ-131",
         title: "Map analytics events",
-        meta: "Dependencies linked",
-        agent: "Sprint Planner",
+        description: "Catalog the events we need before instrumenting reporting.",
+        priority: "low",
+        assignees: [{ id: "u-ravi", name: "Ravi Shah" }],
       },
     ],
   },
   {
-    title: "In Progress",
-    summary: "Work moving this sprint",
+    status: "in_progress",
     items: [
       {
+        code: "PRZ-117",
         title: "Ship workspace invite flow",
-        meta: "PR review context ready",
-        agent: "PR Review Bot",
+        description: "Wire up email invites and seat assignment for new members.",
+        priority: "high",
+        schedule: "Jun 3 - Jun 10",
+        assignees: [
+          { id: "u-jay", name: "Jay Cole" },
+          { id: "u-noa", name: "Noa Kim" },
+        ],
       },
       {
+        code: "PRZ-124",
         title: "Resolve billing edge cases",
-        meta: "Blocker surfaced",
-        agent: "Daily Summary",
+        description: "Handle proration when a workspace downgrades mid-cycle.",
+        priority: "urgent",
+        assignees: [{ id: "u-ravi", name: "Ravi Shah" }],
       },
     ],
   },
   {
-    title: "Done",
-    summary: "Signals closed out",
+    status: "in_review",
     items: [
       {
+        code: "PRZ-109",
+        title: "Realtime presence indicators",
+        description: "Show who is viewing a work item in the side panel.",
+        priority: "medium",
+        schedule: "Due Jun 12",
+        assignees: [{ id: "u-mina", name: "Mina Park" }],
+      },
+    ],
+  },
+  {
+    status: "done",
+    items: [
+      {
+        code: "PRZ-101",
         title: "Launch reference hero",
-        meta: "Release notes prepared",
-        agent: "Daily Summary",
+        description: "Replace the placeholder hero with the prism crystal render.",
+        priority: "medium",
+        assignees: [{ id: "u-jay", name: "Jay Cole" }],
       },
       {
+        code: "PRZ-098",
         title: "Triage navigation copy",
-        meta: "Decision logged",
-        agent: "Backlog Assistant",
+        description: "Finalize labels for the workspace sidebar.",
+        priority: "low",
+        assignees: [{ id: "u-noa", name: "Noa Kim" }],
       },
     ],
   },
