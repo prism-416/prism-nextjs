@@ -1,5 +1,6 @@
-import { Bot, CheckCheck, GitPullRequest, Sparkles } from "lucide-react";
+import { CalendarDays, CheckSquare, LayoutDashboard, Plus } from "lucide-react";
 
+import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { Typography } from "@/atomics/atoms/Typography";
 import { cn } from "@/shared/utils/cn";
 
@@ -7,26 +8,65 @@ import LandingSectionIntro from "./LandingSectionIntro";
 import LandingSectionShell from "./LandingSectionShell";
 import {
   LANDING_PRODUCT_BOARD,
-  LANDING_PRODUCT_METRICS,
   LANDING_PRODUCT_PREVIEW_INTRO,
+  type LandingBoardPriority,
+  type LandingBoardStatus,
   type LandingProductBoardColumn,
   type LandingProductBoardItem,
 } from "../constants/content";
 
-const BOARD_COLUMN_STYLES: Record<string, { dot: string; glow: string }> = {
-  Ready: {
-    dot: "bg-prism-glow-gold",
-    glow: "bg-prism-glow-gold/18",
-  },
-  "In Progress": {
-    dot: "bg-prism-glow-sky",
-    glow: "bg-prism-glow-sky/18",
-  },
-  Done: {
-    dot: "bg-prism-teal-500",
-    glow: "bg-prism-teal-500/14",
-  },
-} as const;
+// Presentational tokens mirrored from the live project dashboard. The home
+// domain must not import from domains/projects, so the labels/colors that keep
+// this preview faithful to the real board are duplicated here intentionally.
+const STATUS_LABELS: Record<LandingBoardStatus, string> = {
+  todo: "Todo",
+  in_progress: "In progress",
+  in_review: "In review",
+  done: "Done",
+};
+
+// Column header dots (matches WORK_ITEM_STATUS_DOT_CLASS_NAMES).
+const STATUS_HEADER_DOT: Record<LandingBoardStatus, string> = {
+  todo: "bg-prism-muted",
+  in_progress: "bg-prism-info",
+  in_review: "bg-prism-review",
+  done: "bg-prism-success",
+};
+
+// Status badge dots on cards (matches ProjectDashboardStatusMenu).
+const STATUS_BADGE_DOT: Record<LandingBoardStatus, string> = {
+  todo: "bg-prism-muted/55",
+  in_progress: "bg-prism-info",
+  in_review: "bg-prism-review",
+  done: "bg-prism-success",
+};
+
+const PRIORITY_LABELS: Record<LandingBoardPriority, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  urgent: "Urgent",
+};
+
+// Matches WORK_ITEM_PRIORITY_CLASS_NAMES in ProjectWorkItemPriorityBadge.
+const PRIORITY_BADGE_CLASS: Record<LandingBoardPriority, string> = {
+  low: "border-border bg-surface-strong text-prism-muted",
+  medium: "border-prism-teal-500/25 bg-prism-teal-500/10 text-prism-navy",
+  high: "border-prism-glow-gold/45 bg-prism-glow-gold/15 text-prism-navy",
+  urgent: "border-prism-danger-soft bg-prism-danger-soft/25 text-prism-danger",
+};
+
+const TOTAL_WORK_ITEMS = LANDING_PRODUCT_BOARD.reduce((sum, column) => sum + column.items.length, 0);
+
+function getColumnCount(status: LandingBoardStatus) {
+  return LANDING_PRODUCT_BOARD.find(column => column.status === status)?.items.length ?? 0;
+}
+
+const PREVIEW_METRICS: readonly { label: string; value: string }[] = [
+  { label: "Work items", value: String(TOTAL_WORK_ITEMS) },
+  { label: "In progress", value: String(getColumnCount("in_progress")) },
+  { label: "In review", value: String(getColumnCount("in_review")) },
+] as const;
 
 export default function LandingProductPreview() {
   return (
@@ -35,44 +75,45 @@ export default function LandingProductPreview() {
       className="relative overflow-hidden border-b border-border bg-(image:--gradient-workflow-surface) py-16 md:py-20 lg:py-24"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-prism-teal-500/60 to-transparent" />
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:items-center lg:gap-12">
-        <div>
-          <LandingSectionIntro {...LANDING_PRODUCT_PREVIEW_INTRO} />
-          <div className="mt-6 grid gap-3 sm:grid-cols-3 md:mt-8 md:gap-4">
-            {LANDING_PRODUCT_METRICS.map(metric => (
-              <div
-                key={metric.label}
-                className="rounded-3xl border border-border bg-white/72 p-4 shadow-[0_14px_40px_rgba(12,71,103,0.06)] transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/45 sm:p-5"
-              >
-                <Typography
-                  variant="bodySm"
-                  tone="muted"
-                  weight="medium"
-                >
-                  {metric.label}
-                </Typography>
-                <Typography
-                  variant="h3"
-                  tone="inherit"
-                  className="mt-2 text-prism-navy"
-                >
-                  {metric.value}
-                </Typography>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        <div className="relative">
-          <div className="absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_55%_45%,rgba(99,178,255,0.16),transparent_55%),radial-gradient(circle_at_22%_18%,rgba(255,107,198,0.08),transparent_32%)] blur-2xl" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-border bg-surface-strong/92 p-2 shadow-2xl shadow-prism-navy/12 backdrop-blur sm:p-3">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(255,241,168,0.26),transparent_26%),radial-gradient(circle_at_85%_18%,rgba(157,123,255,0.1),transparent_28%)]" />
-            <div className="relative rounded-[1.5rem] border border-border/70 bg-white/88">
-              <PreviewHeader />
-              <div className="grid gap-3 border-t border-border/70 bg-prism-sand-soft/28 p-3 sm:p-4 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <LandingSectionIntro {...LANDING_PRODUCT_PREVIEW_INTRO} />
+        <div className="grid w-full max-w-md grid-cols-3 gap-3 lg:w-auto">
+          {PREVIEW_METRICS.map(metric => (
+            <div
+              key={metric.label}
+              className="rounded-3xl border border-border bg-white/72 p-4 shadow-[0_14px_40px_rgba(12,71,103,0.06)]"
+            >
+              <Typography
+                variant="caption"
+                tone="muted"
+                weight="medium"
+              >
+                {metric.label}
+              </Typography>
+              <Typography
+                variant="h3"
+                tone="inherit"
+                className="mt-1 text-prism-navy"
+              >
+                {metric.value}
+              </Typography>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative mt-10 md:mt-14">
+        <div className="pointer-events-none absolute -inset-6 rounded-[2.5rem] bg-[radial-gradient(circle_at_55%_30%,rgba(99,178,255,0.16),transparent_55%),radial-gradient(circle_at_18%_18%,rgba(255,107,198,0.08),transparent_32%)] blur-2xl" />
+        <div className="relative overflow-hidden rounded-[2rem] border border-border bg-surface-strong/92 p-2 shadow-2xl shadow-prism-navy/12 backdrop-blur sm:p-3">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(255,241,168,0.22),transparent_24%),radial-gradient(circle_at_88%_12%,rgba(157,123,255,0.1),transparent_26%)]" />
+          <div className="relative overflow-hidden rounded-[1.5rem] border border-border/70 bg-surface-strong">
+            <BoardHeader />
+            <div className="border-t border-border/70 bg-background p-3 sm:p-4">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                 {LANDING_PRODUCT_BOARD.map(column => (
                   <PreviewColumn
-                    key={column.title}
+                    key={column.status}
                     column={column}
                   />
                 ))}
@@ -85,77 +126,78 @@ export default function LandingProductPreview() {
   );
 }
 
-function PreviewHeader() {
+function BoardHeader() {
   return (
-    <div className="flex flex-col gap-5 p-4 sm:p-5 md:flex-row md:items-center md:justify-between">
-      <div className="flex items-center gap-3">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-prism-navy text-white shadow-lg shadow-prism-navy/15">
-          <Sparkles
-            className="size-5"
+    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
+      <div>
+        <div className="flex items-center gap-2">
+          <LayoutDashboard
+            className="size-5 text-prism-muted"
             aria-hidden
           />
-        </div>
-        <div>
           <Typography
-            variant="overline"
-            tone="muted"
-            weight="medium"
+            variant="h3"
+            tone="primary"
+            className="text-xl tracking-normal"
           >
-            Sprint command center
-          </Typography>
-          <Typography
-            variant="title"
-            tone="inherit"
-            className="mt-1 text-prism-navy"
-          >
-            Autonomous launch sprint
+            Dashboard
           </Typography>
         </div>
+        <Typography
+          variant="bodySm"
+          tone="muted"
+          className="mt-1"
+        >
+          Review top-level work items by status.
+        </Typography>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <StatusPill icon={Bot}>18 agent actions</StatusPill>
-        <StatusPill icon={CheckCheck}>On track</StatusPill>
+      <div
+        className="flex items-center gap-2"
+        aria-hidden
+      >
+        <span className="inline-flex h-10 items-center gap-2 rounded-lg border border-input bg-background px-4 text-sm font-medium text-prism-body">
+          <CheckSquare className="size-4" />
+          Select
+        </span>
+        <span className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground">
+          <Plus className="size-4" />
+          New work item
+        </span>
       </div>
     </div>
   );
 }
 
 function PreviewColumn({ column }: { column: LandingProductBoardColumn }) {
-  const styles = BOARD_COLUMN_STYLES[column.title];
-
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-border/80 bg-white/82 p-3">
-      <div className={cn("absolute right-3 top-3 size-14 rounded-full blur-2xl", styles.glow)} />
-      <div className="relative flex items-center justify-between gap-3 px-1 pb-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className={cn("size-2 rounded-full", styles.dot)} />
-            <Typography
-              as="h3"
-              variant="bodySm"
-              tone="inherit"
-              weight="semibold"
-              className="text-prism-navy"
-            >
-              {column.title}
-            </Typography>
-          </div>
+    <section className="flex flex-col rounded-2xl border border-border/80 bg-surface-strong">
+      <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span
+            className={cn("size-2 shrink-0 rounded-full", STATUS_HEADER_DOT[column.status])}
+            aria-hidden
+          />
           <Typography
-            variant="caption"
-            tone="muted"
-            className="mt-1"
+            as="h3"
+            variant="bodySm"
+            tone="primary"
+            weight="semibold"
           >
-            {column.summary}
+            {STATUS_LABELS[column.status]}
           </Typography>
         </div>
+        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-prism-navy/5 px-2 text-xs font-medium text-prism-muted">
+          {column.items.length}
+        </span>
       </div>
 
-      <div className="relative grid gap-3">
+      <div className="grid gap-3 p-3">
         {column.items.map(item => (
           <PreviewCard
-            key={item.title}
+            key={item.code}
             item={item}
+            status={column.status}
           />
         ))}
       </div>
@@ -163,49 +205,78 @@ function PreviewColumn({ column }: { column: LandingProductBoardColumn }) {
   );
 }
 
-function PreviewCard({ item }: { item: LandingProductBoardItem }) {
+function PreviewCard({ item, status }: { item: LandingProductBoardItem; status: LandingBoardStatus }) {
   return (
-    <article className="rounded-2xl border border-border/70 bg-white p-3 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-prism-teal-500/40 hover:shadow-md sm:p-4">
-      <div className="flex items-start justify-between gap-3">
-        <Typography
-          variant="bodySm"
-          tone="inherit"
-          weight="semibold"
-          className="text-prism-navy"
-        >
-          {item.title}
-        </Typography>
-        <GitPullRequest
-          className="mt-0.5 size-4 shrink-0 text-prism-muted"
-          aria-hidden
-        />
-      </div>
+    <article className="rounded-xl border border-border/80 bg-surface p-3 shadow-[0_1px_0_rgba(255,255,255,0.65)_inset]">
+      <Typography
+        as="span"
+        variant="code"
+        tone="muted"
+        className="shrink-0 text-[11px] leading-none"
+      >
+        {item.code}
+      </Typography>
+      <Typography
+        variant="bodySm"
+        tone="primary"
+        weight="semibold"
+        className="mt-1.5 line-clamp-2"
+      >
+        {item.title}
+      </Typography>
       <Typography
         variant="caption"
         tone="muted"
-        className="mt-2"
+        className="mt-1.5 line-clamp-3"
       >
-        {item.meta}
+        {item.description}
       </Typography>
-      <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-prism-navy/5 px-3 py-1 text-xs font-semibold text-prism-navy">
-        <Bot
-          className="size-3.5"
-          aria-hidden
-        />
-        {item.agent}
+
+      {item.schedule && (
+        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-prism-muted">
+          <CalendarDays className="size-3.5 shrink-0" />
+          <span>{item.schedule}</span>
+        </p>
+      )}
+
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <StatusBadge status={status} />
+        <PriorityBadge priority={item.priority} />
       </div>
+
+      {item.assignees.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <UserAvatarStack
+            users={item.assignees.map(assignee => ({ id: assignee.id, name: assignee.name }))}
+            avatarClassName="size-6 text-[10px]"
+          />
+        </div>
+      )}
     </article>
   );
 }
 
-function StatusPill({ icon: Icon, children }: { icon: typeof Bot; children: string }) {
+function StatusBadge({ status }: { status: LandingBoardStatus }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-border bg-white/76 px-3 py-1.5 text-xs font-semibold text-prism-navy">
-      <Icon
-        className="size-3.5"
+    <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-surface-strong px-2.5 text-xs font-medium text-prism-body">
+      <span
+        className={cn("size-2 shrink-0 rounded-full", STATUS_BADGE_DOT[status])}
         aria-hidden
       />
-      {children}
-    </div>
+      {STATUS_LABELS[status]}
+    </span>
+  );
+}
+
+function PriorityBadge({ priority }: { priority: LandingBoardPriority }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex h-7 items-center rounded-full border px-2.5 text-xs font-medium",
+        PRIORITY_BADGE_CLASS[priority],
+      )}
+    >
+      {PRIORITY_LABELS[priority]}
+    </span>
   );
 }
