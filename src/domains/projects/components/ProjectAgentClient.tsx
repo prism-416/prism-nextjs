@@ -43,10 +43,14 @@ import type {
   AgentStepStatus,
 } from "@/domains/projects/types";
 import {
+  getAgentArtifactName,
   getAgentRunStatusLabel,
+  getAgentRunTriggerTypeLabel,
   getAgentStepStatusLabel,
   getAgentStepTypeLabel,
+  getAgentTypeLabel,
   getFeatureProvisioningStatusLabel,
+  getShortReference,
 } from "@/domains/projects/utils/agent-display";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
 import { formatProjectDateTimeWithSeconds } from "@/domains/projects/utils/work-item-display";
@@ -382,13 +386,19 @@ function AgentStepDagNode({ step, isLast }: { step: AgentStep; isLast: boolean }
         {step.inputObjectName || step.outputObjectName ? (
           <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] text-prism-muted">
             {step.inputObjectName ? (
-              <span className="max-w-full truncate rounded-md border border-border bg-surface px-1.5 py-0.5">
-                Input: {step.inputObjectName}
+              <span
+                className="max-w-full truncate rounded-md border border-border bg-surface px-1.5 py-0.5"
+                title={step.inputObjectName}
+              >
+                Input: {getAgentArtifactName(step.inputObjectName)}
               </span>
             ) : null}
             {step.outputObjectName ? (
-              <span className="max-w-full truncate rounded-md border border-border bg-surface px-1.5 py-0.5">
-                Output: {step.outputObjectName}
+              <span
+                className="max-w-full truncate rounded-md border border-border bg-surface px-1.5 py-0.5"
+                title={step.outputObjectName}
+              >
+                Output: {getAgentArtifactName(step.outputObjectName)}
               </span>
             ) : null}
           </div>
@@ -518,7 +528,7 @@ function AgentRunDagCard({
         <div className="flex flex-wrap items-center gap-2">
           <AgentRunStatusBadge status={run.status} />
           <span className="inline-flex min-h-7 items-center rounded-full border border-border bg-surface-strong px-2.5 text-xs font-medium text-prism-muted">
-            {run.agentType}
+            {getAgentTypeLabel(run.agentType)}
           </span>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -592,17 +602,31 @@ function AgentRunDagCard({
       </dl>
 
       <dl className="mt-3 grid gap-3 text-sm text-prism-muted sm:grid-cols-2">
+        <div className="min-w-0">
+          <dt>Trigger</dt>
+          <dd className="mt-1 truncate text-prism-body">{getAgentRunTriggerTypeLabel(run.triggerType)}</dd>
+        </div>
         {run.workItemId ? (
           <div className="min-w-0">
             <dt>Work item</dt>
-            <dd className="mt-1 truncate font-mono text-prism-body">{run.workItemId}</dd>
+            {run.workItemCode ? (
+              <dd
+                className="mt-1 truncate text-prism-body"
+                title={run.workItemTitle ? `${run.workItemCode} — ${run.workItemTitle}` : run.workItemCode}
+              >
+                <span className="font-medium">{run.workItemCode}</span>
+                {run.workItemTitle ? <span className="text-prism-muted"> — {run.workItemTitle}</span> : null}
+              </dd>
+            ) : (
+              <dd
+                className="mt-1 truncate font-mono text-prism-body"
+                title={run.workItemId}
+              >
+                {getShortReference(run.workItemId)}
+              </dd>
+            )}
           </div>
-        ) : (
-          <div className="min-w-0">
-            <dt>Trigger</dt>
-            <dd className="mt-1 truncate text-prism-body">{run.triggerType}</dd>
-          </div>
-        )}
+        ) : null}
       </dl>
 
       {isExpanded ? (
