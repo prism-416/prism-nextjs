@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, type KeyboardEvent, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CalendarDays, Check, MoreVertical, Pencil, Trash2 } from "lucide-react";
@@ -21,6 +22,7 @@ import { ProjectDashboardStatusMenu } from "@/domains/projects/components/Projec
 import { ProjectWorkItemAssigneeSelector } from "@/domains/projects/components/ProjectWorkItemAssigneeSelector";
 import { ProjectWorkItemCode } from "@/domains/projects/components/ProjectWorkItemCode";
 import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
+import { prefetchProjectWorkItemDetail } from "@/domains/projects/utils/work-item-prefetch";
 import type {
   ProjectParticipant,
   ProjectWorkItem,
@@ -277,6 +279,7 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
   onToggleSelected?: (itemId: string) => void;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const didDragRef = useRef(false);
   const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
   const { attributes, listeners, setNodeRef, isDragging, isOver, transform, transition } = useSortable({
@@ -316,9 +319,10 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
         return;
       }
 
+      prefetchProjectWorkItemDetail(queryClient, item);
       router.push(detailHref);
     },
-    [detailHref, isEditingTitle, item.itemId, onToggleSelected, router, selectionMode],
+    [detailHref, isEditingTitle, item, onToggleSelected, queryClient, router, selectionMode],
   );
 
   const handleKeyDown = useCallback(
@@ -336,10 +340,20 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
         onToggleSelected?.(item.itemId);
         return;
       }
+      prefetchProjectWorkItemDetail(queryClient, item);
       router.push(detailHref);
     },
-    [detailHref, isEditingTitle, item.itemId, onToggleSelected, router, selectionMode],
+    [detailHref, isEditingTitle, item, onToggleSelected, queryClient, router, selectionMode],
   );
+
+  const handlePrefetch = useCallback(() => {
+    if (isEditingTitle || selectionMode) {
+      return;
+    }
+
+    router.prefetch(detailHref);
+    prefetchProjectWorkItemDetail(queryClient, item);
+  }, [detailHref, isEditingTitle, item, queryClient, router, selectionMode]);
 
   return (
     <article
@@ -363,6 +377,8 @@ export const SortableWorkItemCard = memo(function SortableWorkItemCard({
       )}
       {...attributes}
       {...listeners}
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
       onPointerDownCapture={() => {
         didDragRef.current = false;
       }}

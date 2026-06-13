@@ -14,9 +14,13 @@ import {
 import type { WorkspaceNavItem } from "@/domains/workspaces/constants/navigation";
 import { isActiveWorkspaceHref } from "@/domains/workspaces/utils/navigation";
 
+export type WorkspaceNavItemWithPrefetch = WorkspaceNavItem & {
+  prefetchData?: () => void;
+};
+
 type WorkspaceNavGroupProps = {
   label: string;
-  items: WorkspaceNavItem[];
+  items: WorkspaceNavItemWithPrefetch[];
   pathname: string;
 };
 
@@ -46,8 +50,14 @@ export function WorkspaceNavGroup({ label, items, pathname }: WorkspaceNavGroupP
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    onMouseEnter={() => router.prefetch(item.href)}
-                    onFocus={() => router.prefetch(item.href)}
+                    onMouseEnter={() => {
+                      router.prefetch(item.href);
+                      item.prefetchData?.();
+                    }}
+                    onFocus={() => {
+                      router.prefetch(item.href);
+                      item.prefetchData?.();
+                    }}
                   >
                     <Icon />
                     <span>{item.label}</span>

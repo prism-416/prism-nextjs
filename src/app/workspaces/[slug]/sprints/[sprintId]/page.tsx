@@ -1,7 +1,3 @@
-import { notFound } from "next/navigation";
-
-import { getWorkspaceSprint, getWorkspaceSprintWorkItems } from "@/domains/sprints/api";
-import { getWorkspaceBySlugCached } from "@/domains/workspaces/api/server";
 import { WorkspaceSprintRoute } from "@/domains/workspaces/components/routes/WorkspaceSprintRoute";
 
 type WorkspaceSprintPageProps = {
@@ -12,23 +8,7 @@ type WorkspaceSprintPageProps = {
 };
 
 export default async function WorkspaceSprintPage({ params }: WorkspaceSprintPageProps) {
-  const { slug, sprintId } = await params;
-  const workspace = await getWorkspaceBySlugCached(slug);
+  const { sprintId } = await params;
 
-  if (!workspace) {
-    notFound();
-  }
-
-  const [initialSprint, initialWorkItems] = await Promise.all([
-    getWorkspaceSprint(workspace.workspaceId, sprintId).catch(() => undefined),
-    getWorkspaceSprintWorkItems(workspace.workspaceId, sprintId).catch(() => undefined),
-  ]);
-
-  return (
-    <WorkspaceSprintRoute
-      sprintId={sprintId}
-      initialSprint={initialSprint}
-      initialWorkItems={initialWorkItems}
-    />
-  );
+  return <WorkspaceSprintRoute sprintId={sprintId} />;
 }

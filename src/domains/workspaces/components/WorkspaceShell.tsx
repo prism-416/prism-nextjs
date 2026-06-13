@@ -64,6 +64,7 @@ export function WorkspaceShell({
   const resolvedSidebar =
     sidebar === undefined ? (
       <AppSidebar
+        workspaceId={workspaceId}
         workspaceName={workspace?.name}
         workspaceSlug={workspaceSlug}
       />
