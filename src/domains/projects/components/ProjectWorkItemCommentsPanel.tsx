@@ -345,7 +345,7 @@ export function ProjectWorkItemCommentsPanel({
             className="size-9 text-sm"
           />
           <div className="min-w-0 flex-1">
-            <div className="overflow-hidden rounded-xl border border-border bg-surface-field focus-within:border-prism-navy/40 focus-within:ring-2 focus-within:ring-ring/30">
+            <div className="rounded-xl border border-border bg-surface-field focus-within:border-prism-navy/40 focus-within:ring-2 focus-within:ring-ring/30">
               <ProjectCommentMentionTextarea
                 value={body}
                 onValueChange={setBody}

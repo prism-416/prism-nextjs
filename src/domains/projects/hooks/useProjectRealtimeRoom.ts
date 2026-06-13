@@ -74,6 +74,11 @@ export function useProjectRealtimeRoom({
 
     const socket: ProjectRealtimeSocket = createProjectRealtimeSocket(accessToken);
 
+    const resyncProject = () => {
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.detail(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.detailBySlug(projectSlug) });
+    };
+
     const handleConnect = () => {
       setStatus("connected");
       socket.emit(PROJECT_REALTIME_EVENTS.PROJECT_JOIN, { projectId });
@@ -99,6 +104,7 @@ export function useProjectRealtimeRoom({
     const handleProjectJoined = (payload: { projectId: string }) => {
       if (payload.projectId === projectId) {
         setStatus("joined");
+        resyncProject();
       }
     };
 
