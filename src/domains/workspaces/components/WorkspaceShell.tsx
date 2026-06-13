@@ -1,13 +1,21 @@
 "use client";
 
 import type * as React from "react";
+import dynamic from "next/dynamic";
 
 import MainLayout from "@/atomics/templates/MainLayout";
 import { AppHeader } from "@/domains/workspaces/components/AppHeader";
 import { AppSidebar } from "@/domains/workspaces/components/AppSidebar";
-import { WorkspaceRealtimeRoomBridge } from "@/domains/workspaces/components/WorkspaceRealtimeRoomBridge";
 import type { WorkspacePathOption, WorkspacePathSegment } from "@/domains/workspaces/types/path";
 import { resolveWorkspacePathSegments } from "@/domains/workspaces/utils/path";
+
+const WorkspaceRealtimeRoomBridge = dynamic(
+  () =>
+    import("@/domains/workspaces/components/WorkspaceRealtimeRoomBridge").then(
+      module => module.WorkspaceRealtimeRoomBridge,
+    ),
+  { ssr: false },
+);
 
 export type WorkspaceShellProps = {
   children: React.ReactNode;
