@@ -28,7 +28,14 @@ export * from "./comments";
 export * from "./documents";
 
 const AGENT_RUN_HISTORY_LIMIT = 50;
-const FEATURE_PROVISIONING_RESPONSE_WRAPPER_KEYS = ["data", "request", "payload", "result"] as const;
+const FEATURE_PROVISIONING_RESPONSE_WRAPPER_KEYS = [
+  "data",
+  "request",
+  "payload",
+  "result",
+  "response",
+  "body",
+] as const;
 
 function isValidRequestId(value: unknown): value is string {
   return typeof value === "string" && value.trim() !== "" && value !== "undefined" && value !== "null";
@@ -53,6 +60,10 @@ function getRecordString(record: Record<string, unknown>, ...keys: string[]) {
   return undefined;
 }
 
+function getRecordRequestId(record: Record<string, unknown>) {
+  return getRecordString(record, "requestId", "request_id", "payloadId", "payload_id", "runId", "run_id", "id");
+}
+
 function getRecordNullableString(record: Record<string, unknown>, ...keys: string[]) {
   for (const key of keys) {
     const value = record[key];
@@ -71,8 +82,8 @@ function getRecordStatus(record: Record<string, unknown>) {
   return "queued";
 }
 
-function mapSnakeCaseFeatureProvisioningRequest(record: Record<string, unknown>) {
-  const requestId = getRecordString(record, "request_id");
+function mapFeatureProvisioningRequestRecord(record: Record<string, unknown>) {
+  const requestId = getRecordRequestId(record);
   if (!isValidRequestId(requestId)) {
     return undefined;
   }
@@ -107,9 +118,9 @@ function normalizeFeatureProvisioningRequestValue(value: unknown, depth = 0): Fe
   }
 
   const record = value as Record<string, unknown>;
-  const snakeCaseRequest = mapSnakeCaseFeatureProvisioningRequest(record);
-  if (snakeCaseRequest) {
-    return snakeCaseRequest;
+  const request = mapFeatureProvisioningRequestRecord(record);
+  if (request) {
+    return request;
   }
 
   for (const key of FEATURE_PROVISIONING_RESPONSE_WRAPPER_KEYS) {
@@ -125,6 +136,28 @@ function normalizeFeatureProvisioningRequestValue(value: unknown, depth = 0): Fe
 
 function normalizeFeatureProvisioningRequest(response: unknown): FeatureProvisioningRequest | undefined {
   return normalizeFeatureProvisioningRequestValue(response);
+}
+
+function createSubmittedFeatureProvisioningRequestFallback(
+  workspaceId: string,
+  body: CreateFeatureProvisioningRequestPayload,
+): FeatureProvisioningRequest {
+  const now = new Date().toISOString();
+
+  return {
+    requestId: "",
+    workspaceId,
+    projectId: body.projectId,
+    requestedByUserId: null,
+    status: "queued",
+    payloadObjectName: "",
+    payloadVersionId: null,
+    queueMessageId: null,
+    errorMessage: null,
+    dispatchedAt: now,
+    createdAt: now,
+    updatedAt: now,
+  };
 }
 
 function getEmptyAgentRunSearchResult(limit = AGENT_RUN_HISTORY_LIMIT): AgentRunSearchResult {
@@ -413,5 +446,8 @@ export async function requestFeatureProvisioning(workspaceId: string, body: Crea
     version: null,
   });
 
-  return normalizeFeatureProvisioningRequest(response);
+  return (
+    normalizeFeatureProvisioningRequest(response) ??
+    createSubmittedFeatureProvisioningRequestFallback(workspaceId, body)
+  );
 }
