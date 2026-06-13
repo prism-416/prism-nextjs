@@ -28,14 +28,6 @@ export * from "./comments";
 export * from "./documents";
 
 const AGENT_RUN_HISTORY_LIMIT = 50;
-const FEATURE_PROVISIONING_RESPONSE_WRAPPER_KEYS = [
-  "data",
-  "request",
-  "payload",
-  "result",
-  "response",
-  "body",
-] as const;
 
 function isValidRequestId(value: unknown): value is string {
   return typeof value === "string" && value.trim() !== "" && value !== "undefined" && value !== "null";
@@ -61,7 +53,7 @@ function getRecordString(record: Record<string, unknown>, ...keys: string[]) {
 }
 
 function getRecordRequestId(record: Record<string, unknown>) {
-  return getRecordString(record, "requestId", "request_id", "payloadId", "payload_id", "runId", "run_id", "id");
+  return getRecordString(record, "requestId", "request_id");
 }
 
 function getRecordNullableString(record: Record<string, unknown>, ...keys: string[]) {
@@ -104,11 +96,7 @@ function mapFeatureProvisioningRequestRecord(record: Record<string, unknown>) {
   } satisfies FeatureProvisioningRequest;
 }
 
-function normalizeFeatureProvisioningRequestValue(value: unknown, depth = 0): FeatureProvisioningRequest | undefined {
-  if (depth > 4) {
-    return undefined;
-  }
-
+function normalizeFeatureProvisioningRequestValue(value: unknown): FeatureProvisioningRequest | undefined {
   if (isFeatureProvisioningRequest(value)) {
     return value;
   }
@@ -123,41 +111,20 @@ function normalizeFeatureProvisioningRequestValue(value: unknown, depth = 0): Fe
     return request;
   }
 
-  for (const key of FEATURE_PROVISIONING_RESPONSE_WRAPPER_KEYS) {
-    const nestedValue = record[key];
-    const nestedRequest = normalizeFeatureProvisioningRequestValue(nestedValue, depth + 1);
-    if (nestedRequest) {
-      return nestedRequest;
-    }
-  }
-
   return undefined;
 }
 
 function normalizeFeatureProvisioningRequest(response: unknown): FeatureProvisioningRequest | undefined {
-  return normalizeFeatureProvisioningRequestValue(response);
-}
+  const directRequest = normalizeFeatureProvisioningRequestValue(response);
+  if (directRequest) {
+    return directRequest;
+  }
 
-function createSubmittedFeatureProvisioningRequestFallback(
-  workspaceId: string,
-  body: CreateFeatureProvisioningRequestPayload,
-): FeatureProvisioningRequest {
-  const now = new Date().toISOString();
+  if (response && typeof response === "object" && "data" in response) {
+    return normalizeFeatureProvisioningRequestValue((response as ApiResponse<unknown>).data);
+  }
 
-  return {
-    requestId: "",
-    workspaceId,
-    projectId: body.projectId,
-    requestedByUserId: null,
-    status: "queued",
-    payloadObjectName: "",
-    payloadVersionId: null,
-    queueMessageId: null,
-    errorMessage: null,
-    dispatchedAt: now,
-    createdAt: now,
-    updatedAt: now,
-  };
+  return undefined;
 }
 
 function getEmptyAgentRunSearchResult(limit = AGENT_RUN_HISTORY_LIMIT): AgentRunSearchResult {
@@ -446,8 +413,5 @@ export async function requestFeatureProvisioning(workspaceId: string, body: Crea
     version: null,
   });
 
-  return (
-    normalizeFeatureProvisioningRequest(response) ??
-    createSubmittedFeatureProvisioningRequestFallback(workspaceId, body)
-  );
+  return normalizeFeatureProvisioningRequest(response);
 }

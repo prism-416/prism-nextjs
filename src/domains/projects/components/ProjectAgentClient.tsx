@@ -41,6 +41,7 @@ import type {
   AgentRunStepsByRunId,
   AgentStep,
   AgentStepStatus,
+  FeatureProvisioningRequest,
 } from "@/domains/projects/types";
 import {
   getAgentArtifactName,
@@ -49,7 +50,6 @@ import {
   getAgentStepStatusLabel,
   getAgentStepTypeLabel,
   getAgentTypeLabel,
-  getFeatureProvisioningStatusLabel,
   getShortReference,
 } from "@/domains/projects/utils/agent-display";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
@@ -80,6 +80,22 @@ const AGENT_TIMELINE_TICK_MS = 1000;
 const EMPTY_AGENT_RUNS: AgentRun[] = [];
 const EMPTY_AGENT_STEPS: AgentStep[] = [];
 const ACTIVE_AGENT_RUN_STATUSES = new Set<AgentRunStatus>(["queued", "running", "waiting"]);
+
+function getFeatureProvisioningRequestId(request: FeatureProvisioningRequest | undefined) {
+  const requestId = request?.requestId?.trim();
+
+  if (!requestId || requestId === "undefined" || requestId === "null") {
+    return null;
+  }
+
+  return requestId;
+}
+
+function getFeatureProvisioningRequestDetail(request: FeatureProvisioningRequest | undefined) {
+  const requestId = getFeatureProvisioningRequestId(request);
+
+  return requestId ? `Request ${requestId}` : undefined;
+}
 
 const RUN_STATUS_CLASS_NAMES: Record<AgentRunStatus, string> = {
   queued: "border-prism-glow-sky/35 bg-prism-glow-sky/10 text-prism-navy",
@@ -763,13 +779,13 @@ export function ProjectAgentClient({
         projectId: targetProjectId,
         featureSpecification: trimmedSpecification,
       });
-      const statusLabel = getFeatureProvisioningStatusLabel(request.status);
+      const requestDetail = getFeatureProvisioningRequestDetail(request);
 
-      if (request.status === "dispatch_failed") {
+      if (request?.status === "dispatch_failed") {
         setRequestFeedback({
           tone: "error",
           message: request.errorMessage ?? "Provisioning request was created but dispatch failed.",
-          detail: `Request ${request.requestId}`,
+          detail: requestDetail,
         });
         return;
       }
@@ -777,8 +793,8 @@ export function ProjectAgentClient({
       setFeatureSpecification("");
       setRequestFeedback({
         tone: "success",
-        message: `Provisioning request ${statusLabel.toLowerCase()}.`,
-        detail: `Request ${request.requestId}`,
+        message: "Provisioning request queued.",
+        detail: requestDetail,
       });
       refreshAgentOverview();
     } catch (error) {
