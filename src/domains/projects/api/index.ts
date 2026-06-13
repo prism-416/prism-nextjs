@@ -28,35 +28,103 @@ export * from "./comments";
 export * from "./documents";
 
 const AGENT_RUN_HISTORY_LIMIT = 50;
+const FEATURE_PROVISIONING_RESPONSE_WRAPPER_KEYS = ["data", "request", "payload", "result"] as const;
 
-type FeatureProvisioningRequestPayload = FeatureProvisioningRequest | ApiResponse<FeatureProvisioningRequest>;
+function isValidRequestId(value: unknown): value is string {
+  return typeof value === "string" && value.trim() !== "" && value !== "undefined" && value !== "null";
+}
 
 function isFeatureProvisioningRequest(value: unknown): value is FeatureProvisioningRequest {
   return (
     typeof value === "object" &&
     value !== null &&
     "requestId" in value &&
-    typeof (value as { requestId?: unknown }).requestId === "string"
+    isValidRequestId((value as { requestId?: unknown }).requestId)
   );
 }
 
-function normalizeFeatureProvisioningRequest(
-  response: ApiResponse<FeatureProvisioningRequestPayload> | null,
-): FeatureProvisioningRequest | undefined {
-  const payload = response?.data;
+function getRecordString(record: Record<string, unknown>, ...keys: string[]) {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+  return undefined;
+}
 
-  if (isFeatureProvisioningRequest(payload)) {
-    return payload;
+function getRecordNullableString(record: Record<string, unknown>, ...keys: string[]) {
+  for (const key of keys) {
+    const value = record[key];
+    if (value === null || typeof value === "string") {
+      return value;
+    }
+  }
+  return null;
+}
+
+function getRecordStatus(record: Record<string, unknown>) {
+  const status = getRecordString(record, "status");
+  if (status === "pending" || status === "queued" || status === "dispatch_failed") {
+    return status;
+  }
+  return "queued";
+}
+
+function mapSnakeCaseFeatureProvisioningRequest(record: Record<string, unknown>) {
+  const requestId = getRecordString(record, "request_id");
+  if (!isValidRequestId(requestId)) {
+    return undefined;
   }
 
-  if (payload && typeof payload === "object" && "data" in payload) {
-    const nestedPayload = (payload as ApiResponse<FeatureProvisioningRequest>).data;
-    if (isFeatureProvisioningRequest(nestedPayload)) {
-      return nestedPayload;
+  return {
+    requestId,
+    workspaceId: getRecordString(record, "workspace_id", "workspaceId") ?? "",
+    projectId: getRecordString(record, "project_id", "projectId") ?? "",
+    requestedByUserId: getRecordNullableString(record, "requested_by_user_id", "requestedByUserId"),
+    status: getRecordStatus(record),
+    payloadObjectName: getRecordString(record, "payload_object_name", "payloadObjectName") ?? "",
+    payloadVersionId: getRecordNullableString(record, "payload_version_id", "payloadVersionId"),
+    queueMessageId: getRecordNullableString(record, "queue_message_id", "queueMessageId"),
+    errorMessage: getRecordNullableString(record, "error_message", "errorMessage"),
+    dispatchedAt: getRecordNullableString(record, "dispatched_at", "dispatchedAt"),
+    createdAt: getRecordString(record, "created_at", "createdAt") ?? "",
+    updatedAt: getRecordString(record, "updated_at", "updatedAt") ?? "",
+  } satisfies FeatureProvisioningRequest;
+}
+
+function normalizeFeatureProvisioningRequestValue(value: unknown, depth = 0): FeatureProvisioningRequest | undefined {
+  if (depth > 4) {
+    return undefined;
+  }
+
+  if (isFeatureProvisioningRequest(value)) {
+    return value;
+  }
+
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  const snakeCaseRequest = mapSnakeCaseFeatureProvisioningRequest(record);
+  if (snakeCaseRequest) {
+    return snakeCaseRequest;
+  }
+
+  for (const key of FEATURE_PROVISIONING_RESPONSE_WRAPPER_KEYS) {
+    const nestedValue = record[key];
+    const nestedRequest = normalizeFeatureProvisioningRequestValue(nestedValue, depth + 1);
+    if (nestedRequest) {
+      return nestedRequest;
     }
   }
 
   return undefined;
+}
+
+function normalizeFeatureProvisioningRequest(response: unknown): FeatureProvisioningRequest | undefined {
+  return normalizeFeatureProvisioningRequestValue(response);
 }
 
 function getEmptyAgentRunSearchResult(limit = AGENT_RUN_HISTORY_LIMIT): AgentRunSearchResult {
@@ -338,10 +406,7 @@ export async function getAgentRunStepsByRunId(workspaceId: string, runs: AgentRu
 }
 
 export async function requestFeatureProvisioning(workspaceId: string, body: CreateFeatureProvisioningRequestPayload) {
-  const response = await commonAxios<
-    CreateFeatureProvisioningRequestPayload,
-    ApiResponse<FeatureProvisioningRequestPayload>
-  >({
+  const response = await commonAxios<CreateFeatureProvisioningRequestPayload, ApiResponse<unknown>>({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/provision`,
     method: "POST",
     data: body,

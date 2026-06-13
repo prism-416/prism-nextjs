@@ -12,6 +12,10 @@ type RequestFeatureProvisioningVariables = {
   featureSpecification: string;
 };
 
+function isValidRequestId(value: unknown): value is string {
+  return typeof value === "string" && value.trim() !== "" && value !== "undefined" && value !== "null";
+}
+
 export function useRequestFeatureProvisioning() {
   const queryClient = useQueryClient();
 
@@ -22,7 +26,7 @@ export function useRequestFeatureProvisioning() {
         featureSpecification,
       });
 
-      if (!request?.requestId) {
+      if (!isValidRequestId(request?.requestId)) {
         throw new Error("Feature provisioning request could not be created.");
       }
 
