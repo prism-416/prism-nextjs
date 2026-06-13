@@ -77,6 +77,9 @@ export function useProjectRealtimeRoom({
     const resyncProject = () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.detail(projectId) });
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.detailBySlug(projectSlug) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.workItems(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project.documents(projectId) });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.sprints(workspaceId) });
     };
 
     const handleConnect = () => {
