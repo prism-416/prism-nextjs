@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 
-import { ProjectRealtimeRoomBridge } from "@/domains/projects/components/ProjectRealtimeRoomBridge";
 import { ProjectSidebar } from "@/domains/projects/components/ProjectSidebar";
 import { useProject } from "@/domains/projects/hooks/useProject";
 import { useProjects } from "@/domains/projects/hooks/useProjects";
@@ -13,6 +13,12 @@ import { useWorkspaceById } from "@/domains/workspaces/hooks/useWorkspaceById";
 import { useWorkspaces } from "@/domains/workspaces/hooks/useWorkspaces";
 import type { Workspace } from "@/domains/workspaces/types";
 import type { WorkspacePathSegment } from "@/domains/workspaces/types/path";
+
+const ProjectRealtimeRoomBridge = dynamic(
+  () =>
+    import("@/domains/projects/components/ProjectRealtimeRoomBridge").then(module => module.ProjectRealtimeRoomBridge),
+  { ssr: false },
+);
 
 type ProjectRouteContextValue = {
   project: Project;

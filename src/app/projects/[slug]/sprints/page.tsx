@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
-import { getProjectBySlug } from "@/domains/projects/api";
-import { getWorkspaceById } from "@/domains/workspaces/api";
+import { getProjectBySlugCached } from "@/domains/projects/api/server";
+import { getWorkspacesCached } from "@/domains/workspaces/api/server";
 
 type ProjectSprintsPageProps = {
   params: Promise<{
@@ -11,13 +11,14 @@ type ProjectSprintsPageProps = {
 
 export default async function ProjectSprintsPage({ params }: ProjectSprintsPageProps) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const project = await getProjectBySlugCached(slug);
 
   if (!project) {
     notFound();
   }
 
-  const workspace = await getWorkspaceById(project.workspaceId);
+  const workspaces = await getWorkspacesCached();
+  const workspace = workspaces.find(item => item.workspaceId === project.workspaceId);
 
   if (!workspace) {
     notFound();

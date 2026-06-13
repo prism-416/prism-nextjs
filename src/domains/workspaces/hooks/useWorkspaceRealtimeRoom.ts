@@ -99,6 +99,7 @@ export function useWorkspaceRealtimeRoom({ workspaceId, workspaceSlug }: UseWork
 
     const accessTokenSubject = readAccessTokenSubject(accessToken);
     const socket: WorkspaceRealtimeSocket = createWorkspaceRealtimeSocket(accessToken);
+    let hasJoinedWorkspace = false;
 
     const resyncWorkspace = () => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.workspace.detail(workspaceId) });
@@ -140,7 +141,12 @@ export function useWorkspaceRealtimeRoom({ workspaceId, workspaceSlug }: UseWork
       }
 
       setStatus("joined");
-      resyncWorkspace();
+
+      if (hasJoinedWorkspace) {
+        resyncWorkspace();
+      } else {
+        hasJoinedWorkspace = true;
+      }
     };
 
     const handleWorkspaceUpdated = (payload: Workspace) => {

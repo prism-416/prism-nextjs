@@ -22,6 +22,7 @@ import { useBulkPermanentlyDeleteProjectWorkItems } from "@/domains/projects/hoo
 import { useBulkRestoreProjectWorkItems } from "@/domains/projects/hooks/useBulkRestoreProjectWorkItems";
 import { useProjectParticipants } from "@/domains/projects/hooks/useProjectParticipants";
 import { useProjectWorkItemTrash } from "@/domains/projects/hooks/useProjectWorkItemTrash";
+import type { ProjectParticipant, TrashedProjectWorkItemSearchResult } from "@/domains/projects/types";
 import { resolveAssigneeAvatarUsers } from "@/domains/projects/utils/assignee-display";
 import { getProjectMutationErrorMessage } from "@/domains/projects/utils/error";
 import {
@@ -37,6 +38,8 @@ type ProjectTrashClientProps = {
   projectId: string;
   projectSlug: string;
   workspaceId: string;
+  initialData?: TrashedProjectWorkItemSearchResult;
+  initialMembers?: ProjectParticipant[];
 };
 
 function TrashCheckbox({ checked, label, onChange }: { checked: boolean; label: string; onChange: () => void }) {
@@ -60,9 +63,9 @@ function TrashCheckbox({ checked, label, onChange }: { checked: boolean; label: 
   );
 }
 
-export function ProjectTrashClient({ projectId, workspaceId }: ProjectTrashClientProps) {
-  const { data, isPending, isError, refetch } = useProjectWorkItemTrash(projectId);
-  const { data: members = [] } = useProjectParticipants(workspaceId);
+export function ProjectTrashClient({ projectId, workspaceId, initialData, initialMembers }: ProjectTrashClientProps) {
+  const { data, isPending, isError, refetch } = useProjectWorkItemTrash(projectId, initialData);
+  const { data: members = [] } = useProjectParticipants(workspaceId, initialMembers);
   const { mutateAsync: bulkRestore } = useBulkRestoreProjectWorkItems(projectId);
   const { mutateAsync: bulkPermanentlyDelete } = useBulkPermanentlyDeleteProjectWorkItems(projectId);
 
