@@ -29,6 +29,36 @@ export * from "./documents";
 
 const AGENT_RUN_HISTORY_LIMIT = 50;
 
+type FeatureProvisioningRequestPayload = FeatureProvisioningRequest | ApiResponse<FeatureProvisioningRequest>;
+
+function isFeatureProvisioningRequest(value: unknown): value is FeatureProvisioningRequest {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "requestId" in value &&
+    typeof (value as { requestId?: unknown }).requestId === "string"
+  );
+}
+
+function normalizeFeatureProvisioningRequest(
+  response: ApiResponse<FeatureProvisioningRequestPayload> | null,
+): FeatureProvisioningRequest | undefined {
+  const payload = response?.data;
+
+  if (isFeatureProvisioningRequest(payload)) {
+    return payload;
+  }
+
+  if (payload && typeof payload === "object" && "data" in payload) {
+    const nestedPayload = (payload as ApiResponse<FeatureProvisioningRequest>).data;
+    if (isFeatureProvisioningRequest(nestedPayload)) {
+      return nestedPayload;
+    }
+  }
+
+  return undefined;
+}
+
 function getEmptyAgentRunSearchResult(limit = AGENT_RUN_HISTORY_LIMIT): AgentRunSearchResult {
   return {
     items: [],
@@ -308,12 +338,15 @@ export async function getAgentRunStepsByRunId(workspaceId: string, runs: AgentRu
 }
 
 export async function requestFeatureProvisioning(workspaceId: string, body: CreateFeatureProvisioningRequestPayload) {
-  const response = await commonAxios<CreateFeatureProvisioningRequestPayload, ApiResponse<FeatureProvisioningRequest>>({
+  const response = await commonAxios<
+    CreateFeatureProvisioningRequestPayload,
+    ApiResponse<FeatureProvisioningRequestPayload>
+  >({
     url: `/workspaces/${encodeURIComponent(workspaceId)}/provision`,
     method: "POST",
     data: body,
     version: null,
   });
 
-  return response?.data;
+  return normalizeFeatureProvisioningRequest(response);
 }
