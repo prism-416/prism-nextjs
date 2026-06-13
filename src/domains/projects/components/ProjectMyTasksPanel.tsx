@@ -1,6 +1,7 @@
 import { ListTodo, LoaderCircle, RefreshCw, RotateCcw, Search } from "lucide-react";
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/atomics/atoms/Button";
 import { Input } from "@/atomics/atoms/Input";
@@ -8,6 +9,7 @@ import { Typography } from "@/atomics/atoms/Typography";
 import { UserAvatarStack } from "@/atomics/atoms/Avatar";
 import { ProjectWorkItemPriorityBadge } from "@/domains/projects/components/ProjectWorkItemPriorityBadge";
 import { ProjectWorkItemTitleLine } from "@/domains/projects/components/ProjectWorkItemCode";
+import { prefetchProjectWorkItemDetail } from "@/domains/projects/utils/work-item-prefetch";
 import type {
   ProjectParticipant,
   ProjectWorkItem,
@@ -94,6 +96,7 @@ type TaskRowProps = {
 
 function TaskRow({ task, projectSlug, members, isUpdating, onStatusUpdate }: TaskRowProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const visibleLabels = task.labelNames.slice(0, 3);
   const remainingLabelCount = Math.max(task.labelNames.length - visibleLabels.length, 0);
   const assigneeUsers = resolveAssigneeAvatarUsers(task.assigneeUsernames, members);
@@ -102,13 +105,21 @@ function TaskRow({ task, projectSlug, members, isUpdating, onStatusUpdate }: Tas
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     if ((event.target as HTMLElement).closest("button, a, select, input, textarea")) return;
+    prefetchProjectWorkItemDetail(queryClient, task);
     router.push(detailHref);
+  };
+
+  const handlePrefetch = () => {
+    router.prefetch(detailHref);
+    prefetchProjectWorkItemDetail(queryClient, task);
   };
 
   return (
     <article
       className="grid cursor-pointer gap-3 border-b border-border/70 px-4 py-4 last:border-b-0 hover:bg-surface-strong/50 md:grid-cols-[minmax(0,1fr)_8rem_8rem_8rem] md:items-center md:gap-4"
       onClick={handleClick}
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
     >
       <div className="min-w-0">
         <ProjectWorkItemTitleLine

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CalendarDays, Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/atomics/atoms/Button";
@@ -12,6 +13,7 @@ import { ProjectWorkItemCode } from "@/domains/projects/components/ProjectWorkIt
 import { DatePicker } from "@/atomics/molecules/DatePicker";
 import { ProjectWorkItemCommentsPanel } from "@/domains/projects/components/ProjectWorkItemCommentsPanel";
 import { ProjectWorkItemInlineControls } from "@/domains/projects/components/ProjectWorkItemInlineControls";
+import { prefetchProjectWorkItemDetail } from "@/domains/projects/utils/work-item-prefetch";
 import type {
   ProjectParticipant,
   ProjectWorkItem,
@@ -72,19 +74,28 @@ function ChildWorkItemCard({
   onPriorityUpdate: (item: ProjectWorkItem, priority: ProjectWorkItemPriority) => void;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const assigneeUsers = resolveAssigneeAvatarUsers(item.assigneeUsernames, members);
   const scheduleSummary = formatScheduleRange(item.startDate, item.dueDate);
   const detailHref = `/projects/${encodeURIComponent(projectSlug)}/work-items/${encodeURIComponent(item.itemId)}`;
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     if ((event.target as HTMLElement).closest("button, a, select, input, textarea")) return;
+    prefetchProjectWorkItemDetail(queryClient, item);
     router.push(detailHref);
+  };
+
+  const handlePrefetch = () => {
+    router.prefetch(detailHref);
+    prefetchProjectWorkItemDetail(queryClient, item);
   };
 
   return (
     <article
       className="group/card cursor-pointer rounded-xl border border-border/80 bg-surface p-3 shadow-[0_1px_0_rgba(255,255,255,0.65)_inset] transition-[border-color,box-shadow] duration-100"
       onClick={handleClick}
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
     >
       <div className="min-w-0">
         <ProjectWorkItemCode code={item.code} />
