@@ -22,7 +22,7 @@ export function useRequestFeatureProvisioning() {
         featureSpecification,
       });
 
-      if (!request) {
+      if (!request?.requestId) {
         throw new Error("Feature provisioning request could not be created.");
       }
 
