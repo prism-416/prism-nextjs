@@ -15,7 +15,7 @@ type RequestFeatureProvisioningVariables = {
 export function useRequestFeatureProvisioning() {
   const queryClient = useQueryClient();
 
-  return useApiMutation<FeatureProvisioningRequest, Error, RequestFeatureProvisioningVariables>({
+  return useApiMutation<FeatureProvisioningRequest | undefined, Error, RequestFeatureProvisioningVariables>({
     mutationFn: async ({ workspaceId, projectId, featureSpecification }) => {
       const request = await requestFeatureProvisioning(workspaceId, {
         projectId,
